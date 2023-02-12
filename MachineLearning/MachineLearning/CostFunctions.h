@@ -10,16 +10,36 @@ public:
 		const OutputType dif = output - expected;
 		return dif.cwiseProduct(dif).sum();
 	}
+
+	double operator()(const BatchOutputType& output, const BatchOutputType& expected)
+	{
+		double sum = 0;
+
+		BatchOutputType dif = output - expected;
+		dif = dif.cwiseProduct(dif);
+
+		for (unsigned int i = 0; i < output.cols(); ++i)
+			sum += dif.col(i).sum();
+		
+		return sum;
+	}
 };
 
 
-template<> class L2Cost<double, double>
+template<> class L2Cost<double, Eigen::RowVectorXd>
 {
 public:
 	double operator()(const double& output, const double& expected)
 	{
 		const double dif = output - expected;
 		return dif * dif;
+	}
+
+	double operator()(const Eigen::RowVectorXd& output, const Eigen::RowVectorXd& expected)
+	{
+		const Eigen::RowVectorXd dif = output - expected;
+
+		return dif.cwiseProduct(dif).sum();
 	}
 };
 
@@ -30,16 +50,36 @@ public:
 	double operator()(const OutputType& output, const OutputType& expected)
 	{
 		const OutputType dif = output - expected;
-		return dif.abs().sum();
+		return dif.cwiseAbs().sum();
+	}
+
+	double operator()(const BatchOutputType& output, const BatchOutputType& expected)
+	{
+		double sum = 0;
+
+		BatchOutputType dif = output - expected;
+		dif = dif.cwiseAbs();
+
+		for (unsigned int i = 0; i < output.cols(); ++i)
+			sum += dif.col(i).sum();
+
+		return sum;
 	}
 };
 
 
-template<> class L1Cost<double, double>
+template<> class L1Cost<double, Eigen::RowVectorXd>
 {
 public:
 	double operator()(const double& output, const double& expected)
 	{
 		return abs(output - expected);
+	}
+
+	double operator()(const Eigen::RowVectorXd& output, const Eigen::RowVectorXd& expected)
+	{
+		const Eigen::RowVectorXd dif = output - expected;
+
+		return dif.cwiseAbs().sum();
 	}
 };
