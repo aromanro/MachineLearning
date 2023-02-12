@@ -15,9 +15,11 @@ public:
 	{
 	}
 
-	const Eigen::VectorXd& Predict(const InputType& input) override
+	const Eigen::VectorXd Predict(const InputType& input) override
 	{
-		return baseType::linkFunc((baseType::W.cwiseProduct(input) + baseType::b).eval());
+		const Eigen::VectorXd linOut = baseType::W.cwiseProduct(input) + baseType::b;
+
+		return baseType::linkFunc(linOut);
 	}
 };
 
@@ -31,9 +33,11 @@ public:
 	{
 	}
 
-	const Eigen::VectorXd& Predict(const double& input) override
+	const Eigen::VectorXd Predict(const double& input) override
 	{
-		return baseType::linkFunc((baseType::W * input + baseType::b).eval());
+		const Eigen::VectorXd linOut = baseType::W * input + baseType::b;
+
+		return baseType::linkFunc(linOut);
 	}
 };
 

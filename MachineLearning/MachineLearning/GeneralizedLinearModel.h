@@ -17,7 +17,7 @@ public:
 		solver.Initialize(sz);
 	}
 
-	virtual const OutputType& Predict(const InputType& input)
+	virtual const OutputType Predict(const InputType& input)
 	{
 		return linkFunc(W * input + b);
 	}
