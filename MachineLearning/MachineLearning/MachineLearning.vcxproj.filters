@@ -19,4 +19,24 @@
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="GeneralizedLinearModel.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="LinkFunctions.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SimpleLinearRegression.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Solvers.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GradientSolvers.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CostFunctions.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
 </Project>

@@ -1,20 +1,107 @@
 // MachineLearning.cpp : This file contains the 'main' function. Program execution begins and ends there.
 //
 
+#include "SimpleLinearRegression.h"
+
 #include <iostream>
+
+#include <random>
+
+double linearFunction(double x)
+{
+	return 3. * x + 2.;
+}
+
+double linearFunction2(double x)
+{
+	return 7. * x - 4.;
+}
+
+double linearFunction3(double x)
+{
+	return -2. * x + 1.;
+}
 
 int main()
 {
-    std::cout << "Hello World!\n";
+	std::default_random_engine rde(42);
+	std::normal_distribution<double> dist(0., 4.);
+
+	{
+		SimpleLinearRegression simpleLinearRegression;
+
+
+		const unsigned int nrPoints = 100;
+		Eigen::RowVectorXd x, y;
+		x.resize(nrPoints);
+		y.resize(nrPoints);
+
+		for (int i = 0; i < 100; ++i)
+		{
+			x(i) = i;
+			y(i) = linearFunction(i) + dist(rde);
+		}
+
+		simpleLinearRegression.AddBatch(x, y);
+
+		double res = simpleLinearRegression.Predict(7.);
+
+		std::cout << "Prediction for 7 is: " << res << " generating value: " << linearFunction(7) << std::endl;
+	}
+
+	{
+		MultivariateSimpleLinearRegression<double> multivariateSimpleLinearRegression(3);
+
+		Eigen::MatrixXd x, y;
+		x.resize(1, 100);
+		y.resize(3, 100);
+
+		for (int i = 0; i < 100; ++i)
+		{
+			x(0, i) = i;
+			y(0, i) = linearFunction(i) + dist(rde);
+
+
+			y(1, i) = linearFunction2(i) + dist(rde);
+
+			y(2, i) = linearFunction3(i) + dist(rde);
+		}
+
+		multivariateSimpleLinearRegression.AddBatch(x, y);
+
+		Eigen::VectorXd res = multivariateSimpleLinearRegression.Predict(12.);
+
+		std::cout << "Prediction for 12 is: (" << res(0) << ", " << res(1) << ", " << res(2) << ") generating value: (" << linearFunction(12) << ", " << linearFunction2(12) << ", " << linearFunction3(12) << ")" << std::endl;
+	}
+
+	// the above can be also done like this (it's more useful if x values are different for the different simple linear regressions):
+
+	{
+		MultivariateSimpleLinearRegression<> multivariateSimpleLinearRegression(3);
+
+		Eigen::MatrixXd x, y;
+		x.resize(3, 100);
+		y.resize(3, 100);
+
+		for (int i = 0; i < 100; ++i)
+		{
+			x(0, i) = i;
+			y(0, i) = linearFunction(i) + dist(rde);
+
+			x(1, i) = i;
+			y(1, i) = linearFunction2(i) + dist(rde);
+
+			x(2, i) = i;
+			y(2, i) = linearFunction3(i) + dist(rde);
+		}
+
+		multivariateSimpleLinearRegression.AddBatch(x, y);
+
+		Eigen::VectorXd in(3);
+		in(0) = in(1) = in(2) = 12.;
+		Eigen::VectorXd res = multivariateSimpleLinearRegression.Predict(in);
+
+		std::cout << "Prediction for 12 is: (" << res(0) << ", " << res(1) << ", " << res(2) << ") generating value: (" << linearFunction(12) << ", " << linearFunction2(12) << ", " << linearFunction3(12) << ")" << std::endl;
+	}
 }
 
-// Run program: Ctrl + F5 or Debug > Start Without Debugging menu
-// Debug program: F5 or Debug > Start Debugging menu
-
-// Tips for Getting Started: 
-//   1. Use the Solution Explorer window to add/manage files
-//   2. Use the Team Explorer window to connect to source control
-//   3. Use the Output window to see build output and other messages
-//   4. Use the Error List window to view errors
-//   5. Go to Project > Add New Item to create new code files, or Project > Add Existing Item to add existing code files to the project
-//   6. In the future, to open this project again, go to File > Open > Project and select the .sln file
