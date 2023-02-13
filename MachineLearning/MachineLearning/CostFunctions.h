@@ -5,21 +5,21 @@
 template<typename OutputType = Eigen::VectorXd, typename BatchOutputType = Eigen::MatrixXd> class L2Cost
 {
 public:
-	double operator()(const OutputType& output, const OutputType& expected)
+	OutputType operator()(const OutputType& output, const OutputType& expected)
 	{
 		const OutputType dif = output - expected;
-		return dif.cwiseProduct(dif).sum();
+		return dif.cwiseProduct(dif);
 	}
 
-	double operator()(const BatchOutputType& output, const BatchOutputType& expected)
+	OutputType operator()(const BatchOutputType& output, const BatchOutputType& expected)
 	{
-		double sum = 0;
+		OutputType sum = OutputType::Zero(output.rows());
 
 		BatchOutputType dif = output - expected;
 		dif = dif.cwiseProduct(dif);
 
 		for (unsigned int i = 0; i < output.cols(); ++i)
-			sum += dif.col(i).sum();
+			sum += dif.col(i);
 		
 		return sum;
 	}
@@ -47,21 +47,21 @@ public:
 template<typename OutputType = Eigen::VectorXd, typename BatchOutputType = Eigen::MatrixXd> class L1Cost
 {
 public:
-	double operator()(const OutputType& output, const OutputType& expected)
+	OutputType operator()(const OutputType& output, const OutputType& expected)
 	{
 		const OutputType dif = output - expected;
-		return dif.cwiseAbs().sum();
+		return dif.cwiseAbs();
 	}
 
-	double operator()(const BatchOutputType& output, const BatchOutputType& expected)
+	OutputType operator()(const BatchOutputType& output, const BatchOutputType& expected)
 	{
-		double sum = 0;
+		OutputType sum = OutputType::Zero(output.rows());
 
 		BatchOutputType dif = output - expected;
 		dif = dif.cwiseAbs();
 
 		for (unsigned int i = 0; i < output.cols(); ++i)
-			sum += dif.col(i).sum();
+			sum += dif.col(i);
 
 		return sum;
 	}
