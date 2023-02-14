@@ -32,10 +32,10 @@ public:
 };
 
 
-template<typename InputOutputType, typename WeightsType> class LogisticFunction
+template<typename InputOutputType, typename WeightsType> class SigmoidFunction
 {
 public:
-	LogisticFunction(int size = 1)
+	SigmoidFunction(int size = 1)
 	{
 		beta0 = InputOutputType::Zeros(size);
 		beta = InputOutputType::Ones(size);
@@ -64,10 +64,10 @@ protected:
 	WeightsType beta;
 };
 
-template<> class LogisticFunction<double, double>
+template<> class SigmoidFunction<double, double>
 {
 public:
-	LogisticFunction()
+	SigmoidFunction()
 		: beta0(0), beta(1)
 	{
 	}
