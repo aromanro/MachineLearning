@@ -3,7 +3,27 @@
 #include "GeneralizedLinearModel.h"
 #include "Solvers.h"
 
-typedef GeneralizedLinearModel<double, double, double, SimpleLinearRegressionSolver<double, double, double, Eigen::RowVectorXd, Eigen::RowVectorXd>, Eigen::RowVectorXd> SimpleLinearRegression;
+class SimpleLinearRegression : public GeneralizedLinearModel<double, double, double, SimpleLinearRegressionSolver<double, double, double, Eigen::RowVectorXd, Eigen::RowVectorXd>, Eigen::RowVectorXd>
+{
+public:
+	typedef GeneralizedLinearModel<double, double, double, SimpleLinearRegressionSolver<double, double, double, Eigen::RowVectorXd, Eigen::RowVectorXd>, Eigen::RowVectorXd> baseType;
+
+	SimpleLinearRegression(int sz = 1) : baseType(sz)
+	{
+	}
+
+	const double Predict(const double& input) override
+	{
+		return baseType::W * input + baseType::b;
+	}
+
+	void AddBatch(const Eigen::RowVectorXd& batchInput, const Eigen::RowVectorXd& batchOutput) override
+	{
+		baseType::solver.AddBatch(batchInput, batchOutput);
+
+		baseType::solver.getWeightsAndBias(baseType::W, baseType::b);
+	}
+};
 
 // to not be confused with the general case, this corresponds to a bunch of simple linear regressions, even if multivariable
 template<typename InputType = Eigen::VectorXd> class MultivariateSimpleLinearRegression : public GeneralizedLinearModel<InputType, Eigen::VectorXd, Eigen::VectorXd, SimpleLinearRegressionSolver<>, Eigen::MatrixXd>
@@ -11,7 +31,7 @@ template<typename InputType = Eigen::VectorXd> class MultivariateSimpleLinearReg
 public:
 	typedef GeneralizedLinearModel<InputType, Eigen::VectorXd, Eigen::VectorXd, SimpleLinearRegressionSolver<>, Eigen::MatrixXd> baseType;
 
-	MultivariateSimpleLinearRegression(int sz = 1) : GeneralizedLinearModel<InputType, Eigen::VectorXd, Eigen::VectorXd, SimpleLinearRegressionSolver<>, Eigen::MatrixXd>(sz)
+	MultivariateSimpleLinearRegression(int sz = 1) : baseType(sz)
 	{
 	}
 
@@ -19,7 +39,14 @@ public:
 	{
 		const Eigen::VectorXd linOut = baseType::W.cwiseProduct(input) + baseType::b;
 
-		return baseType::linkFunc(linOut);
+		return linOut;
+	}
+
+	void AddBatch(const Eigen::MatrixXd& batchInput, const Eigen::MatrixXd& batchOutput) override
+	{
+		baseType::solver.AddBatch(batchInput, batchOutput);
+
+		baseType::solver.getWeightsAndBias(baseType::W, baseType::b);
 	}
 };
 
@@ -29,7 +56,7 @@ template<> class MultivariateSimpleLinearRegression<double> : public Generalized
 public:
 	typedef GeneralizedLinearModel<double, Eigen::VectorXd, Eigen::VectorXd, SimpleLinearRegressionSolver<double, Eigen::VectorXd, Eigen::VectorXd, Eigen::RowVectorXd, Eigen::MatrixXd>, Eigen::MatrixXd> baseType;
 
-	MultivariateSimpleLinearRegression(int sz = 1) : GeneralizedLinearModel<double, Eigen::VectorXd, Eigen::VectorXd, SimpleLinearRegressionSolver<double, Eigen::VectorXd, Eigen::VectorXd, Eigen::RowVectorXd, Eigen::MatrixXd>, Eigen::MatrixXd>(sz)
+	MultivariateSimpleLinearRegression(int sz = 1) : baseType(sz)
 	{
 	}
 
@@ -37,7 +64,14 @@ public:
 	{
 		const Eigen::VectorXd linOut = baseType::W * input + baseType::b;
 
-		return baseType::linkFunc(linOut);
+		return linOut;
+	}
+
+	void AddBatch(const Eigen::MatrixXd& batchInput, const Eigen::MatrixXd& batchOutput) override
+	{
+		baseType::solver.AddBatch(batchInput, batchOutput);
+
+		baseType::solver.getWeightsAndBias(baseType::W, baseType::b);
 	}
 };
 

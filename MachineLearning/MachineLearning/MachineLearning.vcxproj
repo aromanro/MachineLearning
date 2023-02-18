@@ -144,7 +144,9 @@
   <ItemGroup>
     <ClInclude Include="CostFunctions.h" />
     <ClInclude Include="GeneralizedLinearModel.h" />
+    <ClInclude Include="GeneralLinearModel.h" />
     <ClInclude Include="GradientSolvers.h" />
+    <ClInclude Include="LogisticRegression.h" />
     <ClInclude Include="Solvers.h" />
     <ClInclude Include="LinkFunctions.h" />
     <ClInclude Include="SimpleLinearRegression.h" />

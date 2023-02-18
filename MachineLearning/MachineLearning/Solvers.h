@@ -2,7 +2,8 @@
 
 #include <Eigen/eigen>
 
-template<typename InputType = Eigen::VectorXd, typename OutputType = Eigen::VectorXd, typename WeigthsType = Eigen::VectorXd, typename BatchInputType = Eigen::MatrixXd, typename BatchOutputType = Eigen::MatrixXd> class SimpleLinearRegressionSolver {
+template<typename InputType = Eigen::VectorXd, typename OutputType = Eigen::VectorXd, typename WeightsType = Eigen::VectorXd, typename BatchInputType = Eigen::MatrixXd, typename BatchOutputType = Eigen::MatrixXd> 
+class SimpleLinearRegressionSolver {
 public:
 	SimpleLinearRegressionSolver(int sz = 1)
 	{
@@ -19,6 +20,40 @@ public:
 		count = 0;
 	}
 
+	void AddBatch(const BatchInputType& batchInput, const BatchOutputType& batchOutput)
+	{
+		assert(batchInput.cols() == batchOutput.cols());
+
+		for (unsigned int i = 0; i < batchInput.cols(); ++i)
+			AddSample(batchInput.col(i), batchOutput.col(i));
+	}
+
+	void setPrediction(const BatchOutputType& output)
+	{
+	}
+
+	void setLinearPrediction(const BatchOutputType& output)
+	{
+	}
+
+	void getWeightsAndBias(WeightsType& w, OutputType& b) const
+	{
+		if (!count) {
+			w = WeightsType::Zero(size);
+			b = OutputType::Zero(size);
+			return;
+		}
+
+		w = (count * xyaccum - xaccum.cwiseProduct(yaccum)).cwiseProduct((count * x2accum - xaccum.cwiseProduct(xaccum)).cwiseInverse());
+		b = (yaccum - w.cwiseProduct(xaccum)) / count;
+	}
+
+	const long long int getSize() const
+	{
+		return size;
+	}
+
+protected:
 	void AddSample(const InputType& input, const OutputType& output)
 	{
 		xaccum += input;
@@ -28,34 +63,6 @@ public:
 		++count;
 	}
 
-	void AddBatch(const BatchInputType& batchInput, const BatchOutputType& batchOutput)
-	{
-		assert(batchInput.cols() == batchOutput.cols());
-
-		for (unsigned int i = 0; i < batchInput.cols(); ++i)
-			AddSample(batchInput.col(i), batchOutput.col(i));
-	}
-
-	WeigthsType getWeights() const
-	{
-		if (!count) return WeigthsType::Zero(size);
-
-		return (count * xyaccum - xaccum.cwiseProduct(yaccum)).cwiseProduct((count * x2accum - xaccum.cwiseProduct(xaccum)).cwiseInverse());
-	}
-
-	OutputType getBias() const
-	{
-		if (!count) return OutputType::Zero(size);
-
-		return (yaccum - getWeights().cwiseProduct(xaccum)) / count;
-	}
-
-	const long long int getSize() const
-	{
-		return size;
-	}
-
-protected:
 	InputType xaccum;
 	InputType x2accum;
 	OutputType xyaccum;
@@ -82,6 +89,40 @@ public:
 		count = 0;
 	}
 
+	void AddBatch(const Eigen::RowVectorXd& batchInput, const Eigen::MatrixXd& batchOutput)
+	{
+		assert(batchInput.cols() == batchOutput.cols());
+
+		for (unsigned int i = 0; i < batchInput.cols(); ++i)
+			AddSample(batchInput(i), batchOutput.col(i));
+	}
+
+	void setPrediction(const Eigen::MatrixXd& output)
+	{
+	}
+
+	void setLinearPrediction(const Eigen::MatrixXd& output)
+	{
+	}
+
+	void getWeightsAndBias(Eigen::VectorXd& w, Eigen::VectorXd& b) const
+	{
+		if (!count) {
+			w = Eigen::VectorXd::Zero(size);
+			b = Eigen::VectorXd::Zero(size);
+			return;
+		}
+
+		w = (count * xyaccum - xaccum * yaccum) / (count * x2accum - xaccum * xaccum);
+		b = (yaccum - w * xaccum) / count;
+	}
+
+	const long long int getSize() const
+	{
+		return size;
+	}
+
+protected:
 	void AddSample(const double& input, const Eigen::VectorXd& output)
 	{
 		xaccum += input;
@@ -91,34 +132,6 @@ public:
 		++count;
 	}
 
-	void AddBatch(const Eigen::RowVectorXd& batchInput, const Eigen::MatrixXd& batchOutput)
-	{
-		assert(batchInput.cols() == batchOutput.cols());
-
-		for (unsigned int i = 0; i < batchInput.cols(); ++i)
-			AddSample(batchInput(i), batchOutput.col(i));
-	}
-
-	Eigen::VectorXd getWeights() const
-	{
-		if (!count) return Eigen::VectorXd::Zero(size);
-
-		return (count * xyaccum - xaccum * yaccum) / (count * x2accum - xaccum * xaccum);
-	}
-
-	Eigen::VectorXd getBias() const
-	{
-		if (!count) return Eigen::VectorXd::Zero(size);
-
-		return (yaccum - getWeights() * xaccum) / count;
-	}
-
-	const long long int getSize() const
-	{
-		return size;
-	}
-
-protected:
 	double xaccum;
 	double x2accum;
 	Eigen::VectorXd xyaccum;
@@ -144,6 +157,39 @@ public:
 		count = 0;
 	}
 
+	void AddBatch(const Eigen::RowVectorXd& batchInput, const Eigen::RowVectorXd& batchOutput)
+	{
+		assert(batchInput.cols() == batchOutput.cols());
+
+		for (unsigned int i = 0; i < batchInput.cols(); ++i)
+			AddSample(batchInput.col(i)(0), batchOutput.col(i)(0));
+	}
+
+	void setPrediction(const Eigen::RowVectorXd& output)
+	{
+	}
+
+	void setLinearPrediction(const Eigen::RowVectorXd& output)
+	{
+	}
+
+	void getWeightsAndBias(double& w, double& b) const
+	{
+		if (!count) {
+			w = b = 0;
+			return;
+		}
+
+		w = (count * xyaccum - xaccum * yaccum) / (count * x2accum - xaccum * xaccum);
+		b = (yaccum - w * xaccum) / count;
+	}
+
+	const long long int getSize() const
+	{
+		return 1;
+	}
+
+protected:
 	void AddSample(const double& input, const double& output)
 	{
 		xaccum += input;
@@ -153,34 +199,6 @@ public:
 		++count;
 	}
 
-	void AddBatch(const Eigen::RowVectorXd& batchInput, const Eigen::RowVectorXd& batchOutput)
-	{
-		assert(batchInput.cols() == batchOutput.cols());
-
-		for (unsigned int i = 0; i < batchInput.cols(); ++i)
-			AddSample(batchInput.col(i)(0), batchOutput.col(i)(0));
-	}
-
-	double getWeights() const
-	{
-		if (!count) return 0;
-
-		return (count * xyaccum - xaccum * yaccum) / (count * x2accum - xaccum * xaccum);
-	}
-
-	double getBias() const
-	{
-		if (!count) return 0;
-
-		return (yaccum - getWeights() * xaccum) / count;
-	}
-
-	const long long int getSize() const
-	{
-		return 1;
-	}
-
-protected:
 	double xaccum;
 	double x2accum;
 	double xyaccum;

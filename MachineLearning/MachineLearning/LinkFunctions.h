@@ -11,7 +11,7 @@ public:
 		return input;
 	}
 
-	const InputOutputType getGradient(const InputOutputType& input)
+	const InputOutputType derivative(const InputOutputType& input)
 	{
 		return InputOutputType::Ones(input.size());
 	}
@@ -25,7 +25,7 @@ public:
 		return input;
 	}
 
-	const double getGradient(const double& input)
+	const double derivative(const double& input)
 	{
 		return 1;
 	}

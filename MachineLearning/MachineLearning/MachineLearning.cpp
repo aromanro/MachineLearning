@@ -2,6 +2,8 @@
 //
 
 #include "SimpleLinearRegression.h"
+#include "GeneralLinearModel.h"
+#include "GradientSolvers.h"
 
 #include <iostream>
 
@@ -103,5 +105,38 @@ int main()
 
 		std::cout << "Prediction for 12 is: (" << res(0) << ", " << res(1) << ", " << res(2) << ") generating value: (" << linearFunction(12) << ", " << linearFunction2(12) << ", " << linearFunction3(12) << ")" << std::endl;
 	}
+
+	// TODO: Needs to have derivative calls for batches on link functions as well
+
+	/*
+	{
+		GeneralLinearModel<Eigen::VectorXd, Eigen::VectorXd, Eigen::VectorXd, GradientDescentSolver<>, Eigen::MatrixXd> generalLinearModel;
+
+		Eigen::MatrixXd x, y;
+		x.resize(3, 100);
+		y.resize(3, 100);
+
+		for (int i = 0; i < 100; ++i)
+		{
+			x(0, i) = i;
+			y(0, i) = linearFunction(i) + dist(rde);
+
+			x(1, i) = i;
+			y(1, i) = linearFunction2(i) + dist(rde);
+
+			x(2, i) = i;
+			y(2, i) = linearFunction3(i) + dist(rde);
+		}
+
+		generalLinearModel.AddBatch(x, y);
+
+		Eigen::VectorXd in(3);
+		in(0) = in(1) = in(2) = 12.;
+		Eigen::VectorXd res = generalLinearModel.Predict(in);
+
+		std::cout << "Prediction for 12 is: (" << res(0) << ", " << res(1) << ", " << res(2) << ") generating value: (" << linearFunction(12) << ", " << linearFunction2(12) << ", " << linearFunction3(12) << ")" << std::endl;
+	}
+	*/
+
 }
 
