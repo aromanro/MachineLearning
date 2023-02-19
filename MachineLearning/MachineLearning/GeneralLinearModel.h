@@ -9,5 +9,11 @@ template<typename InputType, typename OutputType, typename WeightsType, class So
 	: public GeneralizedLinearModel<InputType, OutputType, WeightsType, Solver, BatchInputType, BatchOutputType, IdentityFunction<OutputType>, L2Loss<OutputType, BatchOutputType>>
 {
 public:
+	typedef GeneralizedLinearModel<InputType, OutputType, WeightsType, Solver, BatchInputType, BatchOutputType, IdentityFunction<OutputType>, L2Loss<OutputType, BatchOutputType>> baseType;
+
+	GeneralLinearModel(int szi = 1, int szo = 1)
+		: baseType(szi, szo)
+	{
+	}
 };
 

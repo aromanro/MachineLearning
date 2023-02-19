@@ -7,14 +7,16 @@ template<typename InputType, typename OutputType, typename WeigthsType, class So
 class GeneralizedLinearModel
 {
 public:
-	GeneralizedLinearModel(int sz = 1)
+	GeneralizedLinearModel(int szi = 1, int szo = 1)
 	{
-		Initialize(sz);
+		Initialize(szi, szo);
 	}
 
-	void Initialize(int sz = 1)
+	void Initialize(int szi = 1, int szo = 1)
 	{
-		solver.Initialize(sz);
+		solver.Initialize(szi, szo);
+		W = WeigthsType::Zero(szo, szi);
+		b = OutputType::Zero(szo);
 	}
 
 	virtual const OutputType Predict(const InputType& input)
@@ -45,7 +47,7 @@ protected:
 	LinkFunction linkFunc;
 
 	WeigthsType W;
-	WeigthsType b;
+	OutputType b;
 
 	Solver solver;
 };
@@ -54,14 +56,16 @@ template<class Solver, class LinkFunction, class LossFunction>
 class GeneralizedLinearModel<double, double, double, Solver, Eigen::RowVectorXd, Eigen::RowVectorXd, LinkFunction, LossFunction>
 {
 public:
-	GeneralizedLinearModel(int sz = 1)
+	GeneralizedLinearModel(int szi = 1, int szo = 1)
 	{
-		Initialize(sz);
+		Initialize(szi, szo);
+		W = 0;
+		b = 0;
 	}
 
-	void Initialize(int sz = 1)
+	void Initialize(int szi = 1, int szo = 1)
 	{
-		solver.Initialize(sz);
+		solver.Initialize(szi, szo);
 	}
 
 	virtual const double Predict(const double& input)

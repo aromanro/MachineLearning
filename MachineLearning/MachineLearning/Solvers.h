@@ -5,14 +5,14 @@
 template<typename InputType = Eigen::VectorXd, typename OutputType = Eigen::VectorXd, typename WeightsType = Eigen::VectorXd, typename BatchInputType = Eigen::MatrixXd, typename BatchOutputType = Eigen::MatrixXd> 
 class SimpleLinearRegressionSolver {
 public:
-	SimpleLinearRegressionSolver(int sz = 1)
+	SimpleLinearRegressionSolver(int szi = 1, int szo = 1)
 	{
-		Initialize(sz);
+		Initialize(szi, szo);
 	}
 
-	void Initialize(int sz = 1)
+	void Initialize(int szi = 1, int szo = 1)
 	{
-		size = sz;
+		size = szo;
 		xaccum = InputType::Zero(size);
 		x2accum = InputType::Zero(size);
 		xyaccum = InputType::Zero(size);
@@ -74,14 +74,14 @@ protected:
 
 template<> class SimpleLinearRegressionSolver<double, Eigen::VectorXd, Eigen::VectorXd, Eigen::RowVectorXd, Eigen::MatrixXd> {
 public:
-	SimpleLinearRegressionSolver(int sz = 1)
+	SimpleLinearRegressionSolver(int szi = 1, int szo = 1)
 	{
-		Initialize(sz);
+		Initialize(szi, szo);
 	}
 
-	void Initialize(int sz = 1)
+	void Initialize(int szi = 1, int szo = 1)
 	{
-		size = sz;
+		size = szo;
 		xaccum = 0;
 		x2accum = 0;
 		xyaccum = Eigen::VectorXd::Zero(size);
@@ -148,7 +148,7 @@ public:
 	{
 	}
 
-	void Initialize(int sz = 1) // the parameter is ignored for this one
+	void Initialize(int szi = 1, int szo = 1) // the parameters are ignored for this one
 	{
 		xaccum = 0;
 		x2accum = 0;

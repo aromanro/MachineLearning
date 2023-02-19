@@ -8,7 +8,7 @@ class SimpleLinearRegression : public GeneralizedLinearModel<double, double, dou
 public:
 	typedef GeneralizedLinearModel<double, double, double, SimpleLinearRegressionSolver<double, double, double, Eigen::RowVectorXd, Eigen::RowVectorXd>, Eigen::RowVectorXd> baseType;
 
-	SimpleLinearRegression(int sz = 1) : baseType(sz)
+	SimpleLinearRegression() : baseType(1, 1)
 	{
 	}
 
@@ -31,8 +31,16 @@ template<typename InputType = Eigen::VectorXd> class MultivariateSimpleLinearReg
 public:
 	typedef GeneralizedLinearModel<InputType, Eigen::VectorXd, Eigen::VectorXd, SimpleLinearRegressionSolver<>, Eigen::MatrixXd> baseType;
 
-	MultivariateSimpleLinearRegression(int sz = 1) : baseType(sz)
+	MultivariateSimpleLinearRegression(int szi = 1, int szo = 1)
 	{
+		Initialize(szi, szo);
+	}
+
+	void Initialize(int szi = 1, int szo = 1)
+	{
+		baseType::solver.Initialize(szi, szo);
+		baseType::W = Eigen::VectorXd::Zero(szo);
+		baseType::b = Eigen::VectorXd::Zero(szo);
 	}
 
 	const Eigen::VectorXd Predict(const InputType& input) override
@@ -56,7 +64,7 @@ template<> class MultivariateSimpleLinearRegression<double> : public Generalized
 public:
 	typedef GeneralizedLinearModel<double, Eigen::VectorXd, Eigen::VectorXd, SimpleLinearRegressionSolver<double, Eigen::VectorXd, Eigen::VectorXd, Eigen::RowVectorXd, Eigen::MatrixXd>, Eigen::MatrixXd> baseType;
 
-	MultivariateSimpleLinearRegression(int sz = 1) : baseType(sz)
+	MultivariateSimpleLinearRegression(int szi = 1, int szo = 1) : baseType(szi, szo)
 	{
 	}
 
