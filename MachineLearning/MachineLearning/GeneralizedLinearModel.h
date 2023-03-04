@@ -3,7 +3,7 @@
 #include "LinkFunctions.h"
 #include "CostFunctions.h"
 
-template<typename InputType, typename OutputType, typename WeigthsType, class Solver, class BatchInputType, class BatchOutputType = BatchInputType, class LinkFunction = IdentityFunction<OutputType>, class LossFunction = L2Loss<OutputType, BatchOutputType>>
+template<typename InputType, typename OutputType, typename WeigthsType, class Solver, class BatchInputType, class BatchOutputType = BatchInputType, class LinkFunction = IdentityFunction<OutputType>, class LossFunction = L2Loss<OutputType/*, BatchOutputType*/>>
 class GeneralizedLinearModel
 {
 public:
