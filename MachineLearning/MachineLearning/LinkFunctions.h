@@ -1,17 +1,19 @@
 #pragma once
 
+#include <Eigen/eigen>
+#include <unsupported/Eigen/MatrixFunctions>
 
 #include <math.h>
 
 template<typename InputOutputType = Eigen::VectorXd> class IdentityFunction
 {
 public:
-	const InputOutputType& operator()(const InputOutputType& input)
+	const InputOutputType& operator()(const InputOutputType& input) const
 	{
 		return input;
 	}
 
-	const InputOutputType derivative(const InputOutputType& input)
+	const InputOutputType derivative(const InputOutputType& input) const
 	{
 		return InputOutputType::Ones(input.size());
 	}
@@ -20,12 +22,12 @@ public:
 template<> class IdentityFunction<double>
 {
 public:
-	const double& operator()(const double& input)
+	const double& operator()(const double& input) const
 	{
 		return input;
 	}
 
-	const double derivative(const double& input)
+	const double derivative(const double& input) const
 	{
 		return 1;
 	}
@@ -47,12 +49,12 @@ public:
 		beta = b;
 	}
 
-	const InputOutputType operator()(const InputOutputType& input)
+	const InputOutputType operator()(const InputOutputType& input) const
 	{
 		return (1. + (-(beta.cwiseProduct(input) + beta0)).exp()).cwiseInverse();
 	}
 
-	const InputOutputType derivative(const InputOutputType& input)
+	const InputOutputType derivative(const InputOutputType& input) const
 	{
 		const InputOutputType fx = operator()(input);
 
@@ -78,12 +80,12 @@ public:
 		beta = b;
 	}
 
-	const double operator()(const double& input)
+	const double operator()(const double& input) const
 	{
 		return 1. / (1. + exp(-(input * beta + beta0)));
 	}
 
-	const double derivative(const double& input)
+	const double derivative(const double& input) const
 	{
 		const double fx = operator()(input);
 
@@ -102,7 +104,7 @@ public:
 	{
 	}
 
-	const InputOutputType operator()(const InputOutputType& input)
+	const InputOutputType operator()(const InputOutputType& input) const
 	{
 		InputOutputType out = input;
 
@@ -112,7 +114,7 @@ public:
 		return out;
 	}
 
-	const InputOutputType derivative(const InputOutputType& input)
+	const InputOutputType derivative(const InputOutputType& input) const
 	{
 		InputOutputType out = input;
 
@@ -131,12 +133,12 @@ public:
 	{
 	}
 
-	const double operator()(const double& input)
+	const double operator()(const double& input) const
 	{
 		return (input < 0) ? 0 : input;
 	}
 
-	const double derivative(const double& input)
+	const double derivative(const double& input) const
 	{
 		return (input < 0) ? 0 : 1;
 	}

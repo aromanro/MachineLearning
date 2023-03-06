@@ -24,15 +24,21 @@ double linearFunction3(double x)
 	return -2. * x + 1.;
 }
 
+double quadraticFunction(double x)
+{
+	return 3 * x * x - 2. * x + 7.;
+}
+
+
 int main()
 {
 	std::default_random_engine rde(42);
+
 	std::normal_distribution<double> dist(0., 4.);
 	std::uniform_int_distribution<> distInt(0, 99);
 
 	{
 		SimpleLinearRegression simpleLinearRegression;
-
 
 		const unsigned int nrPoints = 100;
 		Eigen::RowVectorXd x, y;
@@ -107,11 +113,39 @@ int main()
 		std::cout << "Prediction for 12 is: (" << res(0) << ", " << res(1) << ", " << res(2) << ") generating value: (" << linearFunction(12) << ", " << linearFunction2(12) << ", " << linearFunction3(12) << ")" << std::endl;
 	}
 
-	// TODO: Needs to have derivative calls for batches on link functions as well
+	std::cout << "With gradient descent: " << std::endl;
 
-	/*
 	{
-		GeneralLinearModel<Eigen::VectorXd, Eigen::VectorXd, Eigen::VectorXd, GradientDescentSolver<>, Eigen::MatrixXd> generalLinearModel(3, 3);
+		// a simple linear regression, but with gradient descent
+		GeneralLinearModel<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, GradientDescentSolver<>, Eigen::MatrixXd> generalLinearModel;
+
+		Eigen::MatrixXd x, y;
+		const int batchSize = 32;
+
+		x.resize(1, batchSize);
+		y.resize(1, batchSize);
+
+		for (int i = 0; i < 10000; ++i)
+		{
+			for (int b = 0; b < batchSize; ++b)
+			{
+				int a = distInt(rde);
+				x(0, b) = a;
+				y(0, b) = linearFunction(a) + dist(rde);
+			}
+
+			generalLinearModel.AddBatch(x, y);
+		}
+
+		Eigen::VectorXd in(1);
+		in(0) = 7.;
+		Eigen::VectorXd res = generalLinearModel.Predict(in);
+
+		std::cout << "Prediction for 7 is: " << res(0) << " generating value: " << linearFunction(7) << std::endl;
+	}
+
+	{
+		GeneralLinearModel<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, GradientDescentSolver<>, Eigen::MatrixXd> generalLinearModel(3, 3);
 
 		Eigen::MatrixXd x, y;
 		const int batchSize = 32;
@@ -119,21 +153,21 @@ int main()
 		x.resize(3, batchSize);
 		y.resize(3, batchSize);
 
-		for (int i = 0; i < 100; ++i)
+		for (int i = 0; i < 10000; ++i)
 		{
 			for (int b = 0; b < batchSize; ++b)
 			{
 				int a = distInt(rde);
-				x(0, i) = a;
-				y(0, i) = linearFunction(a) + dist(rde);
+				x(0, b) = a;
+				y(0, b) = linearFunction(a) + dist(rde);
 
 				a = distInt(rde);
-				x(1, i) = a;
-				y(1, i) = linearFunction2(a) + dist(rde);
+				x(1, b) = a;
+				y(1, b) = linearFunction2(a) + dist(rde);
 
 				a = distInt(rde);
-				x(2, i) = a;
-				y(2, i) = linearFunction3(a) + dist(rde);
+				x(2, b) = a;
+				y(2, b) = linearFunction3(a) + dist(rde);
 			}
 
 			generalLinearModel.AddBatch(x, y);
@@ -145,6 +179,38 @@ int main()
 
 		std::cout << "Prediction for 12 is: (" << res(0) << ", " << res(1) << ", " << res(2) << ") generating value: (" << linearFunction(12) << ", " << linearFunction2(12) << ", " << linearFunction3(12) << ")" << std::endl;
 	}
-	*/
+
+
+	{
+		GeneralLinearModel<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, GradientDescentSolver<>, Eigen::MatrixXd> generalLinearModel(2, 1);
+
+		Eigen::MatrixXd x, y;
+		const int batchSize = 32;
+
+		x.resize(2, batchSize);
+		y.resize(1, batchSize);
+
+		for (int i = 0; i < 10000; ++i)
+		{
+			for (int b = 0; b < batchSize; ++b)
+			{
+				int a = distInt(rde);
+				x(0, b) = a;
+				x(1, b) = a * a;
+				
+				y(0, b) = quadraticFunction(a) + dist(rde);
+			}
+
+			generalLinearModel.AddBatch(x, y);
+		}
+
+		Eigen::VectorXd in(2);
+		in(0) = 12.;
+		in(1) = 12 * 12.;
+
+		Eigen::VectorXd res = generalLinearModel.Predict(in);
+
+		std::cout << "Prediction for 12 is: " << res(0) << " generating value: " << quadraticFunction(12) << std::endl;
+	}
 }
 
