@@ -54,6 +54,7 @@ public:
 			wAdj += lossLinkGrad * input.col(c).transpose();
 
 		w -= alpha * norm * wAdj;
+		//alpha *= 0.99; //learning rate could decrease over time
 	}
 
 protected:
