@@ -646,6 +646,7 @@ protected:
 	double alpha = 0.01;
 	double beta = 0.5;
 	double lim = 10.;
+	int step;
 
 	Eigen::RowVectorXd pred;
 	Eigen::RowVectorXd linpred;
@@ -671,6 +672,7 @@ public:
 		sb = OutputType::Zero(szo);
 		mW = WeightsType::Zero(szo, szi);
 		mb = OutputType::Zero(szo);
+		step = 1;
 	}
 
 	void AddBatch(const BatchInputType& batchInput, const BatchOutputType& batchOutput)
@@ -693,6 +695,7 @@ public:
 
 	void getWeightsAndBias(WeightsType& w, OutputType& b)
 	{
+		++step;
 		OutputType lossLinkGrad = OutputType::Zero(output.rows());
 
 		for (int c = 0; c < output.cols(); ++c)
@@ -706,8 +709,8 @@ public:
 		const double norm = 1. / input.cols();
 		lossLinkGrad *= norm;
 
-		const double div1 = 1. / (1. - beta1 * beta1);
-		const double div2 = 1. / (1. - beta2 * beta2);
+		const double div1 = 1. / (1. - pow(beta1, step));
+		const double div2 = 1. / (1. - pow(beta2, step));
 
 		mb = beta1 * mb + (1. - beta1) * lossLinkGrad;
 		mb *= div1;
@@ -742,9 +745,10 @@ public:
 
 protected:
 	double alpha = 0.01;
-	double beta1 = 0.5;
-	double beta2 = 0.5;
+	double beta1 = 0.6;
+	double beta2 = 0.9;
 	double lim = 10.;
+	int step;
 
 	BatchOutputType pred;
 	BatchOutputType linpred;
@@ -772,6 +776,7 @@ public:
 		sb = 0;
 		mb = 0;
 		mW = 0;
+		step = 1;
 	}
 
 	void AddBatch(const Eigen::RowVectorXd& batchInput, const Eigen::RowVectorXd& batchOutput)
@@ -794,6 +799,7 @@ public:
 
 	void getWeightsAndBias(double& w, double& b)
 	{
+		++step;
 		double lossLinkGrad = 0.;
 
 		for (int c = 0; c < output.cols(); ++c)
@@ -807,8 +813,8 @@ public:
 		const double norm = 1. / input.cols();
 		lossLinkGrad *= norm;
 
-		const double div1 = 1. / (1. - beta1 * beta1);
-		const double div2 = 1. / (1. - beta2 * beta2);
+		const double div1 = 1. / (1. - pow(beta1, step));
+		const double div2 = 1. / (1. - pow(beta2, step));
 
 		mb = beta1 * mb + (1. - beta1) * lossLinkGrad;
 		mb *= div1;
@@ -841,9 +847,10 @@ public:
 
 protected:
 	double alpha = 0.01;
-	double beta1 = 0.5;
-	double beta2 = 0.5;
+	double beta1 = 0.6;
+	double beta2 = 0.9;
 	double lim = 10.;
+	int step;
 
 	Eigen::RowVectorXd pred;
 	Eigen::RowVectorXd linpred;
