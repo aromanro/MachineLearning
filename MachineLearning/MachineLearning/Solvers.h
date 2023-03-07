@@ -1,8 +1,9 @@
 #pragma once
 
 #include <Eigen/eigen>
+#include <unsupported/Eigen/MatrixFunctions>
 
-template<typename InputType = Eigen::VectorXd, typename OutputType = Eigen::VectorXd, typename WeightsType = Eigen::VectorXd, typename BatchInputType = Eigen::MatrixXd, typename BatchOutputType = Eigen::MatrixXd> 
+template<typename InputType = Eigen::VectorXd, typename OutputType = Eigen::VectorXd, typename WeightsType = Eigen::MatrixXd, typename BatchInputType = Eigen::MatrixXd, typename BatchOutputType = Eigen::MatrixXd> 
 class SimpleLinearRegressionSolver {
 public:
 	SimpleLinearRegressionSolver(int szi = 1, int szo = 1)
@@ -42,13 +43,14 @@ public:
 	void getWeightsAndBias(WeightsType& w, OutputType& b) const
 	{
 		if (!count) {
-			w = WeightsType::Zero(size);
+			w = WeightsType::Zero(1, size);
 			b = OutputType::Zero(size);
 			return;
 		}
 
-		w = (count * xyaccum - xaccum.cwiseProduct(yaccum)).cwiseProduct((count * x2accum - xaccum.cwiseProduct(xaccum)).cwiseInverse());
-		b = (yaccum - w.cwiseProduct(xaccum)) / count;
+		const WeightsType wi = (count * xyaccum - xaccum.cwiseProduct(yaccum)).cwiseProduct((count * x2accum - xaccum.cwiseProduct(xaccum)).cwiseInverse());
+		w = wi;
+		b = (yaccum - wi.cwiseProduct(xaccum)) / count;
 	}
 
 	const long long int getSize() const
@@ -73,8 +75,11 @@ protected:
 	void AddSample(const InputType& input, const OutputType& output)
 	{
 		xaccum += input;
+
 		x2accum += input.cwiseProduct(input);
+
 		xyaccum += input.cwiseProduct(output);
+
 		yaccum += output;
 		++count;
 	}
@@ -91,7 +96,7 @@ protected:
 };
 
 
-template<> class SimpleLinearRegressionSolver<double, Eigen::VectorXd, Eigen::VectorXd, Eigen::RowVectorXd, Eigen::MatrixXd> {
+template<> class SimpleLinearRegressionSolver<double, Eigen::VectorXd, Eigen::MatrixXd, Eigen::VectorXd, Eigen::MatrixXd> {
 public:
 	SimpleLinearRegressionSolver(int szi = 1, int szo = 1)
 	{
@@ -127,10 +132,10 @@ public:
 	{
 	}
 
-	void getWeightsAndBias(Eigen::VectorXd& w, Eigen::VectorXd& b) const
+	void getWeightsAndBias(Eigen::MatrixXd& w, Eigen::VectorXd& b) const
 	{
 		if (!count) {
-			w = Eigen::VectorXd::Zero(size);
+			w = Eigen::MatrixXd::Zero(1, size);
 			b = Eigen::VectorXd::Zero(size);
 			return;
 		}

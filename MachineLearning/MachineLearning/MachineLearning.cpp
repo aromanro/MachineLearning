@@ -47,7 +47,6 @@ int main()
 
 	std::uniform_int_distribution<> distInt(0, nrPoints - 1);
 
-
 	{
 		SimpleLinearRegression simpleLinearRegression;
 
@@ -71,6 +70,7 @@ int main()
 		std::cout << "Prediction for 7 is: " << res << " generating value: " << linearFunction(7) << std::endl;
 	}
 
+	
 	{
 		MultivariateSimpleLinearRegression<double> multivariateSimpleLinearRegression(1, 3);
 
@@ -95,6 +95,7 @@ int main()
 
 		std::cout << "Prediction for 12 is: (" << res(0) << ", " << res(1) << ", " << res(2) << ") generating value: (" << linearFunction(12) << ", " << linearFunction2(12) << ", " << linearFunction3(12) << ")" << std::endl;
 	}
+	
 
 	// the above can be also done like this (it's more useful if x values are different for the different simple linear regressions):
 
@@ -132,10 +133,11 @@ int main()
 
 	std::cout << std::endl << "With gradient descent: " << std::endl;
 
+	
 	{
 		// a simple linear regression, but with gradient descent
 		//GeneralLinearModel<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, GradientDescentSolver<>, Eigen::MatrixXd> generalLinearModel;
-		GeneralLinearModel<double, double, double, GradientDescentSolver<double, double, double, Eigen::RowVectorXd, Eigen::RowVectorXd, IdentityFunction<double>, L2Loss<double>>, Eigen::RowVectorXd> generalLinearModel;
+		GeneralLinearModel<double, double, double, AdamSolver<double, double, double, Eigen::RowVectorXd, Eigen::RowVectorXd, IdentityFunction<double>, L2Loss<double>>, Eigen::RowVectorXd> generalLinearModel;
 
 		Eigen::RowVectorXd x, y;
 		const int batchSize = 32;
@@ -143,7 +145,7 @@ int main()
 		x.resize(batchSize);
 		y.resize(batchSize);
 
-		for (int i = 0; i <= 5000; ++i)
+		for (int i = 0; i <= 10000; ++i)
 		{
 			for (int b = 0; b < batchSize; ++b)
 			{
@@ -165,8 +167,9 @@ int main()
 		std::cout << "Simple linear: Prediction for 7 is: " << res << " generating value: " << linearFunction(7) << std::endl;
 	}
 
+	
 	{
-		GeneralLinearModel<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, GradientDescentSolver<>, Eigen::MatrixXd> generalLinearModel(3, 3);
+		GeneralLinearModel<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, AdamSolver<>, Eigen::MatrixXd> generalLinearModel(3, 3);
 
 		Eigen::MatrixXd x, y;
 		const int batchSize = 16;
@@ -174,7 +177,7 @@ int main()
 		x.resize(3, batchSize);
 		y.resize(3, batchSize);
 
-		for (int i = 0; i <= 5000; ++i)
+		for (int i = 0; i <= 10000; ++i)
 		{
 			for (int b = 0; b < batchSize; ++b)
 			{
@@ -207,9 +210,8 @@ int main()
 		std::cout << "General linear: Prediction for 12 is: (" << res(0) << ", " << res(1) << ", " << res(2) << ") generating value: (" << linearFunction(12) << ", " << linearFunction2(12) << ", " << linearFunction3(12) << ")" << std::endl;
 	}
 
-
 	{
-		GeneralLinearModel<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, GradientDescentSolver<>, Eigen::MatrixXd> generalLinearModel(3, 1);
+		GeneralLinearModel<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, AdamSolver<>, Eigen::MatrixXd> generalLinearModel(3, 1);
 
 		Eigen::MatrixXd x, y;
 		const int batchSize = 16;
@@ -217,7 +219,7 @@ int main()
 		x.resize(3, batchSize);
 		y.resize(1, batchSize);
 
-		for (int i = 0; i <= 5000; ++i)
+		for (int i = 0; i <= 10000; ++i)
 		{
 			for (int b = 0; b < batchSize; ++b)
 			{
@@ -249,7 +251,7 @@ int main()
 	}
 
 	{
-		GeneralLinearModel<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, GradientDescentSolver<>, Eigen::MatrixXd> generalLinearModel(3, 1);
+		GeneralLinearModel<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, AdamSolver<>, Eigen::MatrixXd> generalLinearModel(3, 1);
 
 		Eigen::MatrixXd x, y;
 		const int batchSize = 16;
@@ -257,7 +259,7 @@ int main()
 		x.resize(3, batchSize);
 		y.resize(1, batchSize);
 
-		for (int i = 0; i <= 5000; ++i)
+		for (int i = 0; i <= 10000; ++i)
 		{
 			for (int b = 0; b < batchSize; ++b)
 			{
@@ -279,7 +281,7 @@ int main()
 			}
 		}
 
-		Eigen::VectorXd in(4);
+		Eigen::VectorXd in(3);
 		in(0) = 1.;
 		in(1) = 64.;
 		in(2) = 64 * 64.;

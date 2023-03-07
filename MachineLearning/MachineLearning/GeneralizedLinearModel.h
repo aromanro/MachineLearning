@@ -24,10 +24,10 @@ public:
 		return linkFunc(W * input + b);
 	}
 
-	virtual void AddBatch(const BatchInputType& batchInput, const BatchOutputType& batchOutput)
+	void AddBatchNoParamsAdjustment(const BatchInputType& batchInput, const BatchOutputType& batchOutput)
 	{
 		solver.AddBatch(batchInput, batchOutput);
-				
+
 		BatchOutputType pred = BatchOutputType::Zero(batchOutput.rows(), batchOutput.cols());
 		BatchOutputType linpred = BatchOutputType::Zero(batchOutput.rows(), batchOutput.cols());
 
@@ -36,9 +36,14 @@ public:
 			linpred.col(i) = W * batchInput.col(i) + b;
 			pred.col(i) = linkFunc(linpred.col(i));
 		}
-		
+
 		solver.setLinearPrediction(linpred);
 		solver.setPrediction(pred);
+	}
+
+	virtual void AddBatch(const BatchInputType& batchInput, const BatchOutputType& batchOutput)
+	{
+		AddBatchNoParamsAdjustment(batchInput, batchOutput);
 
 		solver.getWeightsAndBias(W, b);
 	}
@@ -78,11 +83,9 @@ public:
 		return linkFunc(W * input + b);
 	}
 
-	virtual void AddBatch(const Eigen::RowVectorXd& batchInput, const Eigen::RowVectorXd& batchOutput)
+	void AddBatchNoParamsAdjustment(const Eigen::RowVectorXd& batchInput, const Eigen::RowVectorXd& batchOutput)
 	{
 		solver.AddBatch(batchInput, batchOutput);
-
-		// TODO: Make something like this work
 
 		Eigen::RowVectorXd pred = Eigen::RowVectorXd::Zero(batchOutput.cols());
 		Eigen::RowVectorXd linpred = Eigen::RowVectorXd::Zero(batchOutput.cols());
@@ -95,6 +98,11 @@ public:
 
 		solver.setLinearPrediction(linpred);
 		solver.setPrediction(pred);
+	}
+
+	virtual void AddBatch(const Eigen::RowVectorXd& batchInput, const Eigen::RowVectorXd& batchOutput)
+	{
+		AddBatchNoParamsAdjustment(batchInput, batchOutput);
 
 		solver.getWeightsAndBias(W, b);
 	}
