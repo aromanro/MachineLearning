@@ -712,25 +712,25 @@ public:
 		const double div1 = 1. / (1. - pow(beta1, step));
 		const double div2 = 1. / (1. - pow(beta2, step));
 
-		mb = beta1 * mb + (1. - beta1) * lossLinkGrad;
+		mb = beta1 * mb - (1. - beta1) * lossLinkGrad;
 		mb *= div1;
 		sb = beta2 * sb + (1. - beta2) * lossLinkGrad.cwiseProduct(lossLinkGrad);
 		sb *= div2;
 
 		OutputType sba = sb + OutputType::Constant(sb.rows(), sb.cols(), 0.000001);
-		b -= alpha * mb.cwiseProduct(sba.cwiseSqrt().cwiseInverse());
+		b += alpha * mb.cwiseProduct(sba.cwiseSqrt().cwiseInverse());
 
 		WeightsType wAdj = WeightsType::Zero(w.rows(), w.cols());
 		for (int c = 0; c < output.cols(); ++c)
 			wAdj += lossLinkGrad * input.col(c).transpose();
 
-		mW = beta1 * mW + (1. - beta1) * wAdj;
+		mW = beta1 * mW - (1. - beta1) * wAdj;
 		mW *= div1;
 		sW = beta2 * sW + (1. - beta2) * wAdj.cwiseProduct(wAdj);
 		sW *= div2;
 
 		WeightsType sWa = sW + WeightsType::Constant(sW.rows(), sW.cols(), 0.000001);
-		w -= alpha * mW.cwiseProduct(sWa.cwiseSqrt().cwiseInverse());
+		w += alpha * mW.cwiseProduct(sWa.cwiseSqrt().cwiseInverse());
 	}
 
 	double getLoss() const
@@ -816,23 +816,23 @@ public:
 		const double div1 = 1. / (1. - pow(beta1, step));
 		const double div2 = 1. / (1. - pow(beta2, step));
 
-		mb = beta1 * mb + (1. - beta1) * lossLinkGrad;
+		mb = beta1 * mb - (1. - beta1) * lossLinkGrad;
 		mb *= div1;
 		sb = beta2 * sb + (1. - beta2) * lossLinkGrad * lossLinkGrad;
 		sb *= div2;
 
-		b -= alpha * mb / sqrt((abs(sb) < 0.00001) ? 0.00001 : sb);
+		b += alpha * mb / sqrt((abs(sb) < 0.00001) ? 0.00001 : sb);
 
 		double wAdj = 0.;
 		for (int c = 0; c < output.cols(); ++c)
 			wAdj += lossLinkGrad * input.col(c)(0);
 
-		mW = beta1 * mW + (1. - beta1) * wAdj;
+		mW = beta1 * mW - (1. - beta1) * wAdj;
 		mW *= div1;
 		sW = beta2 * sW + (1. - beta2) * wAdj * wAdj;
 		sW *= div2;
 
-		w -= alpha * mW / sqrt((abs(sW) < 0.00001) ? 0.00001 : sW);
+		w += alpha * mW / sqrt((abs(sW) < 0.00001) ? 0.00001 : sW);
 	}
 
 	double getLoss() const
