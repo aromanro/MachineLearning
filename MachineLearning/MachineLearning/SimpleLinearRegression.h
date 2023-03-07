@@ -11,18 +11,6 @@ public:
 	SimpleLinearRegression() : baseType(1, 1)
 	{
 	}
-
-	const double Predict(const double& input) override
-	{
-		return baseType::W * input + baseType::b;
-	}
-
-	void AddBatch(const Eigen::RowVectorXd& batchInput, const Eigen::RowVectorXd& batchOutput) override
-	{
-		baseType::solver.AddBatch(batchInput, batchOutput);
-
-		baseType::solver.getWeightsAndBias(baseType::W, baseType::b);
-	}
 };
 
 // to not be confused with the general case, this corresponds to a bunch of simple linear regressions, even if multivariable
@@ -42,20 +30,6 @@ public:
 		baseType::W = Eigen::VectorXd::Zero(szo);
 		baseType::b = Eigen::VectorXd::Zero(szo);
 	}
-
-	const Eigen::VectorXd Predict(const InputType& input) override
-	{
-		const Eigen::VectorXd linOut = baseType::W.cwiseProduct(input) + baseType::b;
-
-		return linOut;
-	}
-
-	void AddBatch(const Eigen::MatrixXd& batchInput, const Eigen::MatrixXd& batchOutput) override
-	{
-		baseType::solver.AddBatch(batchInput, batchOutput);
-
-		baseType::solver.getWeightsAndBias(baseType::W, baseType::b);
-	}
 };
 
 
@@ -66,20 +40,6 @@ public:
 
 	MultivariateSimpleLinearRegression(int szi = 1, int szo = 1) : baseType(szi, szo)
 	{
-	}
-
-	const Eigen::VectorXd Predict(const double& input) override
-	{
-		const Eigen::VectorXd linOut = baseType::W * input + baseType::b;
-
-		return linOut;
-	}
-
-	void AddBatch(const Eigen::MatrixXd& batchInput, const Eigen::MatrixXd& batchOutput) override
-	{
-		baseType::solver.AddBatch(batchInput, batchOutput);
-
-		baseType::solver.getWeightsAndBias(baseType::W, baseType::b);
 	}
 };
 

@@ -3,7 +3,7 @@
 #include <Eigen/eigen>
 #include <unsupported/Eigen/MatrixFunctions>
 
-template<typename OutputType = Eigen::VectorXd/*, typename BatchOutputType = Eigen::MatrixXd*/> class L2Loss
+template<typename OutputType = Eigen::VectorXd> class L2Loss
 {
 public:
 	OutputType operator()(const OutputType& output, const OutputType& expected) const
@@ -19,8 +19,24 @@ public:
 	}
 };
 
+template<> class L2Loss<double>
+{
+public:
+	double operator()(const double& output, const double& expected) const
+	{
+		const double dif = output - expected;
+		return dif * dif;
+	}
 
-template<typename OutputType = Eigen::VectorXd/*, typename BatchOutputType = Eigen::MatrixXd*/> class L1Loss
+	double derivative(const double& output, const double& expected) const
+	{
+		const double dif = output - expected;
+		return 2. * dif;
+	}
+};
+
+
+template<typename OutputType = Eigen::VectorXd> class L1Loss
 {
 public:
 	OutputType operator()(const OutputType& output, const OutputType& expected) const 
@@ -42,7 +58,7 @@ public:
 };
 
 
-template<> class L1Loss<double/*, Eigen::RowVectorXd*/>
+template<> class L1Loss<double>
 {
 public:
 	double operator()(const double& output, const double& expected) const
@@ -56,7 +72,7 @@ public:
 	}
 };
 
-template<typename OutputType = Eigen::VectorXd/*, typename BatchOutputType = Eigen::MatrixXd*/> class BinaryCrossEntropyLoss
+template<typename OutputType = Eigen::VectorXd> class BinaryCrossEntropyLoss
 {
 public:
 	OutputType operator()(const OutputType& output, const OutputType& expected) const
@@ -71,7 +87,7 @@ public:
 };
 
 
-template<> class BinaryCrossEntropyLoss<double/*, Eigen::RowVectorXd*/>
+template<> class BinaryCrossEntropyLoss<double>
 {
 public:
 	double operator()(const double& output, const double& expected)

@@ -26,10 +26,13 @@ public:
 
 		for (unsigned int i = 0; i < batchInput.cols(); ++i)
 			AddSample(batchInput.col(i), batchOutput.col(i));
+
+		output = batchOutput;
 	}
 
 	void setPrediction(const BatchOutputType& output)
 	{
+		pred = output;
 	}
 
 	void setLinearPrediction(const BatchOutputType& output)
@@ -53,6 +56,19 @@ public:
 		return size;
 	}
 
+	double getLoss() const
+	{
+		double cost = 0;
+
+		for (int c = 0; c < output.cols(); ++c)
+		{
+			const OutputType d = pred.col(c) - output.col(c);
+			cost += d.cwiseProduct(d).sum();
+		}
+
+		return cost;
+	}
+
 protected:
 	void AddSample(const InputType& input, const OutputType& output)
 	{
@@ -69,6 +85,9 @@ protected:
 	OutputType yaccum;
 	unsigned long long int count;
 	unsigned long long int size;
+
+	BatchOutputType pred;
+	BatchOutputType output;
 };
 
 
@@ -95,10 +114,13 @@ public:
 
 		for (unsigned int i = 0; i < batchInput.cols(); ++i)
 			AddSample(batchInput(i), batchOutput.col(i));
+
+		output = batchOutput;
 	}
 
 	void setPrediction(const Eigen::MatrixXd& output)
 	{
+		pred = output;
 	}
 
 	void setLinearPrediction(const Eigen::MatrixXd& output)
@@ -122,6 +144,19 @@ public:
 		return size;
 	}
 
+	double getLoss() const
+	{
+		double cost = 0;
+
+		for (int c = 0; c < output.cols(); ++c)
+		{
+			const Eigen::VectorXd d = pred.col(c) - output.col(c);
+			cost += d.cwiseProduct(d).sum();
+		}
+
+		return cost;
+	}
+
 protected:
 	void AddSample(const double& input, const Eigen::VectorXd& output)
 	{
@@ -138,6 +173,9 @@ protected:
 	Eigen::VectorXd yaccum;
 	unsigned long long int count;
 	unsigned long long int size;
+
+	Eigen::MatrixXd pred;
+	Eigen::MatrixXd output;
 };
 
 template<> class SimpleLinearRegressionSolver<double, double, double, Eigen::RowVectorXd, Eigen::RowVectorXd> 
@@ -163,10 +201,13 @@ public:
 
 		for (unsigned int i = 0; i < batchInput.cols(); ++i)
 			AddSample(batchInput.col(i)(0), batchOutput.col(i)(0));
+
+		output = batchOutput;
 	}
 
 	void setPrediction(const Eigen::RowVectorXd& output)
 	{
+		pred = output;
 	}
 
 	void setLinearPrediction(const Eigen::RowVectorXd& output)
@@ -189,6 +230,19 @@ public:
 		return 1;
 	}
 
+	double getLoss() const
+	{
+		double cost = 0;
+
+		for (int c = 0; c < output.cols(); ++c)
+		{
+			const double d = pred(c) - output(c);
+			cost += d * d;
+		}
+
+		return cost;
+	}
+
 protected:
 	void AddSample(const double& input, const double& output)
 	{
@@ -204,6 +258,9 @@ protected:
 	double xyaccum;
 	double yaccum;
 	unsigned long long int count;
+
+	Eigen::RowVectorXd pred;
+	Eigen::RowVectorXd output;
 };
 
 

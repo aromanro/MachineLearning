@@ -54,7 +54,17 @@ public:
 			wAdj += lossLinkGrad * input.col(c).transpose();
 
 		w -= alpha * norm * wAdj;
-		//alpha *= 0.99; //learning rate could decrease over time
+		//alpha *= 0.9999; //learning rate could decrease over time
+	}
+
+	double getLoss() const
+	{
+		OutputType cost = OutputType::Zero(output.rows(), output.cols());
+
+		for (int c = 0; c < output.cols(); ++c)
+			cost += lossFunction(pred.col(c), output.col(c));
+
+		return cost.sum();
 	}
 
 protected:
@@ -66,6 +76,79 @@ protected:
 
 	BatchInputType input;
 	BatchOutputType output;
+
+	LinkFunction linkFunction;
+	LossFunction lossFunction;
+};
+
+template<class LinkFunction, class LossFunction>
+class GradientDescentSolver<double, double, double, Eigen::RowVectorXd, Eigen::RowVectorXd, LinkFunction, LossFunction>
+{
+public:
+	void Initialize(int szi = 1, int szo = 1)
+	{
+	}
+
+	void AddBatch(const Eigen::RowVectorXd& batchInput, const Eigen::RowVectorXd& batchOutput)
+	{
+		assert(batchInput.cols() == batchOutput.cols());
+
+		input = batchInput;
+		output = batchOutput;
+	}
+
+	void setPrediction(const Eigen::RowVectorXd& output)
+	{
+		pred = output;
+	}
+
+	void setLinearPrediction(const Eigen::RowVectorXd& output) // before calling the link function
+	{
+		linpred = output;
+	}
+
+	void getWeightsAndBias(double& w, double& b) const
+	{
+		double lossLinkGrad = 0.;
+
+		for (int c = 0; c < output.cols(); ++c)
+			lossLinkGrad += linkFunction.derivative(linpred.col(c)(0)) * lossFunction.derivative(pred.col(c)(0), output.col(c)(0));
+
+		// clip it if necessary
+		const double n = sqrt(lossLinkGrad * lossLinkGrad);
+		if (n > lim)
+			lossLinkGrad *= lim / n;
+
+		const double norm = 1. / input.cols();
+		b -= alpha * norm * lossLinkGrad;
+
+		double wAdj = 0.;
+		for (int c = 0; c < output.cols(); ++c)
+			wAdj += lossLinkGrad * input.col(c)(0);
+
+		w -= alpha * norm * wAdj;
+		//alpha *= 0.9999; //learning rate could decrease over time
+	}
+
+	double getLoss() const
+	{
+		double cost = 0;
+
+		for (int c = 0; c < output.cols(); ++c)
+			cost += lossFunction(pred.col(c)(0), output.col(c)(0));
+
+		return cost;
+	}
+
+protected:
+	double alpha = 0.000001;
+	double lim = 20.;
+
+	Eigen::RowVectorXd pred;
+	Eigen::RowVectorXd linpred;
+
+	Eigen::RowVectorXd input;
+	Eigen::RowVectorXd output;
 
 	LinkFunction linkFunction;
 	LossFunction lossFunction;

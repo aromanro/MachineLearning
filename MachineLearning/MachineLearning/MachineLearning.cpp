@@ -32,9 +32,8 @@ double quadraticFunction(double x)
 double poliFunction(double x)
 {
 	const double x2 = x * x;
-	const double x3 = x2 * x;
 
-	return -3. * x3 + 7 * x2 - 4. * x + 13;
+	return  2 * x2 - 14. * x + 16;
 }
 
 
@@ -64,6 +63,9 @@ int main()
 
 		simpleLinearRegression.AddBatch(x, y);
 
+		double loss = simpleLinearRegression.getLoss() / nrPoints;
+		std::cout << "Loss: " << loss << std::endl;
+
 		double res = simpleLinearRegression.Predict(7.);
 
 		std::cout << "Prediction for 7 is: " << res << " generating value: " << linearFunction(7) << std::endl;
@@ -80,14 +82,14 @@ int main()
 		{
 			x(0, i) = i;
 			y(0, i) = linearFunction(i) + dist(rde);
-
-
 			y(1, i) = linearFunction2(i) + dist(rde);
-
 			y(2, i) = linearFunction3(i) + dist(rde);
 		}
 
 		multivariateSimpleLinearRegression.AddBatch(x, y);
+
+		double loss = multivariateSimpleLinearRegression.getLoss() / nrPoints;
+		std::cout << "Loss: " << loss << std::endl;
 
 		Eigen::VectorXd res = multivariateSimpleLinearRegression.Predict(12.);
 
@@ -117,6 +119,10 @@ int main()
 
 		multivariateSimpleLinearRegression.AddBatch(x, y);
 
+
+		double loss = multivariateSimpleLinearRegression.getLoss() / nrPoints;
+		std::cout << "Loss: " << loss << std::endl;
+
 		Eigen::VectorXd in(3);
 		in(0) = in(1) = in(2) = 12.;
 		Eigen::VectorXd res = multivariateSimpleLinearRegression.Predict(in);
@@ -124,47 +130,51 @@ int main()
 		std::cout << "Prediction for 12 is: (" << res(0) << ", " << res(1) << ", " << res(2) << ") generating value: (" << linearFunction(12) << ", " << linearFunction2(12) << ", " << linearFunction3(12) << ")" << std::endl;
 	}
 
-	std::cout << "With gradient descent: " << std::endl;
+	std::cout << std::endl << "With gradient descent: " << std::endl;
 
 	{
 		// a simple linear regression, but with gradient descent
-		GeneralLinearModel<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, GradientDescentSolver<>, Eigen::MatrixXd> generalLinearModel;
+		//GeneralLinearModel<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, GradientDescentSolver<>, Eigen::MatrixXd> generalLinearModel;
+		GeneralLinearModel<double, double, double, GradientDescentSolver<double, double, double, Eigen::RowVectorXd, Eigen::RowVectorXd, IdentityFunction<double>, L2Loss<double>>, Eigen::RowVectorXd> generalLinearModel;
 
-		Eigen::MatrixXd x, y;
+		Eigen::RowVectorXd x, y;
 		const int batchSize = 32;
 
-		x.resize(1, batchSize);
-		y.resize(1, batchSize);
+		x.resize(batchSize);
+		y.resize(batchSize);
 
-		for (int i = 0; i < 10000; ++i)
+		for (int i = 0; i <= 5000; ++i)
 		{
 			for (int b = 0; b < batchSize; ++b)
 			{
 				int a = distInt(rde);
-				x(0, b) = a;
-				y(0, b) = linearFunction(a) + dist(rde);
+				x(b) = a;
+				y(b) = linearFunction(a) + dist(rde);
 			}
 
 			generalLinearModel.AddBatch(x, y);
+
+			if (i % 500 == 0)
+			{
+				double loss = generalLinearModel.getLoss() / batchSize;
+				std::cout << "Loss: " << loss << std::endl;
+			}
 		}
+		const double res = generalLinearModel.Predict(7.);
 
-		Eigen::VectorXd in(1);
-		in(0) = 7.;
-		Eigen::VectorXd res = generalLinearModel.Predict(in);
-
-		std::cout << "Prediction for 7 is: " << res(0) << " generating value: " << linearFunction(7) << std::endl;
+		std::cout << "Simple linear: Prediction for 7 is: " << res << " generating value: " << linearFunction(7) << std::endl;
 	}
 
 	{
 		GeneralLinearModel<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, GradientDescentSolver<>, Eigen::MatrixXd> generalLinearModel(3, 3);
 
 		Eigen::MatrixXd x, y;
-		const int batchSize = 32;
+		const int batchSize = 16;
 
 		x.resize(3, batchSize);
 		y.resize(3, batchSize);
 
-		for (int i = 0; i < 10000; ++i)
+		for (int i = 0; i <= 5000; ++i)
 		{
 			for (int b = 0; b < batchSize; ++b)
 			{
@@ -182,13 +192,19 @@ int main()
 			}
 
 			generalLinearModel.AddBatch(x, y);
+
+			if (i % 500 == 0)
+			{
+				double loss = generalLinearModel.getLoss() / batchSize;
+				std::cout << "Loss: " << loss << std::endl;
+			}
 		}
 
 		Eigen::VectorXd in(3);
 		in(0) = in(1) = in(2) = 12.;
 		Eigen::VectorXd res = generalLinearModel.Predict(in);
 
-		std::cout << "Prediction for 12 is: (" << res(0) << ", " << res(1) << ", " << res(2) << ") generating value: (" << linearFunction(12) << ", " << linearFunction2(12) << ", " << linearFunction3(12) << ")" << std::endl;
+		std::cout << "General linear: Prediction for 12 is: (" << res(0) << ", " << res(1) << ", " << res(2) << ") generating value: (" << linearFunction(12) << ", " << linearFunction2(12) << ", " << linearFunction3(12) << ")" << std::endl;
 	}
 
 
@@ -201,7 +217,7 @@ int main()
 		x.resize(3, batchSize);
 		y.resize(1, batchSize);
 
-		for (int i = 0; i < 10000; ++i)
+		for (int i = 0; i <= 5000; ++i)
 		{
 			for (int b = 0; b < batchSize; ++b)
 			{
@@ -214,6 +230,12 @@ int main()
 			}
 
 			generalLinearModel.AddBatch(x, y);
+
+			if (i % 500 == 0)
+			{
+				double loss = generalLinearModel.getLoss() / batchSize;
+				std::cout << "Loss: " << loss << std::endl;
+			}
 		}
 
 		Eigen::VectorXd in(3);
@@ -227,15 +249,15 @@ int main()
 	}
 
 	{
-		GeneralLinearModel<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, GradientDescentSolver<>, Eigen::MatrixXd> generalLinearModel(4, 1);
+		GeneralLinearModel<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, GradientDescentSolver<>, Eigen::MatrixXd> generalLinearModel(3, 1);
 
 		Eigen::MatrixXd x, y;
-		const int batchSize = 8;
+		const int batchSize = 16;
 
-		x.resize(4, batchSize);
+		x.resize(3, batchSize);
 		y.resize(1, batchSize);
 
-		for (int i = 0; i < 10000; ++i)
+		for (int i = 0; i <= 5000; ++i)
 		{
 			for (int b = 0; b < batchSize; ++b)
 			{
@@ -244,23 +266,27 @@ int main()
 				x(0, b) = 1;
 				x(1, b) = a;
 				x(2, b) = a * a;
-				x(3, b) = x(2, b) * a;
 
 				y(0, b) = poliFunction(a) + dist(rde);
 			}
 
 			generalLinearModel.AddBatch(x, y);
+
+			if (i % 500 == 0)
+			{
+				double loss = generalLinearModel.getLoss() / batchSize;
+				std::cout << "Loss: " << loss << std::endl;
+			}
 		}
 
 		Eigen::VectorXd in(4);
 		in(0) = 1.;
-		in(1) = 34.;
-		in(2) = 34 * 34.;
-		in(3) = in(2) * 34.;
+		in(1) = 64.;
+		in(2) = 64 * 64.;
 
 		Eigen::VectorXd res = generalLinearModel.Predict(in);
 
-		std::cout << "Cubic: Prediction for 34 is: " << res(0) << " generating value: " << poliFunction(34) << std::endl;
+		std::cout << "Cubic: Prediction for 64 is: " << res(0) << " generating value: " << poliFunction(64) << std::endl;
 	}
 }
 

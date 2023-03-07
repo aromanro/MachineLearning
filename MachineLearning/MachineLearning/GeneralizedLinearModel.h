@@ -43,6 +43,11 @@ public:
 		solver.getWeightsAndBias(W, b);
 	}
 
+	double getLoss() const
+	{
+		return solver.getLoss();
+	}
+
 protected:
 	LinkFunction linkFunc;
 
@@ -92,6 +97,11 @@ public:
 		solver.setPrediction(pred);
 
 		solver.getWeightsAndBias(W, b);
+	}
+
+	double getLoss() const
+	{
+		return solver.getLoss();
 	}
 
 protected:
