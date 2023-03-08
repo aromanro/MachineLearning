@@ -42,11 +42,8 @@ public:
 
 	void getWeightsAndBias(WeightsType& w, OutputType& b) const
 	{
-		if (!count) {
-			w = WeightsType::Zero(1, size);
-			b = OutputType::Zero(size);
+		if (!count)
 			return;
-		}
 
 		const WeightsType wi = (count * xyaccum - xaccum.cwiseProduct(yaccum)).cwiseProduct((count * x2accum - xaccum.cwiseProduct(xaccum)).cwiseInverse());
 		w = wi;
@@ -134,11 +131,8 @@ public:
 
 	void getWeightsAndBias(Eigen::MatrixXd& w, Eigen::VectorXd& b) const
 	{
-		if (!count) {
-			w = Eigen::MatrixXd::Zero(1, size);
-			b = Eigen::VectorXd::Zero(size);
+		if (!count)
 			return;
-		}
 
 		w = (count * xyaccum - xaccum * yaccum) / (count * x2accum - xaccum * xaccum);
 		b = (yaccum - w * xaccum) / count;

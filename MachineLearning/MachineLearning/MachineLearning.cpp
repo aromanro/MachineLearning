@@ -4,8 +4,9 @@
 #include "SimpleLinearRegression.h"
 #include "GeneralLinearModel.h"
 #include "GradientSolvers.h"
+#include "DataFile.h"
+#include "GnuPlot.h"
 
-#include <iostream>
 
 #include <random>
 
@@ -26,14 +27,12 @@ double linearFunction3(double x)
 
 double quadraticFunction(double x)
 {
-	return 3 * x * x - 2. * x + 7.;
+	return (3 * x * x - 2. * x + 7.) / 100.;
 }
 
-double poliFunction(double x)
+double polyFunction(double x)
 {
-	const double x2 = x * x;
-
-	return  2 * x2 - 14. * x + 16;
+	return (x - 5) * (x - 60) * (x - 80) / 1000.;
 }
 
 
@@ -41,11 +40,13 @@ int main()
 {
 	std::default_random_engine rde(42);
 
-	std::normal_distribution<double> dist(0., 4.);
+	std::normal_distribution<double> dist(0., 10.);
 	
 	const unsigned int nrPoints = 100;
 
 	std::uniform_int_distribution<> distInt(0, nrPoints - 1);
+
+	Gnuplot plot;
 
 	{
 		SimpleLinearRegression simpleLinearRegression;
@@ -135,12 +136,30 @@ int main()
 
 	
 	{
+		DataFileWriter theFile("../../data/data1.txt");
+		
+		std::vector<int> xvals(nrPoints);
+		std::vector<double> yvals(nrPoints);
+
+		// a dataset for the function (for charting):
+		for (int i = 0; i < nrPoints; ++i)
+		{
+			xvals[i] = i;
+			yvals[i] = linearFunction(i);
+		}
+		theFile.AddDataset(xvals, yvals);
+
+		// just generate a bunch of values to be used for training
+		for (int i = 0; i < nrPoints; ++i)
+			yvals[i] = linearFunction(i) + dist(rde);
+		theFile.AddDataset(xvals, yvals);
+
 		// a simple linear regression, but with gradient descent
 		//GeneralLinearModel<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, GradientDescentSolver<>, Eigen::MatrixXd> generalLinearModel;
 		GeneralLinearModel<double, double, double, AdamSolver<double, double, double, Eigen::RowVectorXd, Eigen::RowVectorXd, IdentityFunction<double>, L2Loss<double>>, Eigen::RowVectorXd> generalLinearModel;
 
 		Eigen::RowVectorXd x, y;
-		const int batchSize = 32;
+		const int batchSize = 16;
 
 		x.resize(batchSize);
 		y.resize(batchSize);
@@ -149,9 +168,9 @@ int main()
 		{
 			for (int b = 0; b < batchSize; ++b)
 			{
-				int a = distInt(rde);
-				x(b) = a;
-				y(b) = linearFunction(a) + dist(rde);
+				int ind = distInt(rde);
+				x(b) = xvals[ind];
+				y(b) = yvals[ind];
 			}
 
 			generalLinearModel.AddBatch(x, y);
@@ -165,11 +184,30 @@ int main()
 		const double res = generalLinearModel.Predict(7.);
 
 		std::cout << "Simple linear: Prediction for 7 is: " << res << " generating value: " << linearFunction(7) << std::endl;
+
+		for (int i = 0; i < nrPoints; ++i)
+			yvals[i] = generalLinearModel.Predict(xvals[i]);
+		theFile.AddDataset(xvals, yvals);
 	}
 
+	plot.setCmdFileName("plot1.plt");
+	plot.setDataFileName("data1.txt");
+	plot.Execute();
 	
 	{
-		GeneralLinearModel<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, AdamSolver<>, Eigen::MatrixXd> generalLinearModel(3, 3);
+		std::vector<int> xvals(nrPoints);
+		std::vector<double> yvals(nrPoints);
+		std::vector<double> yvals2(nrPoints);
+		std::vector<double> yvals3(nrPoints);
+		for (int i = 0; i < nrPoints; ++i)
+		{
+			xvals[i] = i;
+			yvals[i] = linearFunction(i) + dist(rde);
+			yvals2[i] = linearFunction2(i) + dist(rde);
+			yvals3[i] = linearFunction3(i) + dist(rde);
+		}
+
+		GeneralLinearModel<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, AdamSolver<>> generalLinearModel(3, 3);
 
 		Eigen::MatrixXd x, y;
 		const int batchSize = 16;
@@ -181,17 +219,17 @@ int main()
 		{
 			for (int b = 0; b < batchSize; ++b)
 			{
-				int a = distInt(rde);
-				x(0, b) = a;
-				y(0, b) = linearFunction(a) + dist(rde);
+				int ind = distInt(rde);
+				x(0, b) = xvals[ind];
+				y(0, b) = yvals[ind];
 
-				a = distInt(rde);
-				x(1, b) = a;
-				y(1, b) = linearFunction2(a) + dist(rde);
+				ind = distInt(rde);
+				x(1, b) = xvals[ind];
+				y(1, b) = yvals2[ind];
 
-				a = distInt(rde);
-				x(2, b) = a;
-				y(2, b) = linearFunction3(a) + dist(rde);
+				ind = distInt(rde);
+				x(2, b) = xvals[ind];
+				y(2, b) = yvals3[ind];
 			}
 
 			generalLinearModel.AddBatch(x, y);
@@ -211,7 +249,29 @@ int main()
 	}
 
 	{
-		GeneralLinearModel<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, AdamSolver<>, Eigen::MatrixXd> generalLinearModel(3, 1);
+		std::vector<int> xvals(nrPoints);
+		std::vector<double> yvals(nrPoints);
+
+		DataFileWriter theFile("../../data/data2.txt");
+
+
+		// a dataset for the function (for charting):
+		for (int i = 0; i < nrPoints; ++i)
+		{
+			xvals[i] = i;
+			yvals[i] = quadraticFunction(i);
+		}
+		theFile.AddDataset(xvals, yvals);
+
+		for (int i = 0; i < nrPoints; ++i)
+			yvals[i] = quadraticFunction(i) + dist(rde);
+		theFile.AddDataset(xvals, yvals);
+
+		GeneralLinearModel<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, AdamSolver<>> generalLinearModel(3, 1);
+		generalLinearModel.solver.alpha = 0.0001;
+		generalLinearModel.solver.beta1 = 0.7;
+		generalLinearModel.solver.beta2 = 0.9;
+		generalLinearModel.solver.lim = 20;
 
 		Eigen::MatrixXd x, y;
 		const int batchSize = 16;
@@ -219,21 +279,22 @@ int main()
 		x.resize(3, batchSize);
 		y.resize(1, batchSize);
 
-		for (int i = 0; i <= 10000; ++i)
+		for (int i = 0; i <= 100000; ++i)
 		{
 			for (int b = 0; b < batchSize; ++b)
 			{
-				int a = distInt(rde);
+				int ind = distInt(rde);
+
 				x(0, b) = 1;
-				x(1, b) = a;
-				x(2, b) = a * a;
+				x(1, b) = xvals[ind];
+				x(2, b) = xvals[ind] * xvals[ind];
 				
-				y(0, b) = quadraticFunction(a) + dist(rde);
+				y(0, b) = yvals[ind];
 			}
 
 			generalLinearModel.AddBatch(x, y);
 
-			if (i % 500 == 0)
+			if (i % 10000 == 0)
 			{
 				double loss = generalLinearModel.getLoss() / batchSize;
 				std::cout << "Loss: " << loss << std::endl;
@@ -248,47 +309,103 @@ int main()
 		Eigen::VectorXd res = generalLinearModel.Predict(in);
 
 		std::cout << "Quadratic: Prediction for 24 is: " << res(0) << " generating value: " << quadraticFunction(24) << std::endl;
+
+		for (int i = 0; i < nrPoints; ++i)
+		{
+			in(0) = 1.;
+			in(1) = i;
+			in(2) = i * i;
+			yvals[i] = generalLinearModel.Predict(in)(0);
+		}
+
+		theFile.AddDataset(xvals, yvals);
 	}
 
+
+	plot.setCmdFileName("plot2.plt");
+	plot.setDataFileName("data2.txt");
+	plot.Execute();
+
 	{
-		GeneralLinearModel<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, AdamSolver<>, Eigen::MatrixXd> generalLinearModel(3, 1);
+		std::vector<int> xvals(nrPoints);
+		std::vector<double> yvals(nrPoints);
+
+		DataFileWriter theFile("../../data/data3.txt");
+
+		// a dataset for the function (for charting):
+		for (int i = 0; i < nrPoints; ++i)
+		{
+			xvals[i] = i;
+			yvals[i] = polyFunction(i);
+		}
+		theFile.AddDataset(xvals, yvals);
+
+		for (int i = 0; i < nrPoints; ++i)
+			yvals[i] = polyFunction(i) + dist(rde);
+		theFile.AddDataset(xvals, yvals);
+
+		//typedef AdamSolver<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, Eigen::MatrixXd, Eigen::MatrixXd, IdentityFunction<Eigen::VectorXd>, L1Loss<Eigen::VectorXd>> theSolver;
+		typedef AdamSolver<> theSolver;
+		GeneralLinearModel<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, theSolver> generalLinearModel(4, 1);
+
+		generalLinearModel.solver.alpha = 0.00001;
+		generalLinearModel.solver.beta1 = 0.7;
+		generalLinearModel.solver.beta2 = 0.95;
+		
 
 		Eigen::MatrixXd x, y;
 		const int batchSize = 16;
 
-		x.resize(3, batchSize);
+		x.resize(4, batchSize);
 		y.resize(1, batchSize);
 
-		for (int i = 0; i <= 10000; ++i)
+		for (int i = 0; i <= 10000000; ++i)
 		{
 			for (int b = 0; b < batchSize; ++b)
 			{
-				int a = distInt(rde);
+				int ind = distInt(rde);
 
 				x(0, b) = 1;
-				x(1, b) = a;
-				x(2, b) = a * a;
+				x(1, b) = xvals[ind];
+				x(2, b) = xvals[ind] * xvals[ind];
+				x(3, b) = x(2, b) * xvals[ind];
 
-				y(0, b) = poliFunction(a) + dist(rde);
+				y(0, b) = yvals[ind];
 			}
 
 			generalLinearModel.AddBatch(x, y);
 
-			if (i % 500 == 0)
+			if (i % 50000 == 0)
 			{
 				double loss = generalLinearModel.getLoss() / batchSize;
 				std::cout << "Loss: " << loss << std::endl;
 			}
 		}
 
-		Eigen::VectorXd in(3);
+		Eigen::VectorXd in(4);
 		in(0) = 1.;
-		in(1) = 64.;
-		in(2) = 64 * 64.;
+		in(1) = 32.;
+		in(2) = 32 * 32.;
+		in(3) = in(2) * 32.;
 
 		Eigen::VectorXd res = generalLinearModel.Predict(in);
 
-		std::cout << "Cubic: Prediction for 64 is: " << res(0) << " generating value: " << poliFunction(64) << std::endl;
+		std::cout << "Quartic: Prediction for 32 is: " << res(0) << " generating value: " << polyFunction(32) << std::endl;
+
+		for (int i = 0; i < nrPoints; ++i)
+		{
+			in(0) = 1.;
+			in(1) = i;
+			in(2) = i * i;
+			in(3) = in(2) * i;
+			yvals[i] = generalLinearModel.Predict(in)(0);
+		}
+
+		theFile.AddDataset(xvals, yvals);
 	}
+
+	plot.setCmdFileName("plot3.plt");
+	plot.setDataFileName("data3.txt");
+	plot.Execute();
 }
 

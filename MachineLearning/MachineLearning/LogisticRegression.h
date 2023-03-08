@@ -7,8 +7,9 @@
 typedef BinaryCrossEntropyLoss<double/*, Eigen::RowVectorXd*/> LogLoss;
 
 template<typename InputType, typename OutputType, typename WeightsType, class Solver, class BatchInputType, class BatchOutputType = BatchInputType> class LogisticRegression
-	: public GeneralizedLinearModel<InputType, OutputType, WeightsType, Solver, BatchInputType, BatchOutputType, SigmoidFunction<InputType, WeightsType>, LogLoss>
+	: public GeneralizedLinearModel<InputType, OutputType, WeightsType, Solver, BatchInputType, BatchOutputType, SigmoidFunction<InputType, WeightsType>>
 {
 public:
+	typedef GeneralizedLinearModel<InputType, OutputType, WeightsType, Solver, BatchInputType, BatchOutputType, SigmoidFunction<InputType, WeightsType>> baseType;
 };
 

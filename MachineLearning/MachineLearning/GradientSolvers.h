@@ -41,19 +41,21 @@ public:
 		for (int c = 0; c < output.cols(); ++c)
 			lossLinkGrad += linkFunction.derivative(linpred.col(c)).cwiseProduct(lossFunction.derivative(pred.col(c), output.col(c)));
 
+		const double norm = 1. / input.cols();
+		lossLinkGrad *= norm;
+
 		// clip it if necessary
 		const double n = sqrt(lossLinkGrad.cwiseProduct(lossLinkGrad).sum());
 		if (n > lim)
 			lossLinkGrad *= lim / n;
 
-		const double norm = 1. / input.cols();
-		b -= alpha * norm * lossLinkGrad;
+		b -= alpha * lossLinkGrad;
 
 		WeightsType wAdj = WeightsType::Zero(w.rows(), w.cols());
 		for (int c = 0; c < output.cols(); ++c)
 			wAdj += lossLinkGrad * input.col(c).transpose();
 
-		w -= alpha * norm * wAdj;
+		w -= alpha * wAdj;
 		//alpha *= 0.9999; //learning rate could decrease over time
 	}
 
@@ -67,10 +69,11 @@ public:
 		return cost.sum();
 	}
 
-protected:
+
 	double alpha = 0.000001;
 	double lim = 20.;
 
+protected:
 	BatchOutputType pred;
 	BatchOutputType linpred;
 
@@ -114,19 +117,22 @@ public:
 		for (int c = 0; c < output.cols(); ++c)
 			lossLinkGrad += linkFunction.derivative(linpred.col(c)(0)) * lossFunction.derivative(pred.col(c)(0), output.col(c)(0));
 
+
+		const double norm = 1. / input.cols();
+		lossLinkGrad *= norm;
+
 		// clip it if necessary
 		const double n = sqrt(lossLinkGrad * lossLinkGrad);
 		if (n > lim)
 			lossLinkGrad *= lim / n;
 
-		const double norm = 1. / input.cols();
-		b -= alpha * norm * lossLinkGrad;
+		b -= alpha * lossLinkGrad;
 
 		double wAdj = 0.;
 		for (int c = 0; c < output.cols(); ++c)
 			wAdj += lossLinkGrad * input.col(c)(0);
 
-		w -= alpha * norm * wAdj;
+		w -= alpha * wAdj;
 		//alpha *= 0.9999; //learning rate could decrease over time
 	}
 
@@ -140,10 +146,11 @@ public:
 		return cost;
 	}
 
-protected:
+
 	double alpha = 0.000001;
 	double lim = 20.;
 
+protected:
 	Eigen::RowVectorXd pred;
 	Eigen::RowVectorXd linpred;
 
@@ -191,20 +198,24 @@ public:
 		for (int c = 0; c < output.cols(); ++c)
 			lossLinkGrad += linkFunction.derivative(linpred.col(c)).cwiseProduct(lossFunction.derivative(pred.col(c), output.col(c)));
 
+
+		const double norm = 1. / input.cols();
+		lossLinkGrad *= norm;
+
 		// clip it if necessary
 		const double n = sqrt(lossLinkGrad.cwiseProduct(lossLinkGrad).sum());
 		if (n > lim)
 			lossLinkGrad *= lim / n;
 
 		const double norm = 1. / input.cols();
-		mb = beta * mb - alpha * norm * lossLinkGrad;
+		mb = beta * mb - alpha * lossLinkGrad;
 
 		b += mb;
 
 		WeightsType wAdj = WeightsType::Zero(w.rows(), w.cols());
 		for (int c = 0; c < output.cols(); ++c)
 			wAdj += lossLinkGrad * input.col(c).transpose();
-		mW = beta * mW - alpha * norm * wAdj;
+		mW = beta * mW - alpha * wAdj;
 
 		w += mW;
 	}
@@ -219,11 +230,12 @@ public:
 		return cost.sum();
 	}
 
-protected:
+
 	double alpha = 0.000001;
 	double beta = 0.5;
-	double lim = 10.;
+	double lim = 20.;
 
+protected:
 	BatchOutputType pred;
 	BatchOutputType linpred;
 
@@ -272,14 +284,16 @@ public:
 		for (int c = 0; c < output.cols(); ++c)
 			lossLinkGrad += linkFunction.derivative(linpred.col(c)(0)) * lossFunction.derivative(pred.col(c)(0), output.col(c)(0));
 
+
+		const double norm = 1. / input.cols();
+		lossLinkGrad *= norm;
+
 		// clip it if necessary
 		const double n = sqrt(lossLinkGrad * lossLinkGrad);
 		if (n > lim)
 			lossLinkGrad *= lim / n;
-
-		const double norm = 1. / input.cols();
-		
-		mb = beta * mb - alpha * norm * lossLinkGrad;
+	
+		mb = beta * mb - alpha * lossLinkGrad;
 
 		b += mb;
 
@@ -287,7 +301,7 @@ public:
 		for (int c = 0; c < output.cols(); ++c)
 			wAdj += lossLinkGrad * input.col(c)(0);
 
-		mW = beta * mW - alpha * norm * wAdj;
+		mW = beta * mW - alpha * wAdj;
 
 		w += mW;
 	}
@@ -302,11 +316,12 @@ public:
 		return cost;
 	}
 
-protected:
+
 	double alpha = 0.000001;
 	double beta = 0.5;
-	double lim = 10.;
+	double lim = 20.;
 
+protected:
 	Eigen::RowVectorXd pred;
 	Eigen::RowVectorXd linpred;
 
@@ -356,13 +371,15 @@ public:
 		for (int c = 0; c < output.cols(); ++c)
 			lossLinkGrad += linkFunction.derivative(linpred.col(c)).cwiseProduct(lossFunction.derivative(pred.col(c), output.col(c)));
 
+
+		const double norm = 1. / input.cols();
+		lossLinkGrad *= norm;
+
 		// clip it if necessary
 		const double n = sqrt(lossLinkGrad.cwiseProduct(lossLinkGrad).sum());
 		if (n > lim)
 			lossLinkGrad *= lim / n;
 
-		const double norm = 1. / input.cols();
-		lossLinkGrad *= norm;
 
 		sb += lossLinkGrad.cwiseProduct(lossLinkGrad);
 
@@ -389,10 +406,11 @@ public:
 		return cost.sum();
 	}
 
-protected:
-	double alpha = 0.1;
-	double lim = 10.;
 
+	double alpha = 0.1;
+	double lim = 20.;
+
+protected:
 	BatchOutputType pred;
 	BatchOutputType linpred;
 
@@ -441,13 +459,16 @@ public:
 		for (int c = 0; c < output.cols(); ++c)
 			lossLinkGrad += linkFunction.derivative(linpred.col(c)(0)) * lossFunction.derivative(pred.col(c)(0), output.col(c)(0));
 
+
+		const double norm = 1. / input.cols();
+		lossLinkGrad *= norm;
+
+
 		// clip it if necessary
 		const double n = sqrt(lossLinkGrad * lossLinkGrad);
 		if (n > lim)
 			lossLinkGrad *= lim / n;
 
-		const double norm = 1. / input.cols();
-		lossLinkGrad *= norm;
 
 		sb += lossLinkGrad * lossLinkGrad;
 
@@ -472,9 +493,10 @@ public:
 		return cost;
 	}
 
-protected:
+
 	double alpha = 0.1;
-	double lim = 10.;
+	double lim = 20.;
+protected:
 
 	Eigen::RowVectorXd pred;
 	Eigen::RowVectorXd linpred;
@@ -525,13 +547,13 @@ public:
 		for (int c = 0; c < output.cols(); ++c)
 			lossLinkGrad += linkFunction.derivative(linpred.col(c)).cwiseProduct(lossFunction.derivative(pred.col(c), output.col(c)));
 
+		const double norm = 1. / input.cols();
+		lossLinkGrad *= norm;
+
 		// clip it if necessary
 		const double n = sqrt(lossLinkGrad.cwiseProduct(lossLinkGrad).sum());
 		if (n > lim)
 			lossLinkGrad *= lim / n;
-
-		const double norm = 1. / input.cols();
-		lossLinkGrad *= norm;
 
 		sb = beta * sb + (1. - beta) * lossLinkGrad.cwiseProduct(lossLinkGrad);
 
@@ -558,11 +580,12 @@ public:
 		return cost.sum();
 	}
 
-protected:
+
 	double alpha = 0.01;
 	double beta = 0.5;
-	double lim = 10.;
+	double lim = 20.;
 
+protected:
 	BatchOutputType pred;
 	BatchOutputType linpred;
 
@@ -611,13 +634,14 @@ public:
 		for (int c = 0; c < output.cols(); ++c)
 			lossLinkGrad += linkFunction.derivative(linpred.col(c)(0)) * lossFunction.derivative(pred.col(c)(0), output.col(c)(0));
 
+		const double norm = 1. / input.cols();
+		lossLinkGrad *= norm;
+
 		// clip it if necessary
 		const double n = sqrt(lossLinkGrad * lossLinkGrad);
 		if (n > lim)
 			lossLinkGrad *= lim / n;
 
-		const double norm = 1. / input.cols();
-		lossLinkGrad *= norm;
 
 		sb = beta * sb + (1. - beta) * lossLinkGrad * lossLinkGrad;
 
@@ -642,10 +666,12 @@ public:
 		return cost;
 	}
 
-protected:
+
 	double alpha = 0.01;
 	double beta = 0.5;
-	double lim = 10.;
+	double lim = 20.;
+
+protected:
 	int step;
 
 	Eigen::RowVectorXd pred;
@@ -672,7 +698,7 @@ public:
 		sb = OutputType::Zero(szo);
 		mW = WeightsType::Zero(szo, szi);
 		mb = OutputType::Zero(szo);
-		step = 1;
+		step = 0;
 	}
 
 	void AddBatch(const BatchInputType& batchInput, const BatchOutputType& batchOutput)
@@ -701,13 +727,13 @@ public:
 		for (int c = 0; c < output.cols(); ++c)
 			lossLinkGrad += linkFunction.derivative(linpred.col(c)).cwiseProduct(lossFunction.derivative(pred.col(c), output.col(c)));
 
+		const double norm = 1. / input.cols();
+		lossLinkGrad *= norm;
+
 		// clip it if necessary
 		const double n = sqrt(lossLinkGrad.cwiseProduct(lossLinkGrad).sum());
 		if (n > lim)
 			lossLinkGrad *= lim / n;
-
-		const double norm = 1. / input.cols();
-		lossLinkGrad *= norm;
 
 		const double div1 = 1. / (1. - pow(beta1, step));
 		const double div2 = 1. / (1. - pow(beta2, step));
@@ -743,12 +769,14 @@ public:
 		return cost.sum();
 	}
 
-protected:
+
 	double alpha = 0.01;
-	double beta1 = 0.6;
+	double beta1 = 0.7;
 	double beta2 = 0.9;
-	double lim = 10.;
-	int step;
+	double lim = 20.;
+
+protected:
+	int step = 0;
 
 	BatchOutputType pred;
 	BatchOutputType linpred;
@@ -776,7 +804,7 @@ public:
 		sb = 0;
 		mb = 0;
 		mW = 0;
-		step = 1;
+		step = 0;
 	}
 
 	void AddBatch(const Eigen::RowVectorXd& batchInput, const Eigen::RowVectorXd& batchOutput)
@@ -805,13 +833,14 @@ public:
 		for (int c = 0; c < output.cols(); ++c)
 			lossLinkGrad += linkFunction.derivative(linpred.col(c)(0)) * lossFunction.derivative(pred.col(c)(0), output.col(c)(0));
 
+		const double norm = 1. / input.cols();
+		lossLinkGrad *= norm;
+
 		// clip it if necessary
 		const double n = sqrt(lossLinkGrad * lossLinkGrad);
 		if (n > lim)
 			lossLinkGrad *= lim / n;
 
-		const double norm = 1. / input.cols();
-		lossLinkGrad *= norm;
 
 		const double div1 = 1. / (1. - pow(beta1, step));
 		const double div2 = 1. / (1. - pow(beta2, step));
@@ -845,12 +874,14 @@ public:
 		return cost;
 	}
 
-protected:
+
 	double alpha = 0.01;
-	double beta1 = 0.6;
+	double beta1 = 0.7;
 	double beta2 = 0.9;
-	double lim = 10.;
-	int step;
+	double lim = 20.;
+
+protected:
+	int step = 0;
 
 	Eigen::RowVectorXd pred;
 	Eigen::RowVectorXd linpred;

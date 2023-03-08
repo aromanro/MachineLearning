@@ -3,7 +3,7 @@
 #include "LinkFunctions.h"
 #include "CostFunctions.h"
 
-template<typename InputType, typename OutputType, typename WeigthsType, class Solver, class BatchInputType, class BatchOutputType = BatchInputType, class LinkFunction = IdentityFunction<OutputType>, class LossFunction = L2Loss<OutputType/*, BatchOutputType*/>>
+template<typename InputType, typename OutputType, typename WeigthsType, class Solver, class BatchInputType = Eigen::MatrixXd, class BatchOutputType = BatchInputType, class LinkFunction = IdentityFunction<OutputType>>
 class GeneralizedLinearModel
 {
 public:
@@ -15,7 +15,8 @@ public:
 	void Initialize(int szi = 1, int szo = 1)
 	{
 		solver.Initialize(szi, szo);
-		W = WeigthsType::Zero(szo, szi);
+		// TODO: provide initializers!
+		W = WeigthsType::Random(szo, szi); // random between -1 and 1 by default
 		b = OutputType::Zero(szo);
 	}
 
@@ -59,11 +60,12 @@ protected:
 	WeigthsType W;
 	OutputType b;
 
+public:
 	Solver solver;
 };
 
-template<class Solver, class LinkFunction, class LossFunction>
-class GeneralizedLinearModel<double, double, double, Solver, Eigen::RowVectorXd, Eigen::RowVectorXd, LinkFunction, LossFunction>
+template<class Solver, class LinkFunction>
+class GeneralizedLinearModel<double, double, double, Solver, Eigen::RowVectorXd, Eigen::RowVectorXd, LinkFunction>
 {
 public:
 	GeneralizedLinearModel(int szi = 1, int szo = 1)
@@ -118,5 +120,6 @@ protected:
 	double W;
 	double b;
 
+public:
 	Solver solver;
 };
