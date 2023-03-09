@@ -43,8 +43,8 @@ public:
 		for (int c = 0; c < output.cols(); ++c)
 			lossLinkGrad += linkFunction.derivative(linpred.col(c)).cwiseProduct(lossFunction.derivative(pred.col(c), output.col(c)));
 
-		const double norm = 1. / input.cols();
-		lossLinkGrad *= norm;
+		//const double norm = 1. / input.cols();
+		//lossLinkGrad *= norm;
 
 		// clip it if necessary
 		const double n = sqrt(lossLinkGrad.cwiseProduct(lossLinkGrad).sum());
@@ -121,8 +121,8 @@ public:
 			lossLinkGrad += linkFunction.derivative(linpred.col(c)(0)) * lossFunction.derivative(pred.col(c)(0), output.col(c)(0));
 
 
-		const double norm = 1. / input.cols();
-		lossLinkGrad *= norm;
+		//const double norm = 1. / input.cols();
+		//lossLinkGrad *= norm;
 
 		// clip it if necessary
 		const double n = sqrt(lossLinkGrad * lossLinkGrad);
@@ -203,16 +203,16 @@ public:
 			lossLinkGrad += linkFunction.derivative(linpred.col(c)).cwiseProduct(lossFunction.derivative(pred.col(c), output.col(c)));
 
 
-		const double norm = 1. / input.cols();
-		lossLinkGrad *= norm;
+		//const double norm = 1. / input.cols();
+		//lossLinkGrad *= norm;
 
 		// clip it if necessary
 		const double n = sqrt(lossLinkGrad.cwiseProduct(lossLinkGrad).sum());
 		if (n > lim)
 			lossLinkGrad *= lim / n;
 
-		const double norm = 1. / input.cols();
-		mb = beta * mb - alpha * lossLinkGrad;
+		//const double norm = 1. / input.cols();
+		//mb = beta * mb - alpha * lossLinkGrad;
 
 		b += mb;
 
@@ -289,8 +289,8 @@ public:
 			lossLinkGrad += linkFunction.derivative(linpred.col(c)(0)) * lossFunction.derivative(pred.col(c)(0), output.col(c)(0));
 
 
-		const double norm = 1. / input.cols();
-		lossLinkGrad *= norm;
+		//const double norm = 1. / input.cols();
+		//lossLinkGrad *= norm;
 
 		// clip it if necessary
 		const double n = sqrt(lossLinkGrad * lossLinkGrad);
@@ -376,8 +376,8 @@ public:
 			lossLinkGrad += linkFunction.derivative(linpred.col(c)).cwiseProduct(lossFunction.derivative(pred.col(c), output.col(c)));
 
 
-		const double norm = 1. / input.cols();
-		lossLinkGrad *= norm;
+		//const double norm = 1. / input.cols();
+		//lossLinkGrad *= norm;
 
 		// clip it if necessary
 		const double n = sqrt(lossLinkGrad.cwiseProduct(lossLinkGrad).sum());
@@ -464,8 +464,8 @@ public:
 			lossLinkGrad += linkFunction.derivative(linpred.col(c)(0)) * lossFunction.derivative(pred.col(c)(0), output.col(c)(0));
 
 
-		const double norm = 1. / input.cols();
-		lossLinkGrad *= norm;
+		//const double norm = 1. / input.cols();
+		//lossLinkGrad *= norm;
 
 
 		// clip it if necessary
@@ -551,8 +551,8 @@ public:
 		for (int c = 0; c < output.cols(); ++c)
 			lossLinkGrad += linkFunction.derivative(linpred.col(c)).cwiseProduct(lossFunction.derivative(pred.col(c), output.col(c)));
 
-		const double norm = 1. / input.cols();
-		lossLinkGrad *= norm;
+		//const double norm = 1. / input.cols();
+		//lossLinkGrad *= norm;
 
 		// clip it if necessary
 		const double n = sqrt(lossLinkGrad.cwiseProduct(lossLinkGrad).sum());
@@ -638,8 +638,8 @@ public:
 		for (int c = 0; c < output.cols(); ++c)
 			lossLinkGrad += linkFunction.derivative(linpred.col(c)(0)) * lossFunction.derivative(pred.col(c)(0), output.col(c)(0));
 
-		const double norm = 1. / input.cols();
-		lossLinkGrad *= norm;
+		//const double norm = 1. / input.cols();
+		//lossLinkGrad *= norm;
 
 		// clip it if necessary
 		const double n = sqrt(lossLinkGrad * lossLinkGrad);
@@ -731,8 +731,8 @@ public:
 		for (int c = 0; c < output.cols(); ++c)
 			lossLinkGrad += linkFunction.derivative(linpred.col(c)).cwiseProduct(lossFunction.derivative(pred.col(c), output.col(c)));
 
-		const double norm = 1. / input.cols();
-		lossLinkGrad *= norm;
+		//const double norm = 1. / input.cols();
+		//lossLinkGrad *= norm;
 
 		// clip it if necessary
 		const double n = sqrt(lossLinkGrad.cwiseProduct(lossLinkGrad).sum());
@@ -838,8 +838,8 @@ public:
 		for (int c = 0; c < output.cols(); ++c)
 			lossLinkGrad += linkFunction.derivative(linpred.col(c)(0)) * lossFunction.derivative(pred.col(c)(0), output.col(c)(0));
 
-		const double norm = 1. / input.cols();
-		lossLinkGrad *= norm;
+		//const double norm = 1. / input.cols();
+		//lossLinkGrad *= norm;
 
 		// clip it if necessary
 		const double n = sqrt(lossLinkGrad * lossLinkGrad);

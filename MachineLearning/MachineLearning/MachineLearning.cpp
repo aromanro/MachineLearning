@@ -285,7 +285,7 @@ int main()
 		generalLinearModel.solver.alpha = 0.1;
 		generalLinearModel.solver.beta1 = 0.7;
 		generalLinearModel.solver.beta2 = 0.9;
-		generalLinearModel.solver.lim = 200;
+		generalLinearModel.solver.lim = 2000;
 
 		Eigen::MatrixXd x, y;
 		const int batchSize = 32;
@@ -365,10 +365,10 @@ int main()
 		typedef AdamSolver<> theSolver;
 		GeneralLinearModel<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, theSolver> generalLinearModel(3, 1);
 
-		//generalLinearModel.solver.alpha = 0.000000000001;
+		//generalLinearModel.solver.alpha = 0.01;
 		//generalLinearModel.solver.lim = 100;
 
-		generalLinearModel.solver.alpha = 0.1;
+		generalLinearModel.solver.alpha = 0.2;
 		generalLinearModel.solver.beta1 = 0.8;
 		generalLinearModel.solver.beta2 = 0.9;
 		generalLinearModel.solver.lim = 2000;
