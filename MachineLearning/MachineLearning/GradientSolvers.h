@@ -36,10 +36,10 @@ public:
 		linpred = output;
 	}
 
-	void getWeightsAndBias(WeightsType& w, OutputType& b) const
+	void getWeightsAndBias(WeightsType& w, OutputType& b)
 	{
 		OutputType lossLinkGrad = OutputType::Zero(output.rows());
-		
+
 		for (int c = 0; c < output.cols(); ++c)
 			lossLinkGrad += linkFunction.derivative(linpred.col(c)).cwiseProduct(lossFunction.derivative(pred.col(c), output.col(c)));
 
@@ -58,7 +58,7 @@ public:
 			wAdj += lossLinkGrad * input.col(c).transpose();
 
 		w -= alpha * wAdj;
-		//alpha *= 0.9999; //learning rate could decrease over time
+		alpha *= decay; //learning rate could decrease over time
 	}
 
 	double getLoss() const
@@ -73,6 +73,7 @@ public:
 
 
 	double alpha = 0.000001;
+	double decay = 1.;
 	double lim = 20.;
 
 protected:
@@ -112,7 +113,7 @@ public:
 		linpred = output;
 	}
 
-	void getWeightsAndBias(double& w, double& b) const
+	void getWeightsAndBias(double& w, double& b)
 	{
 		double lossLinkGrad = 0.;
 
@@ -135,7 +136,7 @@ public:
 			wAdj += lossLinkGrad * input.col(c)(0);
 
 		w -= alpha * wAdj;
-		//alpha *= 0.9999; //learning rate could decrease over time
+		alpha *= decay; //learning rate could decrease over time
 	}
 
 	double getLoss() const
@@ -150,6 +151,7 @@ public:
 
 
 	double alpha = 0.000001;
+	double decay = 1.;
 	double lim = 20.;
 
 protected:
@@ -759,6 +761,8 @@ public:
 
 		const WeightsType sWa = sW + WeightsType::Constant(sW.rows(), sW.cols(), eps);
 		w += alpha * mW.cwiseProduct(sWa.cwiseSqrt().cwiseInverse());
+
+		alpha *= 0.999999;
 	}
 
 	double getLoss() const
@@ -771,10 +775,9 @@ public:
 		return cost.sum();
 	}
 
-
-	double alpha = 0.01;
-	double beta1 = 0.7;
-	double beta2 = 0.9;
+	double alpha = 0.001;
+	double beta1 = 0.9;
+	double beta2 = 0.995;
 	double lim = 20.;
 
 protected:
@@ -877,9 +880,9 @@ public:
 	}
 
 
-	double alpha = 0.01;
-	double beta1 = 0.7;
-	double beta2 = 0.9;
+	double alpha = 0.001;
+	double beta1 = 0.9;
+	double beta2 = 0.995;
 	double lim = 20.;
 
 protected:

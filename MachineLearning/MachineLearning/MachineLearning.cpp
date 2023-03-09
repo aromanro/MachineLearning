@@ -132,7 +132,7 @@ int main()
 		std::cout << "Prediction for 12 is: (" << res(0) << ", " << res(1) << ", " << res(2) << ") generating value: (" << linearFunction(12) << ", " << linearFunction2(12) << ", " << linearFunction3(12) << ")" << std::endl;
 	}
 
-	std::cout << std::endl << "With gradient descent: " << std::endl;
+	std::cout << std::endl << "With gradient descent: " << std::endl << std::endl;
 
 	
 	{
@@ -157,6 +157,10 @@ int main()
 		// a simple linear regression, but with gradient descent
 		//GeneralLinearModel<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, GradientDescentSolver<>, Eigen::MatrixXd> generalLinearModel;
 		GeneralLinearModel<double, double, double, AdamSolver<double, double, double, Eigen::RowVectorXd, Eigen::RowVectorXd, IdentityFunction<double>, L2Loss<double>>, Eigen::RowVectorXd> generalLinearModel;
+		generalLinearModel.solver.alpha = 0.01;
+		generalLinearModel.solver.beta1 = 0.7;
+		generalLinearModel.solver.beta2 = 0.9;
+		generalLinearModel.solver.lim = 20;
 
 		Eigen::RowVectorXd x, y;
 		const int batchSize = 32;
@@ -208,6 +212,10 @@ int main()
 		}
 
 		GeneralLinearModel<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, AdamSolver<>> generalLinearModel(3, 3);
+		generalLinearModel.solver.alpha = 0.01;
+		generalLinearModel.solver.beta1 = 0.7;
+		generalLinearModel.solver.beta2 = 0.9;
+		generalLinearModel.solver.lim = 200;
 
 		Eigen::MatrixXd x, y;
 		const int batchSize = 32;
@@ -249,39 +257,43 @@ int main()
 	}
 
 	{
-		std::vector<int> xvals(nrPoints);
+		std::vector<double> xvals(nrPoints);
 		std::vector<double> yvals(nrPoints);
 
 		DataFileWriter theFile("../../data/data2.txt");
 
+		// the division with 100 below is for scaling things down, otherwise the stochastic gradient descent will have a hard time finding the solution
+		// normally it will be scaled by standard deviation or the size of the interval, but that should be enough for tests
 
 		// a dataset for the function (for charting):
 		for (int i = 0; i < nrPoints; ++i)
 		{
-			xvals[i] = i;
-			yvals[i] = quadraticFunction(i);
+			xvals[i] = static_cast<double>(i) / 100;
+			yvals[i] = quadraticFunction(i) / 100;
 		}
 		theFile.AddDataset(xvals, yvals);
 
 		for (int i = 0; i < nrPoints; ++i)
-			yvals[i] = quadraticFunction(i) + dist(rde);
+			yvals[i] = (quadraticFunction(i) + dist(rde)) / 100;
 		theFile.AddDataset(xvals, yvals);
 
 		//typedef AdamSolver<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, Eigen::MatrixXd, Eigen::MatrixXd, IdentityFunction<Eigen::VectorXd>, L1Loss<Eigen::VectorXd>> theSolver;
+		//typedef GradientDescentSolver<> theSolver;
 		typedef AdamSolver<> theSolver;
 		GeneralLinearModel<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, theSolver> generalLinearModel(2, 1);
-		generalLinearModel.solver.alpha = 0.001;
-		generalLinearModel.solver.beta1 = 0.9;
-		generalLinearModel.solver.beta2 = 0.95;
-		generalLinearModel.solver.lim = 20;
+
+		generalLinearModel.solver.alpha = 0.1;
+		generalLinearModel.solver.beta1 = 0.7;
+		generalLinearModel.solver.beta2 = 0.9;
+		generalLinearModel.solver.lim = 200;
 
 		Eigen::MatrixXd x, y;
-		const int batchSize = 16;
+		const int batchSize = 32;
 
 		x.resize(2, batchSize);
 		y.resize(1, batchSize);
 
-		for (int i = 0; i <= 1000000; ++i)
+		for (int i = 0; i <= 10000; ++i)
 		{
 			for (int b = 0; b < batchSize; ++b)
 			{
@@ -303,17 +315,17 @@ int main()
 		}
 
 		Eigen::VectorXd in(2);
-		in(0) = 24.;
-		in(1) = 24 * 24.;
+		in(0) = 24. / 100;
+		in(1) = 24 * 24. / 10000;
 
 		Eigen::VectorXd res = generalLinearModel.Predict(in);
 
-		std::cout << "Quadratic: Prediction for 24 is: " << res(0) << " generating value: " << quadraticFunction(24) << std::endl;
+		std::cout << "Quadratic: Prediction for 24 is: " << res(0) * 100 << " generating value: " << quadraticFunction(24) << std::endl;
 
 		for (int i = 0; i < nrPoints; ++i)
 		{
-			in(0) = i;
-			in(1) = i * i;
+			in(0) = xvals[i];
+			in(1) = xvals[i] * xvals[i];
 			yvals[i] = generalLinearModel.Predict(in)(0);
 		}
 
@@ -325,8 +337,12 @@ int main()
 	plot.setDataFileName("data2.txt");
 	plot.Execute();
 
+
+	// the division with 100 below is for scaling things down, otherwise the stochastic gradient descent will have a hard time finding the solution
+	// normally it will be scaled by standard deviation or the size of the interval, but that should be enough for tests
+	
 	{
-		std::vector<int> xvals(nrPoints);
+		std::vector<double> xvals(nrPoints);
 		std::vector<double> yvals(nrPoints);
 
 		DataFileWriter theFile("../../data/data3.txt");
@@ -334,36 +350,36 @@ int main()
 		// a dataset for the function (for charting):
 		for (int i = 0; i < nrPoints; ++i)
 		{
-			xvals[i] = i;
-			yvals[i] = polyFunction(i);
+			xvals[i] = static_cast<double>(i) / 100;
+			yvals[i] = polyFunction(i) / 100;
 		}
 		theFile.AddDataset(xvals, yvals);
 
 		for (int i = 0; i < nrPoints; ++i)
-			yvals[i] = polyFunction(i) + dist(rde);
+			yvals[i] = (polyFunction(i) + dist(rde)) / 100;
 		theFile.AddDataset(xvals, yvals);
 
+		//typedef GradientDescentSolver<> theSolver;
 		//typedef AdamSolver<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, Eigen::MatrixXd, Eigen::MatrixXd, IdentityFunction<Eigen::VectorXd>, L1Loss<Eigen::VectorXd>> theSolver;
+		
 		typedef AdamSolver<> theSolver;
 		GeneralLinearModel<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, theSolver> generalLinearModel(3, 1);
 
-		generalLinearModel.solver.alpha = 0.0001;
-		generalLinearModel.solver.beta1 = 0.9;
-		generalLinearModel.solver.beta2 = 0.995;
-		generalLinearModel.solver.lim = 20;
+		//generalLinearModel.solver.alpha = 0.000000000001;
+		//generalLinearModel.solver.lim = 100;
 
-		//generalLinearModel.solver.alpha = 0.0001;
-		//generalLinearModel.solver.beta1 = 0.7;
-		//generalLinearModel.solver.beta2 = 0.8;
-		//generalLinearModel.solver.lim = 2000;
+		generalLinearModel.solver.alpha = 0.1;
+		generalLinearModel.solver.beta1 = 0.8;
+		generalLinearModel.solver.beta2 = 0.9;
+		generalLinearModel.solver.lim = 2000;
 
 		Eigen::MatrixXd x, y;
-		const int batchSize = 8;
+		const int batchSize = 32;
 
 		x.resize(3, batchSize);
 		y.resize(1, batchSize);
 
-		for (int i = 0; i <= 10000000; ++i)
+		for (int i = 0; i <= 100000; ++i)
 		{
 			for (int b = 0; b < batchSize; ++b)
 			{
@@ -386,19 +402,19 @@ int main()
 		}
 
 		Eigen::VectorXd in(3);
-		in(0) = 32.;
-		in(1) = 32 * 32.;
-		in(2) = in(1) * 32.;
+		in(0) = 32. / 100;
+		in(1) = in(0) * in(0);
+		in(2) = in(1) * in(0);
 
 		Eigen::VectorXd res = generalLinearModel.Predict(in);
 
-		std::cout << "Quartic: Prediction for 32 is: " << res(0) << " generating value: " << polyFunction(32) << std::endl;
+		std::cout << "Quartic: Prediction for 32 is: " << res(0) * 100 << " generating value: " << polyFunction(32) << std::endl;
 
 		for (int i = 0; i < nrPoints; ++i)
 		{
-			in(0) = i;
-			in(1) = i * i;
-			in(2) = in(1) * i;
+			in(0) = xvals[i];
+			in(1) = xvals[i] * xvals[i];
+			in(2) = in(1) * xvals[i];
 			yvals[i] = generalLinearModel.Predict(in)(0);
 		}
 
