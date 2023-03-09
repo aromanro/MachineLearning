@@ -8,6 +8,8 @@
 
 #include <iostream>
 
+const double eps = 1E-10;
+
 template<typename InputType = Eigen::VectorXd, typename OutputType = Eigen::VectorXd, typename WeightsType = Eigen::MatrixXd, typename BatchInputType = Eigen::MatrixXd, typename BatchOutputType = Eigen::MatrixXd, class LinkFunction = IdentityFunction<OutputType>, class LossFunction = L2Loss<OutputType>>
 class GradientDescentSolver
 {
@@ -383,7 +385,7 @@ public:
 
 		sb += lossLinkGrad.cwiseProduct(lossLinkGrad);
 
-		OutputType sba = sb + OutputType::Constant(sb.rows(), sb.cols(), 0.000001);
+		OutputType sba = sb + OutputType::Constant(sb.rows(), sb.cols(), eps);
 		b -= alpha * lossLinkGrad.cwiseProduct(sba.cwiseSqrt().cwiseInverse());
 
 		WeightsType wAdj = WeightsType::Zero(w.rows(), w.cols());
@@ -392,7 +394,7 @@ public:
 
 		sW += wAdj.cwiseProduct(wAdj);
 
-		WeightsType sWa = sW + WeightsType::Constant(sW.rows(), sW.cols(), 0.000001);
+		WeightsType sWa = sW + WeightsType::Constant(sW.rows(), sW.cols(), eps);
 		w -= alpha * wAdj.cwiseProduct(sWa.cwiseSqrt().cwiseInverse());
 	}
 
@@ -472,7 +474,7 @@ public:
 
 		sb += lossLinkGrad * lossLinkGrad;
 
-		b -= alpha * lossLinkGrad / sqrt((abs(sb) < 0.00001) ? 0.00001 : sb);
+		b -= alpha * lossLinkGrad / sqrt(sb + eps);
 		
 		double wAdj = 0.;
 		for (int c = 0; c < output.cols(); ++c)
@@ -480,7 +482,7 @@ public:
 
 		sW += wAdj * wAdj;
 
-		w -= alpha * wAdj / sqrt((abs(sW) < 0.00001) ? 0.00001 : sW);
+		w -= alpha * wAdj / sqrt(sW + eps);
 	}
 
 	double getLoss() const
@@ -557,7 +559,7 @@ public:
 
 		sb = beta * sb + (1. - beta) * lossLinkGrad.cwiseProduct(lossLinkGrad);
 
-		OutputType sba = sb + OutputType::Constant(sb.rows(), sb.cols(), 0.000001);
+		OutputType sba = sb + OutputType::Constant(sb.rows(), sb.cols(), eps);
 		b -= alpha * lossLinkGrad.cwiseProduct(sba.cwiseSqrt().cwiseInverse());
 
 		WeightsType wAdj = WeightsType::Zero(w.rows(), w.cols());
@@ -566,7 +568,7 @@ public:
 
 		sW = beta * sW + (1. - beta) * wAdj.cwiseProduct(wAdj);
 
-		WeightsType sWa = sW + WeightsType::Constant(sW.rows(), sW.cols(), 0.000001);
+		WeightsType sWa = sW + WeightsType::Constant(sW.rows(), sW.cols(), eps);
 		w -= alpha * wAdj.cwiseProduct(sWa.cwiseSqrt().cwiseInverse());
 	}
 
@@ -645,7 +647,7 @@ public:
 
 		sb = beta * sb + (1. - beta) * lossLinkGrad * lossLinkGrad;
 
-		b -= alpha * lossLinkGrad / sqrt((abs(sb) < 0.00001) ? 0.00001 : sb);
+		b -= alpha * lossLinkGrad / sqrt(sb + eps);
 
 		double wAdj = 0.;
 		for (int c = 0; c < output.cols(); ++c)
@@ -653,7 +655,7 @@ public:
 
 		sW = beta * sW + (1. - beta) * wAdj * wAdj;
 
-		w -= alpha * wAdj / sqrt((abs(sW) < 0.00001) ? 0.00001 : sW);
+		w -= alpha * wAdj / sqrt(sW + eps);
 	}
 
 	double getLoss() const
@@ -743,7 +745,7 @@ public:
 		sb = beta2 * sb + (1. - beta2) * lossLinkGrad.cwiseProduct(lossLinkGrad);
 		sb *= div2;
 
-		OutputType sba = sb + OutputType::Constant(sb.rows(), sb.cols(), 0.000001);
+		const OutputType sba = sb + OutputType::Constant(sb.rows(), sb.cols(), eps);
 		b += alpha * mb.cwiseProduct(sba.cwiseSqrt().cwiseInverse());
 
 		WeightsType wAdj = WeightsType::Zero(w.rows(), w.cols());
@@ -755,7 +757,7 @@ public:
 		sW = beta2 * sW + (1. - beta2) * wAdj.cwiseProduct(wAdj);
 		sW *= div2;
 
-		WeightsType sWa = sW + WeightsType::Constant(sW.rows(), sW.cols(), 0.000001);
+		const WeightsType sWa = sW + WeightsType::Constant(sW.rows(), sW.cols(), eps);
 		w += alpha * mW.cwiseProduct(sWa.cwiseSqrt().cwiseInverse());
 	}
 
@@ -850,7 +852,7 @@ public:
 		sb = beta2 * sb + (1. - beta2) * lossLinkGrad * lossLinkGrad;
 		sb *= div2;
 
-		b += alpha * mb / sqrt((abs(sb) < 0.00001) ? 0.00001 : sb);
+		b += alpha * mb / sqrt(sb + eps);
 
 		double wAdj = 0.;
 		for (int c = 0; c < output.cols(); ++c)
@@ -861,7 +863,7 @@ public:
 		sW = beta2 * sW + (1. - beta2) * wAdj * wAdj;
 		sW *= div2;
 
-		w += alpha * mW / sqrt((abs(sW) < 0.00001) ? 0.00001 : sW);
+		w += alpha * mW / sqrt(sW + eps);
 	}
 
 	double getLoss() const

@@ -27,7 +27,7 @@ double linearFunction3(double x)
 
 double quadraticFunction(double x)
 {
-	return (3 * x * x - 2. * x + 7.) / 100.;
+	return (x - 45) * (x - 50) / 50.;
 }
 
 double polyFunction(double x)
@@ -159,12 +159,12 @@ int main()
 		GeneralLinearModel<double, double, double, AdamSolver<double, double, double, Eigen::RowVectorXd, Eigen::RowVectorXd, IdentityFunction<double>, L2Loss<double>>, Eigen::RowVectorXd> generalLinearModel;
 
 		Eigen::RowVectorXd x, y;
-		const int batchSize = 16;
+		const int batchSize = 32;
 
 		x.resize(batchSize);
 		y.resize(batchSize);
 
-		for (int i = 0; i <= 10000; ++i)
+		for (int i = 0; i <= 1000; ++i)
 		{
 			for (int b = 0; b < batchSize; ++b)
 			{
@@ -210,12 +210,12 @@ int main()
 		GeneralLinearModel<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, AdamSolver<>> generalLinearModel(3, 3);
 
 		Eigen::MatrixXd x, y;
-		const int batchSize = 16;
+		const int batchSize = 32;
 
 		x.resize(3, batchSize);
 		y.resize(3, batchSize);
 
-		for (int i = 0; i <= 10000; ++i)
+		for (int i = 0; i <= 1000; ++i)
 		{
 			for (int b = 0; b < batchSize; ++b)
 			{
@@ -267,27 +267,28 @@ int main()
 			yvals[i] = quadraticFunction(i) + dist(rde);
 		theFile.AddDataset(xvals, yvals);
 
-		GeneralLinearModel<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, AdamSolver<>> generalLinearModel(3, 1);
-		generalLinearModel.solver.alpha = 0.0001;
-		generalLinearModel.solver.beta1 = 0.7;
-		generalLinearModel.solver.beta2 = 0.9;
+		//typedef AdamSolver<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, Eigen::MatrixXd, Eigen::MatrixXd, IdentityFunction<Eigen::VectorXd>, L1Loss<Eigen::VectorXd>> theSolver;
+		typedef AdamSolver<> theSolver;
+		GeneralLinearModel<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, theSolver> generalLinearModel(2, 1);
+		generalLinearModel.solver.alpha = 0.001;
+		generalLinearModel.solver.beta1 = 0.9;
+		generalLinearModel.solver.beta2 = 0.95;
 		generalLinearModel.solver.lim = 20;
 
 		Eigen::MatrixXd x, y;
 		const int batchSize = 16;
 
-		x.resize(3, batchSize);
+		x.resize(2, batchSize);
 		y.resize(1, batchSize);
 
-		for (int i = 0; i <= 100000; ++i)
+		for (int i = 0; i <= 1000000; ++i)
 		{
 			for (int b = 0; b < batchSize; ++b)
 			{
 				int ind = distInt(rde);
 
-				x(0, b) = 1;
-				x(1, b) = xvals[ind];
-				x(2, b) = xvals[ind] * xvals[ind];
+				x(0, b) = xvals[ind];
+				x(1, b) = xvals[ind] * xvals[ind];
 				
 				y(0, b) = yvals[ind];
 			}
@@ -301,10 +302,9 @@ int main()
 			}
 		}
 
-		Eigen::VectorXd in(3);
-		in(0) = 1.;
-		in(1) = 24.;
-		in(2) = 24 * 24.;
+		Eigen::VectorXd in(2);
+		in(0) = 24.;
+		in(1) = 24 * 24.;
 
 		Eigen::VectorXd res = generalLinearModel.Predict(in);
 
@@ -312,9 +312,8 @@ int main()
 
 		for (int i = 0; i < nrPoints; ++i)
 		{
-			in(0) = 1.;
-			in(1) = i;
-			in(2) = i * i;
+			in(0) = i;
+			in(1) = i * i;
 			yvals[i] = generalLinearModel.Predict(in)(0);
 		}
 
@@ -346,17 +345,22 @@ int main()
 
 		//typedef AdamSolver<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, Eigen::MatrixXd, Eigen::MatrixXd, IdentityFunction<Eigen::VectorXd>, L1Loss<Eigen::VectorXd>> theSolver;
 		typedef AdamSolver<> theSolver;
-		GeneralLinearModel<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, theSolver> generalLinearModel(4, 1);
+		GeneralLinearModel<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, theSolver> generalLinearModel(3, 1);
 
-		generalLinearModel.solver.alpha = 0.00001;
-		generalLinearModel.solver.beta1 = 0.7;
-		generalLinearModel.solver.beta2 = 0.95;
-		
+		generalLinearModel.solver.alpha = 0.0001;
+		generalLinearModel.solver.beta1 = 0.9;
+		generalLinearModel.solver.beta2 = 0.995;
+		generalLinearModel.solver.lim = 20;
+
+		//generalLinearModel.solver.alpha = 0.0001;
+		//generalLinearModel.solver.beta1 = 0.7;
+		//generalLinearModel.solver.beta2 = 0.8;
+		//generalLinearModel.solver.lim = 2000;
 
 		Eigen::MatrixXd x, y;
-		const int batchSize = 16;
+		const int batchSize = 8;
 
-		x.resize(4, batchSize);
+		x.resize(3, batchSize);
 		y.resize(1, batchSize);
 
 		for (int i = 0; i <= 10000000; ++i)
@@ -365,10 +369,9 @@ int main()
 			{
 				int ind = distInt(rde);
 
-				x(0, b) = 1;
-				x(1, b) = xvals[ind];
-				x(2, b) = xvals[ind] * xvals[ind];
-				x(3, b) = x(2, b) * xvals[ind];
+				x(0, b) = xvals[ind];
+				x(1, b) = xvals[ind] * xvals[ind];
+				x(2, b) = x(1, b) * xvals[ind];
 
 				y(0, b) = yvals[ind];
 			}
@@ -382,11 +385,10 @@ int main()
 			}
 		}
 
-		Eigen::VectorXd in(4);
-		in(0) = 1.;
-		in(1) = 32.;
-		in(2) = 32 * 32.;
-		in(3) = in(2) * 32.;
+		Eigen::VectorXd in(3);
+		in(0) = 32.;
+		in(1) = 32 * 32.;
+		in(2) = in(1) * 32.;
 
 		Eigen::VectorXd res = generalLinearModel.Predict(in);
 
@@ -394,10 +396,9 @@ int main()
 
 		for (int i = 0; i < nrPoints; ++i)
 		{
-			in(0) = 1.;
-			in(1) = i;
-			in(2) = i * i;
-			in(3) = in(2) * i;
+			in(0) = i;
+			in(1) = i * i;
+			in(2) = in(1) * i;
 			yvals[i] = generalLinearModel.Predict(in)(0);
 		}
 
