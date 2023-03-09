@@ -9,6 +9,7 @@
 
 
 #include <random>
+#include <chrono>
 
 double linearFunction(double x)
 {
@@ -341,6 +342,8 @@ int main()
 	// the division with 100 below is for scaling things down, otherwise the stochastic gradient descent will have a hard time finding the solution
 	// normally it will be scaled by standard deviation or the size of the interval, but that should be enough for tests
 	
+	
+
 	{
 		std::vector<double> xvals(nrPoints);
 		std::vector<double> yvals(nrPoints);
@@ -379,7 +382,9 @@ int main()
 		x.resize(3, batchSize);
 		y.resize(1, batchSize);
 
-		for (int i = 0; i <= 100000; ++i)
+		std::chrono::high_resolution_clock::time_point t1 = std::chrono::high_resolution_clock::now();
+
+		for (int i = 0; i <= 1000000; ++i)
 		{
 			for (int b = 0; b < batchSize; ++b)
 			{
@@ -400,6 +405,11 @@ int main()
 				std::cout << "Loss: " << loss << std::endl;
 			}
 		}
+
+		std::chrono::high_resolution_clock::time_point t2 = std::chrono::high_resolution_clock::now();
+		auto dif = std::chrono::duration_cast<std::chrono::seconds>(t2 - t1).count();
+
+		std::cout << "Computation took: " << dif << " seconds!" << std::endl;
 
 		Eigen::VectorXd in(3);
 		in(0) = 32. / 100;

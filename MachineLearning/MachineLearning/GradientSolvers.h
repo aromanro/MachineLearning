@@ -38,13 +38,14 @@ public:
 
 	void getWeightsAndBias(WeightsType& w, OutputType& b)
 	{
+		/*
 		OutputType lossLinkGrad = OutputType::Zero(output.rows());
 
 		for (int c = 0; c < output.cols(); ++c)
 			lossLinkGrad += linkFunction.derivative(linpred.col(c)).cwiseProduct(lossFunction.derivative(pred.col(c), output.col(c)));
 
-		//const double norm = 1. / input.cols();
-		//lossLinkGrad *= norm;
+		const double norm = 1. / input.cols();
+		lossLinkGrad *= norm;
 
 		// clip it if necessary
 		const double n = sqrt(lossLinkGrad.cwiseProduct(lossLinkGrad).sum());
@@ -59,6 +60,31 @@ public:
 
 		w -= alpha * wAdj;
 		alpha *= decay; //learning rate could decrease over time
+		*/
+
+		// looks it would be a little faster at a first glance
+		// the above took 17 seconds while the one below 15
+		// might be worth changing all implementations to compute directly with the batches
+
+		BatchOutputType lossLinkGrad;
+		lossLinkGrad.resize(output.rows(), output.cols());
+		for (int c = 0; c < output.cols(); ++c)
+		{
+			lossLinkGrad.col(c) = linkFunction.derivative(linpred.col(c)).cwiseProduct(lossFunction.derivative(pred.col(c), output.col(c)));
+			// clip it if necessary
+			const double n = sqrt(lossLinkGrad.col(c).cwiseProduct(lossLinkGrad.col(c)).sum());
+			if (n > lim)
+				lossLinkGrad.col(c) *= lim / n;
+		}
+
+		const double norm = 1. / input.cols();
+
+		for (int c = 0; c < output.cols(); ++c)
+			b -= alpha * norm * lossLinkGrad.col(c);
+
+		WeightsType wAdj = lossLinkGrad * input.transpose();
+		w -= alpha * norm * wAdj;
+		alpha *= decay; //learning rate could decrease over time
 	}
 
 	double getLoss() const
@@ -70,7 +96,6 @@ public:
 
 		return cost.sum();
 	}
-
 
 	double alpha = 0.000001;
 	double decay = 1.;
@@ -121,8 +146,8 @@ public:
 			lossLinkGrad += linkFunction.derivative(linpred.col(c)(0)) * lossFunction.derivative(pred.col(c)(0), output.col(c)(0));
 
 
-		//const double norm = 1. / input.cols();
-		//lossLinkGrad *= norm;
+		const double norm = 1. / input.cols();
+		lossLinkGrad *= norm;
 
 		// clip it if necessary
 		const double n = sqrt(lossLinkGrad * lossLinkGrad);
@@ -203,16 +228,16 @@ public:
 			lossLinkGrad += linkFunction.derivative(linpred.col(c)).cwiseProduct(lossFunction.derivative(pred.col(c), output.col(c)));
 
 
-		//const double norm = 1. / input.cols();
-		//lossLinkGrad *= norm;
+		const double norm = 1. / input.cols();
+		lossLinkGrad *= norm;
 
 		// clip it if necessary
 		const double n = sqrt(lossLinkGrad.cwiseProduct(lossLinkGrad).sum());
 		if (n > lim)
 			lossLinkGrad *= lim / n;
 
-		//const double norm = 1. / input.cols();
-		//mb = beta * mb - alpha * lossLinkGrad;
+		const double norm = 1. / input.cols();
+		mb = beta * mb - alpha * lossLinkGrad;
 
 		b += mb;
 
@@ -289,8 +314,8 @@ public:
 			lossLinkGrad += linkFunction.derivative(linpred.col(c)(0)) * lossFunction.derivative(pred.col(c)(0), output.col(c)(0));
 
 
-		//const double norm = 1. / input.cols();
-		//lossLinkGrad *= norm;
+		const double norm = 1. / input.cols();
+		lossLinkGrad *= norm;
 
 		// clip it if necessary
 		const double n = sqrt(lossLinkGrad * lossLinkGrad);
@@ -376,8 +401,8 @@ public:
 			lossLinkGrad += linkFunction.derivative(linpred.col(c)).cwiseProduct(lossFunction.derivative(pred.col(c), output.col(c)));
 
 
-		//const double norm = 1. / input.cols();
-		//lossLinkGrad *= norm;
+		const double norm = 1. / input.cols();
+		lossLinkGrad *= norm;
 
 		// clip it if necessary
 		const double n = sqrt(lossLinkGrad.cwiseProduct(lossLinkGrad).sum());
@@ -463,10 +488,8 @@ public:
 		for (int c = 0; c < output.cols(); ++c)
 			lossLinkGrad += linkFunction.derivative(linpred.col(c)(0)) * lossFunction.derivative(pred.col(c)(0), output.col(c)(0));
 
-
-		//const double norm = 1. / input.cols();
-		//lossLinkGrad *= norm;
-
+		const double norm = 1. / input.cols();
+		lossLinkGrad *= norm;
 
 		// clip it if necessary
 		const double n = sqrt(lossLinkGrad * lossLinkGrad);
@@ -551,8 +574,8 @@ public:
 		for (int c = 0; c < output.cols(); ++c)
 			lossLinkGrad += linkFunction.derivative(linpred.col(c)).cwiseProduct(lossFunction.derivative(pred.col(c), output.col(c)));
 
-		//const double norm = 1. / input.cols();
-		//lossLinkGrad *= norm;
+		const double norm = 1. / input.cols();
+		lossLinkGrad *= norm;
 
 		// clip it if necessary
 		const double n = sqrt(lossLinkGrad.cwiseProduct(lossLinkGrad).sum());
@@ -638,8 +661,8 @@ public:
 		for (int c = 0; c < output.cols(); ++c)
 			lossLinkGrad += linkFunction.derivative(linpred.col(c)(0)) * lossFunction.derivative(pred.col(c)(0), output.col(c)(0));
 
-		//const double norm = 1. / input.cols();
-		//lossLinkGrad *= norm;
+		const double norm = 1. / input.cols();
+		lossLinkGrad *= norm;
 
 		// clip it if necessary
 		const double n = sqrt(lossLinkGrad * lossLinkGrad);
@@ -731,8 +754,8 @@ public:
 		for (int c = 0; c < output.cols(); ++c)
 			lossLinkGrad += linkFunction.derivative(linpred.col(c)).cwiseProduct(lossFunction.derivative(pred.col(c), output.col(c)));
 
-		//const double norm = 1. / input.cols();
-		//lossLinkGrad *= norm;
+		const double norm = 1. / input.cols();
+		lossLinkGrad *= norm;
 
 		// clip it if necessary
 		const double n = sqrt(lossLinkGrad.cwiseProduct(lossLinkGrad).sum());
@@ -838,8 +861,8 @@ public:
 		for (int c = 0; c < output.cols(); ++c)
 			lossLinkGrad += linkFunction.derivative(linpred.col(c)(0)) * lossFunction.derivative(pred.col(c)(0), output.col(c)(0));
 
-		//const double norm = 1. / input.cols();
-		//lossLinkGrad *= norm;
+		const double norm = 1. / input.cols();
+		lossLinkGrad *= norm;
 
 		// clip it if necessary
 		const double n = sqrt(lossLinkGrad * lossLinkGrad);
