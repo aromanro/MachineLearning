@@ -158,7 +158,7 @@ int main()
 		// a simple linear regression, but with gradient descent
 		//GeneralLinearModel<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, GradientDescentSolver<>, Eigen::MatrixXd> generalLinearModel;
 		GeneralLinearModel<double, double, double, AdamSolver<double, double, double, Eigen::RowVectorXd, Eigen::RowVectorXd, IdentityFunction<double>, L2Loss<double>>, Eigen::RowVectorXd> generalLinearModel;
-		generalLinearModel.solver.alpha = 0.01;
+		generalLinearModel.solver.alpha = 0.03;
 		generalLinearModel.solver.beta1 = 0.7;
 		generalLinearModel.solver.beta2 = 0.9;
 		generalLinearModel.solver.lim = 20;
@@ -213,7 +213,7 @@ int main()
 		}
 
 		GeneralLinearModel<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, AdamSolver<>> generalLinearModel(3, 3);
-		generalLinearModel.solver.alpha = 0.01;
+		generalLinearModel.solver.alpha = 0.02;
 		generalLinearModel.solver.beta1 = 0.7;
 		generalLinearModel.solver.beta2 = 0.9;
 		generalLinearModel.solver.lim = 200;
@@ -283,7 +283,7 @@ int main()
 		typedef AdamSolver<> theSolver;
 		GeneralLinearModel<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, theSolver> generalLinearModel(2, 1);
 
-		generalLinearModel.solver.alpha = 0.1;
+		generalLinearModel.solver.alpha = 0.02;
 		generalLinearModel.solver.beta1 = 0.7;
 		generalLinearModel.solver.beta2 = 0.9;
 		generalLinearModel.solver.lim = 2000;
@@ -294,7 +294,7 @@ int main()
 		x.resize(2, batchSize);
 		y.resize(1, batchSize);
 
-		for (int i = 0; i <= 10000; ++i)
+		for (int i = 0; i <= 1000; ++i)
 		{
 			for (int b = 0; b < batchSize; ++b)
 			{
@@ -308,7 +308,7 @@ int main()
 
 			generalLinearModel.AddBatch(x, y);
 
-			if (i % 10000 == 0)
+			if (i % 100 == 0)
 			{
 				double loss = generalLinearModel.getLoss() / batchSize;
 				std::cout << "Loss: " << loss << std::endl;
@@ -363,6 +363,11 @@ int main()
 		theFile.AddDataset(xvals, yvals);
 
 		//typedef GradientDescentSolver<> theSolver;
+		//typedef MomentumSolver<> theSolver;
+		//typedef AdaGradSolver<> theSolver;
+		//typedef RMSPropSolver<> theSolver;
+		
+		// for testing with L1 loss
 		//typedef AdamSolver<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, Eigen::MatrixXd, Eigen::MatrixXd, IdentityFunction<Eigen::VectorXd>, L1Loss<Eigen::VectorXd>> theSolver;
 		
 		typedef AdamSolver<> theSolver;
@@ -371,8 +376,10 @@ int main()
 		//generalLinearModel.solver.alpha = 0.01;
 		//generalLinearModel.solver.lim = 100;
 
-		generalLinearModel.solver.alpha = 0.2;
-		generalLinearModel.solver.beta1 = 0.8;
+		//generalLinearModel.solver.beta = 0.8;
+
+		generalLinearModel.solver.alpha = 0.01;
+		generalLinearModel.solver.beta1 = 0.9;
 		generalLinearModel.solver.beta2 = 0.9;
 		generalLinearModel.solver.lim = 2000;
 
@@ -384,7 +391,7 @@ int main()
 
 		std::chrono::high_resolution_clock::time_point t1 = std::chrono::high_resolution_clock::now();
 
-		for (int i = 0; i <= 1000000; ++i)
+		for (int i = 0; i <= 100000; ++i)
 		{
 			for (int b = 0; b < batchSize; ++b)
 			{
@@ -399,7 +406,7 @@ int main()
 
 			generalLinearModel.AddBatch(x, y);
 
-			if (i % 50000 == 0)
+			if (i % 10000 == 0)
 			{
 				double loss = generalLinearModel.getLoss() / batchSize;
 				std::cout << "Loss: " << loss << std::endl;
@@ -407,9 +414,9 @@ int main()
 		}
 
 		std::chrono::high_resolution_clock::time_point t2 = std::chrono::high_resolution_clock::now();
-		auto dif = std::chrono::duration_cast<std::chrono::seconds>(t2 - t1).count();
+		auto dif = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();
 
-		std::cout << "Computation took: " << dif << " seconds!" << std::endl;
+		std::cout << "Computation took: " << dif / 1000. << " seconds!" << std::endl;
 
 		Eigen::VectorXd in(3);
 		in(0) = 32. / 100;
