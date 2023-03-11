@@ -97,6 +97,88 @@ protected:
 	double beta;
 };
 
+template<typename InputOutputType, typename WeightsType> class TanhFunction
+{
+public:
+	TanhFunction(int size = 1)
+	{
+	}
+
+	const InputOutputType operator()(const InputOutputType& input) const
+	{
+		return input.tanh();
+	}
+
+	const InputOutputType derivative(const InputOutputType& input) const
+	{
+		const InputOutputType fx = operator()(input);
+
+		return 1. - fx.cwiseProduct(fx);
+	}
+};
+
+template<> class TanhFunction<double, double>
+{
+public:
+	TanhFunction()
+	{
+	}
+
+	const double operator()(const double& input) const
+	{
+		return tanh(input);
+	}
+
+	const double derivative(const double& input) const
+	{
+		const double fx = operator()(input);
+
+		return 1. - fx * fx;
+	}
+};
+
+template<typename InputOutputType, typename WeightsType> class SoftplusFunction
+{
+public:
+	SoftplusFunction(int size = 1)
+	{
+	}
+
+	const InputOutputType operator()(const InputOutputType& input) const
+	{
+		return input.exp() + 1.;
+	}
+
+	const InputOutputType derivative(const InputOutputType& input) const
+	{
+		const InputOutputType fx = operator()(-input);
+
+		return fx.cwiseInverse();
+	}
+};
+
+template<> class SoftplusFunction<double, double>
+{
+public:
+	SoftplusFunction()
+	{
+	}
+
+	const double operator()(const double& input) const
+	{
+		return 1. + exp(input);
+	}
+
+	const double derivative(const double& input) const
+	{
+		const double fx = operator()(-input);
+
+		return 1. / fx;
+	}
+};
+
+
+
 template<typename InputOutputType> class RELUFunction
 {
 public:
@@ -142,4 +224,67 @@ public:
 	{
 		return (input < 0) ? 0 : 1;
 	}
+};
+
+
+template<typename InputOutputType> class LeakyRELUFunction
+{
+public:
+	LeakyRELUFunction()
+	{
+	}
+
+	void setParams(double a)
+	{
+		alpha = a;
+	}
+
+	const InputOutputType operator()(const InputOutputType& input) const
+	{
+		InputOutputType out = input;
+
+		for (unsigned int i = 0; i < out.size(); ++i)
+			out(i) *= (out(i) < 0) ? alpha : 1.;
+
+		return out;
+	}
+
+	const InputOutputType derivative(const InputOutputType& input) const
+	{
+		InputOutputType out = input;
+
+		for (unsigned int i = 0; i < out.size(); ++i)
+			out(i) = (out(i) < 0) ? alpha : 1.;
+
+		return out;
+	}
+
+protected:
+	double alpha = 0.01;
+};
+
+template<> class LeakyRELUFunction<double>
+{
+public:
+	LeakyRELUFunction()
+	{
+	}
+
+	void setParams(double a)
+	{
+		alpha = a;
+	}
+
+	const double operator()(const double& input) const
+	{
+		return ((input < 0) ? alpha : 1.) * input;
+	}
+
+	const double derivative(const double& input) const
+	{
+		return (input < 0) ? alpha : 1.;
+	}
+
+protected:
+	double alpha = 0.01;
 };
