@@ -56,5 +56,8 @@
     <ClInclude Include="Gnuplot.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Normalizer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

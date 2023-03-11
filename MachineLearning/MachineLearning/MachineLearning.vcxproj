@@ -155,6 +155,7 @@
     <ClInclude Include="Gnuplot.h" />
     <ClInclude Include="GradientSolvers.h" />
     <ClInclude Include="LogisticRegression.h" />
+    <ClInclude Include="Normalizer.h" />
     <ClInclude Include="Solvers.h" />
     <ClInclude Include="LinkFunctions.h" />
     <ClInclude Include="SimpleLinearRegression.h" />
