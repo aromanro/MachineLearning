@@ -16,7 +16,7 @@ public:
 
 	const double Predict(const double& input) override
 	{
-		return baseType::linkFunc(baseType::W * input + baseType::b);
+		return baseType::W * input + baseType::b;
 	}
 };
 
@@ -40,8 +40,10 @@ public:
 
 	const Eigen::VectorXd Predict(const InputType& input) override
 	{
-		return baseType::linkFunc(baseType::W.cwiseProduct(input) + baseType::b);
+		return baseType::W.cwiseProduct(input) + baseType::b;
 	}
+
+	IdentityFunction<Eigen::VectorXd> linkFunction;
 };
 
 template<> class MultivariateSimpleLinearRegression<double> : public GeneralizedLinearModel<double, Eigen::VectorXd, Eigen::MatrixXd, SimpleLinearRegressionSolver<double, Eigen::VectorXd, Eigen::MatrixXd, Eigen::VectorXd, Eigen::MatrixXd>, Eigen::MatrixXd>

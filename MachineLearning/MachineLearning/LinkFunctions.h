@@ -39,7 +39,7 @@ template<typename InputOutputType, typename WeightsType> class SigmoidFunction
 public:
 	SigmoidFunction(int size = 1)
 	{
-		beta0 = InputOutputType::Zeros(size);
+		beta0 = InputOutputType::Zero(size);
 		beta = InputOutputType::Ones(size);
 	}
 
@@ -51,7 +51,7 @@ public:
 
 	const InputOutputType operator()(const InputOutputType& input) const
 	{
-		return (1. + (-(beta.cwiseProduct(input) + beta0)).exp()).cwiseInverse();
+		return (InputOutputType::Ones(input.size()) + (-(beta.cwiseProduct(input) + beta0)).exp()).cwiseInverse();
 	}
 
 	const InputOutputType derivative(const InputOutputType& input) const
@@ -287,4 +287,38 @@ public:
 
 protected:
 	double alpha = 0.01;
+};
+
+template<typename InputOutputType = Eigen::VectorXd> class SoftmaxFunction
+{
+public:
+	const InputOutputType& operator()(const InputOutputType& input) const
+	{
+		InputOutputType output;
+		output.resize(input.size());
+
+		double sum = 0;
+		for (int i = 0; i < input.size(); ++i)
+		{
+			const double v = exp(input(i));
+			output(i) = v;
+			sum += v;
+		}
+
+		return output / sum;
+	}
+
+	const Eigen::MatrixXd derivative(const InputOutputType& input) const
+	{
+		Eigen::MatrixXd output;
+		output.resize(input.size(), input.size());
+
+		InputOutputType fx = operator()(input);
+
+		for (int i = 0; i < input.size(); ++i)
+			for (int j = 0; j < input.size(); ++j)
+				output(i, j) = fx(i) * (((i == j) ? 1. : 0.) - fx(j));
+
+		return output;
+	}
 };

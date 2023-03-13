@@ -4,6 +4,8 @@
 #include "SimpleLinearRegression.h"
 #include "GeneralLinearModel.h"
 #include "GradientSolvers.h"
+#include "LogisticRegression.h"
+
 #include "DataFile.h"
 #include "GnuPlot.h"
 
@@ -441,5 +443,78 @@ int main()
 	plot.setCmdFileName("plot3.plt");
 	plot.setDataFileName("data3.txt");
 	plot.Execute();
+
+
+	std::cout << std::endl << "Logistic regression: " << std::endl << std::endl;
+
+
+	// very simple case, every point that's above the line is the '1' class, everything else is the '0' class
+	{
+		std::vector<double> xvals(nrPoints);
+		std::vector<double> yvals(nrPoints);
+		std::vector<double> ovals(nrPoints);
+
+		for (int i = 0; i < nrPoints; ++i)
+		{
+			xvals[i] = static_cast<double>(i) / 100;
+			yvals[i] = (linearFunction(i) + dist(rde)) / 100;
+			ovals[i] = (yvals[i] > linearFunction(i) / 100) ? 1. : 0.;
+		}
+
+		typedef AdamSolver<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, Eigen::MatrixXd, Eigen::MatrixXd, SigmoidFunction<Eigen::VectorXd, Eigen::MatrixXd>, LogLoss<Eigen::VectorXd>> theSolver;
+		LogisticRegression<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, theSolver> logisticModel(2, 1);
+
+		//logisticModel.solver.alpha = 0.01;
+		//logisticModel.solver.lim = 100;
+
+		//logisticModel.solver.beta = 0.8;
+
+		logisticModel.solver.alpha = 0.02;
+		logisticModel.solver.beta1 = 0.7;
+		logisticModel.solver.beta2 = 0.9;
+		logisticModel.solver.lim = 2000;
+
+		Eigen::MatrixXd x, y;
+		const int batchSize = 32;
+
+		x.resize(2, batchSize);
+		y.resize(1, batchSize);
+
+		
+		for (int i = 0; i <= 100000; ++i)
+		{
+			for (int b = 0; b < batchSize; ++b)
+			{
+				int ind = distInt(rde);
+
+				x(0, b) = xvals[ind];
+				x(1, b) = yvals[ind];
+
+				y(0, b) = ovals[ind];
+			}
+
+			logisticModel.AddBatch(x, y);
+
+			if (i % 10000 == 0)
+			{
+				double loss = logisticModel.getLoss() / batchSize;
+				std::cout << "Loss: " << loss << std::endl;
+			}
+		}
+
+		Eigen::VectorXd in(2);
+		in(0) = 32. / 100;
+		in(1) = (linearFunction(32) + 3.) / 100.;
+
+		Eigen::VectorXd res = logisticModel.Predict(in);
+
+		std::cout << "Logistic regression: Prediction for a value above is: " << res(0) << " should be > 0.5" << std::endl;
+
+		in(0) = 64. / 100;
+		in(1) = (linearFunction(64) - 2.) / 100;
+		res = logisticModel.Predict(in);
+
+		std::cout << "Logistic regression: Prediction for a value below is: " << res(0) << " should be < 0.5" << std::endl;
+	}
 }
 

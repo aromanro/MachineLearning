@@ -3,7 +3,7 @@
 #include "LinkFunctions.h"
 #include "CostFunctions.h"
 
-template<typename InputType, typename OutputType, typename WeigthsType, class Solver, class BatchInputType = Eigen::MatrixXd, class BatchOutputType = BatchInputType, class LinkFunction = IdentityFunction<OutputType>>
+template<typename InputType, typename OutputType, typename WeigthsType, class Solver, class BatchInputType = Eigen::MatrixXd, class BatchOutputType = BatchInputType>
 class GeneralizedLinearModel
 {
 public:
@@ -22,7 +22,7 @@ public:
 
 	virtual const OutputType Predict(const InputType& input)
 	{
-		return linkFunc(W * input + b);
+		return solver.linkFunction(W * input + b);
 	}
 
 	void AddBatchNoParamsAdjustment(const BatchInputType& batchInput, const BatchOutputType& batchOutput)
@@ -35,7 +35,7 @@ public:
 		for (unsigned int i = 0; i < batchInput.cols(); ++i)
 		{
 			linpred.col(i) = W * batchInput.col(i) + b;
-			pred.col(i) = linkFunc(linpred.col(i));
+			pred.col(i) = solver.linkFunction(linpred.col(i));
 		}
 
 		solver.setLinearPrediction(linpred);
@@ -55,8 +55,6 @@ public:
 	}
 
 protected:
-	LinkFunction linkFunc;
-
 	WeigthsType W;
 	OutputType b;
 
@@ -64,8 +62,8 @@ public:
 	Solver solver;
 };
 
-template<class Solver, class LinkFunction>
-class GeneralizedLinearModel<double, double, double, Solver, Eigen::RowVectorXd, Eigen::RowVectorXd, LinkFunction>
+template<class Solver>
+class GeneralizedLinearModel<double, double, double, Solver, Eigen::RowVectorXd, Eigen::RowVectorXd>
 {
 public:
 	GeneralizedLinearModel(int szi = 1, int szo = 1)
@@ -82,7 +80,7 @@ public:
 
 	virtual const double Predict(const double& input)
 	{
-		return linkFunc(W * input + b);
+		return solver.linkFunction(W * input + b);
 	}
 
 	void AddBatchNoParamsAdjustment(const Eigen::RowVectorXd& batchInput, const Eigen::RowVectorXd& batchOutput)
@@ -95,7 +93,7 @@ public:
 		for (unsigned int i = 0; i < batchInput.cols(); ++i)
 		{
 			linpred(i) = W * batchInput(i) + b;
-			pred(i) = linkFunc(linpred(i));
+			pred(i) = solver.linkFunction(linpred(i));
 		}
 
 		solver.setLinearPrediction(linpred);
@@ -115,8 +113,6 @@ public:
 	}
 
 protected:
-	LinkFunction linkFunc;
-
 	double W;
 	double b;
 

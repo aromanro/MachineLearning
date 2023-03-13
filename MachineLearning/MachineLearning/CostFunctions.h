@@ -77,12 +77,16 @@ template<typename OutputType = Eigen::VectorXd> class BinaryCrossEntropyLoss
 public:
 	OutputType operator()(const OutputType& output, const OutputType& expected) const
 	{
-		return -(output * expected.log() + (1. - expected) * (1. - output).log());
+		static const double eps = 1E-10;
+		const OutputType ones = OutputType::Ones(output.size());
+		const OutputType epsv = OutputType::Constant(output.size(), eps);
+
+		return -(expected.cwiseProduct((output + epsv).log()) + (ones - expected).cwiseProduct((ones + epsv - output).log()));
 	}
 
 	OutputType derivative(const OutputType& output, const OutputType& expected) const
 	{
-		return output / (expected + 1E-10) + (1. - output) / (1. + 1E-10 - expected);
+		return output - expected;
 	}
 };
 
@@ -90,14 +94,15 @@ public:
 template<> class BinaryCrossEntropyLoss<double>
 {
 public:
-	double operator()(const double& output, const double& expected)
+	double operator()(const double& output, const double& expected) const
 	{
-		return -(output * log(expected) + (1. - expected) * log(1. - output));
+		static const double eps = 1E-10;
+		return -(expected * log(output + eps) + (1. - expected) * log(1. + eps - output));
 	}
 
-	double derivative(const double& output, const double& expected)
+	double derivative(const double& output, const double& expected) const
 	{
-		return output / (expected + 1E-10) + (1. - output) / (1. + 1E-10 - expected);
+		return output - expected;
 	}
 };
 

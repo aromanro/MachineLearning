@@ -41,7 +41,7 @@ public:
 	{
 		double cost = 0;
 
-		for (int c = 0; c <output.cols(); ++c)
+		for (int c = 0; c < output.cols(); ++c)
 			cost += lossFunction(pred.col(c), output.col(c)).sum();
 
 		return cost;
@@ -76,6 +76,7 @@ protected:
 	BatchInputType input;
 	BatchOutputType output;
 
+public:
 	LinkFunction linkFunction;
 	LossFunction lossFunction;
 };
@@ -143,6 +144,7 @@ protected:
 	Eigen::RowVectorXd input;
 	Eigen::RowVectorXd output;
 
+public:
 	LinkFunction linkFunction;
 	LossFunction lossFunction;
 };
@@ -556,9 +558,9 @@ public:
 protected:
 	int step = 0;
 
-	double sW;
-	double sb;
+	double sW = 0;
+	double sb = 0;
 
-	double mW;
-	double mb;
+	double mW = 0;
+	double mb = 0;
 };
