@@ -9,7 +9,6 @@ void Gnuplot::Execute()
 	std::string cmdPath = relPath;
 	
 	{
-		std::ofstream cmdf(cmdPath);
 		std::filesystem::path p = std::filesystem::current_path();
 		if (cmdPath[0] != '/' && cmdPath[0] != '\\')
 			p += '/';
@@ -17,10 +16,22 @@ void Gnuplot::Execute()
 		p += relPath;
 		p += dataFileName;
 
-		cmdf << "plot " << p << " index 0 using 1:2 with lines title \"Generating Function\", " << p << " index 1 using 1:2 with points title \"Data Points\", " << p << " index 2 using 1:2 with lines title \"Regression\"" << std::endl;
-	}
+		if (cmdPath[cmdPath.length() - 1] != '/' && cmdPath[cmdPath.length() - 1] != '\\')
+			cmdPath += "/";
+		
+		cmdPath += cmdFileName;
 
-	cmdPath += cmdFileName;
+		std::ofstream cmdf(cmdPath);
+
+		if (ctype == ChartType::logisticRegression)
+		{
+			cmdf << "plot " << p << " index 0 u 1:2 w l lt 1 lw 2 lc rgb \"blue\" title \"Generating Function\", " << p << " index 1 u 1:2 w p pt 7 ps 1 lc rgb \"green\" title \"Data Points First Class\", " << p << " index 2 u 1:2 w p pt 7 ps 1 lc rgb \"red\" title \"Data Points Second Class\"" << std::endl;
+		}
+		else
+		{
+			cmdf << "plot " << p << " index 0 u 1:2 w l lt 1 lw 2 lc rgb \"blue\" title \"Generating Function\", " << p << " index 1 u 1:2 w p pt 7 ps 1 lc rgb \"green\" title \"Data Points\", " << p << " index 2 u 1:2 w l lt 1 lw 2 lc rgb \"red\" title \"Regression\"" << std::endl;
+		}
+	}
 
 	std::string cmd = std::string("start /b gnuplot ") + cmdPath;
 

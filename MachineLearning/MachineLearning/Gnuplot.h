@@ -5,6 +5,12 @@
 class Gnuplot
 {
 public:
+	enum class ChartType : int
+	{
+		linearRegression,
+		logisticRegression
+	};
+
 	void Execute();
 
 	void setRelativePath(const std::string& p)
@@ -26,7 +32,13 @@ public:
 		cmdFileName = c;
 	}
 
+	void setType(ChartType t)
+	{
+		ctype = t;
+	}
+
 protected:
+	ChartType ctype = ChartType::linearRegression;
 	std::string relPath = "../../data/";
 	std::string dataFileName = "data.txt";
 	std::string cmdFileName = "plot.plt";

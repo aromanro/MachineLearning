@@ -44,9 +44,6 @@
     <ClInclude Include="CostFunctions.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="GeneralLinearModel.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="LogisticRegression.h">
       <Filter>Header Files</Filter>
     </ClInclude>

@@ -2,7 +2,6 @@
 //
 
 #include "SimpleLinearRegression.h"
-#include "GeneralLinearModel.h"
 #include "GradientSolvers.h"
 #include "LogisticRegression.h"
 
@@ -159,7 +158,7 @@ int main()
 
 		// a simple linear regression, but with gradient descent
 		//GeneralLinearModel<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, GradientDescentSolver<>, Eigen::MatrixXd> generalLinearModel;
-		GeneralLinearModel<double, double, double, AdamSolver<double, double, double, Eigen::RowVectorXd, Eigen::RowVectorXd, IdentityFunction<double>, L2Loss<double>>, Eigen::RowVectorXd> generalLinearModel;
+		GeneralizedLinearModel<double, double, double, AdamSolver<double, double, double, Eigen::RowVectorXd, Eigen::RowVectorXd, IdentityFunction<double>, L2Loss<double>>, Eigen::RowVectorXd> generalLinearModel;
 		generalLinearModel.solver.alpha = 0.03;
 		generalLinearModel.solver.beta1 = 0.7;
 		generalLinearModel.solver.beta2 = 0.9;
@@ -214,7 +213,7 @@ int main()
 			yvals3[i] = linearFunction3(i) + dist(rde);
 		}
 
-		GeneralLinearModel<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, AdamSolver<>> generalLinearModel(3, 3);
+		GeneralizedLinearModel<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, AdamSolver<>> generalLinearModel(3, 3);
 		generalLinearModel.solver.alpha = 0.02;
 		generalLinearModel.solver.beta1 = 0.7;
 		generalLinearModel.solver.beta2 = 0.9;
@@ -283,7 +282,7 @@ int main()
 		//typedef AdamSolver<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, Eigen::MatrixXd, Eigen::MatrixXd, IdentityFunction<Eigen::VectorXd>, L1Loss<Eigen::VectorXd>> theSolver;
 		//typedef GradientDescentSolver<> theSolver;
 		typedef AdamSolver<> theSolver;
-		GeneralLinearModel<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, theSolver> generalLinearModel(2, 1);
+		GeneralizedLinearModel<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, theSolver> generalLinearModel(2, 1);
 
 		generalLinearModel.solver.alpha = 0.02;
 		generalLinearModel.solver.beta1 = 0.7;
@@ -373,7 +372,7 @@ int main()
 		//typedef AdamSolver<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, Eigen::MatrixXd, Eigen::MatrixXd, IdentityFunction<Eigen::VectorXd>, L1Loss<Eigen::VectorXd>> theSolver;
 		
 		typedef AdamSolver<> theSolver;
-		GeneralLinearModel<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, theSolver> generalLinearModel(3, 1);
+		GeneralizedLinearModel<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, theSolver> generalLinearModel(3, 1);
 
 		//generalLinearModel.solver.alpha = 0.01;
 		//generalLinearModel.solver.lim = 100;

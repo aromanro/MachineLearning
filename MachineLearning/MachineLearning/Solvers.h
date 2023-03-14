@@ -62,10 +62,7 @@ public:
 		double cost = 0;
 
 		for (int c = 0; c < output.cols(); ++c)
-		{
-			const OutputType d = pred.col(c) - output.col(c);
-			cost += d.cwiseProduct(d).sum();
-		}
+			cost += lossFunction(pred.col(c), output.col(c)).sum();
 
 		return cost;
 	}
@@ -95,6 +92,7 @@ protected:
 
 public:
 	IdentityFunction<Eigen::VectorXd> linkFunction;
+	L2Loss<Eigen::VectorXd> lossFunction;
 };
 
 
@@ -153,10 +151,7 @@ public:
 		double cost = 0;
 
 		for (int c = 0; c < output.cols(); ++c)
-		{
-			const Eigen::VectorXd d = pred.col(c) - output.col(c);
-			cost += d.cwiseProduct(d).sum();
-		}
+			cost += lossFunction(pred.col(c), output.col(c)).sum();
 
 		return cost;
 	}
@@ -183,6 +178,7 @@ protected:
 
 public:
 	IdentityFunction<Eigen::VectorXd> linkFunction;
+	L2Loss<Eigen::VectorXd> lossFunction;
 };
 
 template<> class SimpleLinearRegressionSolver<double, double, double, Eigen::RowVectorXd, Eigen::RowVectorXd> 
@@ -242,10 +238,7 @@ public:
 		double cost = 0;
 
 		for (int c = 0; c < output.cols(); ++c)
-		{
-			const double d = pred(c) - output(c);
-			cost += d * d;
-		}
+			cost += lossFunction(pred.col(c), output.col(c)).sum();
 
 		return cost;
 	}
@@ -271,6 +264,7 @@ protected:
 
 public:
 	IdentityFunction<double> linkFunction;
+	L2Loss<Eigen::VectorXd> lossFunction;
 };
 
 
