@@ -25,7 +25,7 @@ void Gnuplot::Execute()
 
 		if (ctype == ChartType::logisticRegression)
 		{
-			cmdf << "plot " << p << " index 0 u 1:2 w l lt 1 lw 2 lc rgb \"blue\" title \"Generating Function\", " << p << " index 1 u 1:2 w p pt 7 ps 1 lc rgb \"green\" title \"Data Points First Class\", " << p << " index 2 u 1:2 w p pt 7 ps 1 lc rgb \"red\" title \"Data Points Second Class\"" << std::endl;
+			cmdf << "plot " << p << " index 0 u 1:2 w l lt 1 lw 2 lc rgb \"blue\" title \"Generating Boundary\", " << p << " index 1 u 1:2 w p pt 7 ps 1 lc rgb \"green\" title \"Data Points First Class\", " << p << " index 2 u 1:2 w p pt 7 ps 1 lc rgb \"red\" title \"Data Points Second Class\"" << std::endl;
 		}
 		else
 		{
