@@ -27,3 +27,5 @@ bool SimpleLinearRegressionTests();
 bool LinearRegressionTests();
 bool LogisticRegressionTests();
 
+bool AllTests();
+

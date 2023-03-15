@@ -6,15 +6,7 @@
 
 int main()
 {
-	SimpleLinearRegressionTests();
-
-	std::cout << std::endl << "With gradient descent: " << std::endl << std::endl;
-
-	LinearRegressionTests();
-	
-	std::cout << std::endl << "Logistic regression: " << std::endl << std::endl;
-
-	LogisticRegressionTests();
+	if (!AllTests()) return -1;
 
 	return 0;
 }

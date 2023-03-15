@@ -24,3 +24,25 @@ double polyFunction(double x)
 {
 	return (x - 5) * (x - 60) * (x - 80) / 1000.;
 }
+
+
+bool AllTests()
+{
+	bool res = SimpleLinearRegressionTests();
+
+	if (res)
+	{
+		std::cout << std::endl << "With gradient descent: " << std::endl << std::endl;
+
+		res = LinearRegressionTests();
+
+		if (res)
+		{
+			std::cout << std::endl << "Logistic regression: " << std::endl << std::endl;
+
+			res = LogisticRegressionTests();
+		}
+	}
+
+	return res;
+}
