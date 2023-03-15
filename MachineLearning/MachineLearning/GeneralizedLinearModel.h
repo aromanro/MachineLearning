@@ -12,6 +12,8 @@ public:
 		Initialize(szi, szo);
 	}
 
+	virtual ~GeneralizedLinearModel() {}
+
 	void Initialize(int szi = 1, int szo = 1)
 	{
 		solver.Initialize(szi, szo);
@@ -72,6 +74,8 @@ public:
 		W = 0;
 		b = 0;
 	}
+
+	virtual ~GeneralizedLinearModel() {}
 
 	void Initialize(int szi = 1, int szo = 1)
 	{

@@ -8,8 +8,14 @@ template<typename T> class LogLoss : public BinaryCrossEntropyLoss<T>
 {
 };
 
+typedef GradientDescentSolver<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, Eigen::MatrixXd, Eigen::MatrixXd, SigmoidFunction<Eigen::VectorXd, Eigen::MatrixXd>, LogLoss<Eigen::VectorXd>> LogisticRegressionGradientDescentSolver;
+typedef MomentumSolver<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, Eigen::MatrixXd, Eigen::MatrixXd, SigmoidFunction<Eigen::VectorXd, Eigen::MatrixXd>, LogLoss<Eigen::VectorXd>> LogisticRegressionMomentumSolver;
+typedef AdaGradSolver<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, Eigen::MatrixXd, Eigen::MatrixXd, SigmoidFunction<Eigen::VectorXd, Eigen::MatrixXd>, LogLoss<Eigen::VectorXd>> LogisticRegressionAdaGradSolver;
+typedef RMSPropSolver<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, Eigen::MatrixXd, Eigen::MatrixXd, SigmoidFunction<Eigen::VectorXd, Eigen::MatrixXd>, LogLoss<Eigen::VectorXd>> LogisticRegressionRMSPropSolver;
+typedef AdamSolver<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, Eigen::MatrixXd, Eigen::MatrixXd, SigmoidFunction<Eigen::VectorXd, Eigen::MatrixXd>, LogLoss<Eigen::VectorXd>> LogisticRegressionAdamSolver;
 
-template<typename InputType, typename OutputType, typename WeightsType, class Solver, class BatchInputType = Eigen::MatrixXd, class BatchOutputType = BatchInputType> class LogisticRegression
+
+template<typename InputType = Eigen::VectorXd, typename OutputType = Eigen::VectorXd, typename WeightsType = Eigen::MatrixXd, class Solver = LogisticRegressionAdamSolver, class BatchInputType = Eigen::MatrixXd, class BatchOutputType = BatchInputType> class LogisticRegression
 	: public GeneralizedLinearModel<InputType, OutputType, WeightsType, Solver, BatchInputType, BatchOutputType>
 {
 public:

@@ -147,7 +147,11 @@
   <ItemGroup>
     <ClCompile Include="DataFile.cpp" />
     <ClCompile Include="Gnuplot.cpp" />
+    <ClCompile Include="LinearRegressionTests.cpp" />
+    <ClCompile Include="LogisticRegressionTests.cpp" />
     <ClCompile Include="MachineLearning.cpp" />
+    <ClCompile Include="SimpleLinearTests.cpp" />
+    <ClCompile Include="Tests.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CostFunctions.h" />
@@ -160,6 +164,7 @@
     <ClInclude Include="Solvers.h" />
     <ClInclude Include="LinkFunctions.h" />
     <ClInclude Include="SimpleLinearRegression.h" />
+    <ClInclude Include="Tests.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
