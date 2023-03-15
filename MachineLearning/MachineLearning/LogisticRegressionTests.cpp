@@ -43,7 +43,7 @@ bool LogisticRegressionTests()
 
 		//logisticModel.solver.beta = 0.8;
 
-		logisticModel.solver.alpha = 0.01;
+		logisticModel.solver.alpha = 0.05;
 		logisticModel.solver.beta1 = 0.7;
 		logisticModel.solver.beta2 = 0.9;
 		logisticModel.solver.lim = 2000;
@@ -177,7 +177,7 @@ bool LogisticRegressionTests()
 		Eigen::MatrixXd avgi = normalizer.getAverageInput();
 		Eigen::MatrixXd istdi = normalizer.getVarianceInput().cwiseSqrt().cwiseInverse();
 
-		std::cout << "Averages for input:" << std::endl << avgi << std::endl << std::endl;
+		std::cout << std::endl << "Averages for input:" << std::endl << avgi << std::endl << std::endl;
 		std::cout << "Inverse of std for input:" << std::endl << istdi << std::endl << std::endl;
 
 		std::cout << "Averages should be close to 100 and 180 respectively, while 1/std should be aproximately equal with 1/10" << std::endl << std::endl;

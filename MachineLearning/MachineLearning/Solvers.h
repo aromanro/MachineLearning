@@ -30,7 +30,7 @@ public:
 		for (unsigned int i = 0; i < batchInput.cols(); ++i)
 			AddSample(batchInput.col(i), batchOutput.col(i));
 
-		output = batchOutput;
+		target = batchOutput;
 	}
 
 	void setPrediction(const BatchOutputType& output)
@@ -61,8 +61,8 @@ public:
 	{
 		double cost = 0;
 
-		for (int c = 0; c < output.cols(); ++c)
-			cost += lossFunction(pred.col(c), output.col(c)).sum();
+		for (int c = 0; c < target.cols(); ++c)
+			cost += lossFunction(pred.col(c), target.col(c)).sum();
 
 		return cost;
 	}
@@ -88,7 +88,7 @@ protected:
 	unsigned long long int size;
 
 	BatchOutputType pred;
-	BatchOutputType output;
+	BatchOutputType target;
 
 public:
 	IdentityFunction<Eigen::VectorXd> linkFunction;
@@ -120,7 +120,7 @@ public:
 		for (unsigned int i = 0; i < batchInput.cols(); ++i)
 			AddSample(batchInput(i), batchOutput.col(i));
 
-		output = batchOutput;
+		target = batchOutput;
 	}
 
 	void setPrediction(const Eigen::MatrixXd& output)
@@ -150,8 +150,8 @@ public:
 	{
 		double cost = 0;
 
-		for (int c = 0; c < output.cols(); ++c)
-			cost += lossFunction(pred.col(c), output.col(c)).sum();
+		for (int c = 0; c < target.cols(); ++c)
+			cost += lossFunction(pred.col(c), target.col(c)).sum();
 
 		return cost;
 	}
@@ -174,7 +174,7 @@ protected:
 	unsigned long long int size;
 
 	Eigen::MatrixXd pred;
-	Eigen::MatrixXd output;
+	Eigen::MatrixXd target;
 
 public:
 	IdentityFunction<Eigen::VectorXd> linkFunction;
@@ -205,7 +205,7 @@ public:
 		for (unsigned int i = 0; i < batchInput.cols(); ++i)
 			AddSample(batchInput.col(i)(0), batchOutput.col(i)(0));
 
-		output = batchOutput;
+		target = batchOutput;
 	}
 
 	void setPrediction(const Eigen::RowVectorXd& output)
@@ -237,8 +237,8 @@ public:
 	{
 		double cost = 0;
 
-		for (int c = 0; c < output.cols(); ++c)
-			cost += lossFunction(pred.col(c), output.col(c)).sum();
+		for (int c = 0; c < target.cols(); ++c)
+			cost += lossFunction(pred.col(c), target.col(c)).sum();
 
 		return cost;
 	}
@@ -260,7 +260,7 @@ protected:
 	unsigned long long int count;
 
 	Eigen::RowVectorXd pred;
-	Eigen::RowVectorXd output;
+	Eigen::RowVectorXd target;
 
 public:
 	IdentityFunction<double> linkFunction;

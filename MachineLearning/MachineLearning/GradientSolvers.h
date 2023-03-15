@@ -24,7 +24,7 @@ public:
 		assert(batchInput.cols() == batchOutput.cols());
 
 		input = batchInput;
-		output = batchOutput;
+		target = batchOutput;
 	}
 
 	void setPrediction(const BatchOutputType& output)
@@ -41,8 +41,8 @@ public:
 	{
 		double cost = 0;
 
-		for (int c = 0; c < output.cols(); ++c)
-			cost += lossFunction(pred.col(c), output.col(c)).sum();
+		for (int c = 0; c < target.cols(); ++c)
+			cost += lossFunction(pred.col(c), target.col(c)).sum();
 
 		return cost;
 	}
@@ -54,13 +54,13 @@ protected:
 	inline BatchOutputType getGrad()
 	{
 		BatchOutputType lossLinkGrad;
-		lossLinkGrad.resize(output.rows(), output.cols());
+		lossLinkGrad.resize(target.rows(), target.cols());
 		
 		const double norm = 1. / input.cols();
 
-		for (int c = 0; c < output.cols(); ++c)
+		for (int c = 0; c < target.cols(); ++c)
 		{
-			lossLinkGrad.col(c) = norm * linkFunction.derivative(linpred.col(c)).cwiseProduct(lossFunction.derivative(pred.col(c), output.col(c)));
+			lossLinkGrad.col(c) = norm * linkFunction.derivative(linpred.col(c)).cwiseProduct(lossFunction.derivative(pred.col(c), target.col(c)));
 			// clip it if necessary
 			const double n = sqrt(lossLinkGrad.col(c).cwiseProduct(lossLinkGrad.col(c)).sum());
 			if (n > lim)
@@ -74,7 +74,7 @@ protected:
 	BatchOutputType linpred;
 
 	BatchInputType input;
-	BatchOutputType output;
+	BatchOutputType target;
 
 public:
 	LinkFunction linkFunction;
@@ -92,7 +92,7 @@ public:
 		assert(batchInput.cols() == batchOutput.cols());
 
 		input = batchInput;
-		output = batchOutput;
+		target = batchOutput;
 	}
 
 	void setPrediction(const Eigen::RowVectorXd& output)
@@ -109,8 +109,8 @@ public:
 	{
 		double cost = 0;
 
-		for (int c = 0; c < output.cols(); ++c)
-			cost += lossFunction(pred(c), output(c));
+		for (int c = 0; c < target.cols(); ++c)
+			cost += lossFunction(pred(c), target(c));
 
 		return cost;
 	}
@@ -122,13 +122,13 @@ protected:
 	inline Eigen::RowVectorXd getGrad()
 	{
 		Eigen::RowVectorXd lossLinkGrad;
-		lossLinkGrad.resize(output.cols());
+		lossLinkGrad.resize(target.cols());
 
 		const double norm = 1. / input.cols();
 
-		for (int c = 0; c < output.cols(); ++c)
+		for (int c = 0; c < target.cols(); ++c)
 		{
-			lossLinkGrad(c) = norm * linkFunction.derivative(linpred(c)) * lossFunction.derivative(pred(c), output(c));
+			lossLinkGrad(c) = norm * linkFunction.derivative(linpred(c)) * lossFunction.derivative(pred(c), target(c));
 			// clip it if necessary
 			const double n = sqrt(lossLinkGrad(c) * lossLinkGrad(c));
 			if (n > lim)
@@ -142,7 +142,7 @@ protected:
 	Eigen::RowVectorXd linpred;
 
 	Eigen::RowVectorXd input;
-	Eigen::RowVectorXd output;
+	Eigen::RowVectorXd target;
 
 public:
 	LinkFunction linkFunction;
@@ -275,8 +275,8 @@ public:
 	{
 		double cost = 0;
 
-		for (int c = 0; c < BaseType::output.cols(); ++c)
-			cost += BaseType::lossFunction(BaseType::pred(c), BaseType::output(c));
+		for (int c = 0; c < BaseType::target.cols(); ++c)
+			cost += BaseType::lossFunction(BaseType::pred(c), BaseType::target(c));
 
 		return cost;
 	}
@@ -357,8 +357,8 @@ public:
 	{
 		double cost = 0;
 
-		for (int c = 0; c < BaseType::output.cols(); ++c)
-			cost += BaseType::lossFunction(BaseType::pred(c), BaseType::output(c));
+		for (int c = 0; c < BaseType::target.cols(); ++c)
+			cost += BaseType::lossFunction(BaseType::pred(c), BaseType::target(c));
 
 		return cost;
 	}
@@ -439,8 +439,8 @@ public:
 	{
 		double cost = 0;
 
-		for (int c = 0; c < BaseType::output.cols(); ++c)
-			cost += BaseType::lossFunction(BaseType::pred(c), BaseType::output(c));
+		for (int c = 0; c < BaseType::target.cols(); ++c)
+			cost += BaseType::lossFunction(BaseType::pred(c), BaseType::target(c));
 
 		return cost;
 	}
