@@ -41,13 +41,13 @@
     <ClInclude Include="GeneralizedLinearModel.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="LinkFunctions.h">
+    <ClInclude Include="ActivationFunctions.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="SimpleLinearRegression.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Solvers.h">
+    <ClInclude Include="SimpleLinearRegressionSolvers.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="GradientSolvers.h">

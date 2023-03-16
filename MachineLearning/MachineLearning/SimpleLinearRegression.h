@@ -3,7 +3,7 @@
 #include <Eigen/eigen>
 
 #include "GeneralizedLinearModel.h"
-#include "Solvers.h"
+#include "SimpleLinearRegressionSolvers.h"
 
 class SimpleLinearRegression : public GeneralizedLinearModel<double, double, double, SimpleLinearRegressionSolver<double, double, double, Eigen::RowVectorXd, Eigen::RowVectorXd>, Eigen::RowVectorXd>
 {
@@ -43,7 +43,7 @@ public:
 		return baseType::W.cwiseProduct(input) + baseType::b;
 	}
 
-	IdentityFunction<Eigen::VectorXd> linkFunction;
+	IdentityFunction<Eigen::VectorXd> activationFunction;
 };
 
 template<> class MultivariateSimpleLinearRegression<double> : public GeneralizedLinearModel<double, Eigen::VectorXd, Eigen::MatrixXd, SimpleLinearRegressionSolver<double, Eigen::VectorXd, Eigen::MatrixXd, Eigen::VectorXd, Eigen::MatrixXd>, Eigen::MatrixXd>

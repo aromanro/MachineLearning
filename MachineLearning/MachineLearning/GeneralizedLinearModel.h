@@ -1,6 +1,6 @@
 #pragma once
 
-#include "LinkFunctions.h"
+#include "ActivationFunctions.h"
 #include "CostFunctions.h"
 
 template<typename InputType, typename OutputType, typename WeigthsType, class Solver, class BatchInputType = Eigen::MatrixXd, class BatchOutputType = BatchInputType>
@@ -24,7 +24,7 @@ public:
 
 	virtual const OutputType Predict(const InputType& input)
 	{
-		return solver.linkFunction(W * input + b);
+		return solver.activationFunction(W * input + b);
 	}
 
 	void AddBatchNoParamsAdjustment(const BatchInputType& batchInput, const BatchOutputType& batchOutput)
@@ -37,7 +37,7 @@ public:
 		for (unsigned int i = 0; i < batchInput.cols(); ++i)
 		{
 			linpred.col(i) = W * batchInput.col(i) + b;
-			pred.col(i) = solver.linkFunction(linpred.col(i));
+			pred.col(i) = solver.activationFunction(linpred.col(i));
 		}
 
 		solver.setLinearPrediction(linpred);
@@ -84,7 +84,7 @@ public:
 
 	virtual const double Predict(const double& input)
 	{
-		return solver.linkFunction(W * input + b);
+		return solver.activationFunction(W * input + b);
 	}
 
 	void AddBatchNoParamsAdjustment(const Eigen::RowVectorXd& batchInput, const Eigen::RowVectorXd& batchOutput)
@@ -97,7 +97,7 @@ public:
 		for (unsigned int i = 0; i < batchInput.cols(); ++i)
 		{
 			linpred(i) = W * batchInput(i) + b;
-			pred(i) = solver.linkFunction(linpred(i));
+			pred(i) = solver.activationFunction(linpred(i));
 		}
 
 		solver.setLinearPrediction(linpred);

@@ -161,8 +161,8 @@
     <ClInclude Include="GradientSolvers.h" />
     <ClInclude Include="LogisticRegression.h" />
     <ClInclude Include="Normalizer.h" />
-    <ClInclude Include="Solvers.h" />
-    <ClInclude Include="LinkFunctions.h" />
+    <ClInclude Include="SimpleLinearRegressionSolvers.h" />
+    <ClInclude Include="ActivationFunctions.h" />
     <ClInclude Include="SimpleLinearRegression.h" />
     <ClInclude Include="Tests.h" />
   </ItemGroup>

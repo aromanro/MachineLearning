@@ -3,7 +3,7 @@
 #include <Eigen/eigen>
 #include <unsupported/Eigen/MatrixFunctions>
 
-#include "LinkFunctions.h"
+#include "ActivationFunctions.h"
 
 template<typename InputType = Eigen::VectorXd, typename OutputType = Eigen::VectorXd, typename WeightsType = Eigen::MatrixXd, typename BatchInputType = Eigen::MatrixXd, typename BatchOutputType = Eigen::MatrixXd> 
 class SimpleLinearRegressionSolver {
@@ -91,7 +91,7 @@ protected:
 	BatchOutputType target;
 
 public:
-	IdentityFunction<Eigen::VectorXd> linkFunction;
+	IdentityFunction<Eigen::VectorXd> activationFunction;
 	L2Loss<Eigen::VectorXd> lossFunction;
 };
 
@@ -177,7 +177,7 @@ protected:
 	Eigen::MatrixXd target;
 
 public:
-	IdentityFunction<Eigen::VectorXd> linkFunction;
+	IdentityFunction<Eigen::VectorXd> activationFunction;
 	L2Loss<Eigen::VectorXd> lossFunction;
 };
 
@@ -263,7 +263,7 @@ protected:
 	Eigen::RowVectorXd target;
 
 public:
-	IdentityFunction<double> linkFunction;
+	IdentityFunction<double> activationFunction;
 	L2Loss<Eigen::VectorXd> lossFunction;
 };
 

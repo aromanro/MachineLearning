@@ -3,7 +3,7 @@
 #include <Eigen/eigen>
 #include <unsupported/Eigen/MatrixFunctions>
 
-#include "LinkFunctions.h"
+#include "ActivationFunctions.h"
 #include "CostFunctions.h"
 
 #include <iostream>
@@ -14,7 +14,7 @@ const double eps = 1E-10;
 // Base class for all
 //*************************************************************************************************************************************************************************************************************************************************************************************************************
 
-template<typename InputType = Eigen::VectorXd, typename OutputType = Eigen::VectorXd, typename WeightsType = Eigen::MatrixXd, typename BatchInputType = Eigen::MatrixXd, typename BatchOutputType = Eigen::MatrixXd, class LinkFunction = IdentityFunction<OutputType>, class LossFunction = L2Loss<OutputType>>
+template<typename InputType = Eigen::VectorXd, typename OutputType = Eigen::VectorXd, typename WeightsType = Eigen::MatrixXd, typename BatchInputType = Eigen::MatrixXd, typename BatchOutputType = Eigen::MatrixXd, class ActivationFunction = IdentityFunction<OutputType>, class LossFunction = L2Loss<OutputType>>
 class GradientDescentSolverBase
 {
 public:
@@ -60,7 +60,7 @@ protected:
 
 		for (int c = 0; c < target.cols(); ++c)
 		{
-			lossLinkGrad.col(c) = norm * linkFunction.derivative(linpred.col(c)).cwiseProduct(lossFunction.derivative(pred.col(c), target.col(c)));
+			lossLinkGrad.col(c) = norm * activationFunction.derivative(linpred.col(c)).cwiseProduct(lossFunction.derivative(pred.col(c), target.col(c)));
 			// clip it if necessary
 			const double n = sqrt(lossLinkGrad.col(c).cwiseProduct(lossLinkGrad.col(c)).sum());
 			if (n > lim)
@@ -77,13 +77,13 @@ protected:
 	BatchOutputType target;
 
 public:
-	LinkFunction linkFunction;
+	ActivationFunction activationFunction;
 	LossFunction lossFunction;
 };
 
 
-template<class LinkFunction, class LossFunction>
-class GradientDescentSolverBase<double, double, double, Eigen::RowVectorXd, Eigen::RowVectorXd, LinkFunction, LossFunction>
+template<class ActivationFunction, class LossFunction>
+class GradientDescentSolverBase<double, double, double, Eigen::RowVectorXd, Eigen::RowVectorXd, ActivationFunction, LossFunction>
 {
 public:
 
@@ -128,7 +128,7 @@ protected:
 
 		for (int c = 0; c < target.cols(); ++c)
 		{
-			lossLinkGrad(c) = norm * linkFunction.derivative(linpred(c)) * lossFunction.derivative(pred(c), target(c));
+			lossLinkGrad(c) = norm * activationFunction.derivative(linpred(c)) * lossFunction.derivative(pred(c), target(c));
 			// clip it if necessary
 			const double n = sqrt(lossLinkGrad(c) * lossLinkGrad(c));
 			if (n > lim)
@@ -145,7 +145,7 @@ protected:
 	Eigen::RowVectorXd target;
 
 public:
-	LinkFunction linkFunction;
+	ActivationFunction activationFunction;
 	LossFunction lossFunction;
 };
 
@@ -155,11 +155,11 @@ public:
 //*************************************************************************************************************************************************************************************************************************************************************************************************************
 
 
-template<typename InputType = Eigen::VectorXd, typename OutputType = Eigen::VectorXd, typename WeightsType = Eigen::MatrixXd, typename BatchInputType = Eigen::MatrixXd, typename BatchOutputType = Eigen::MatrixXd, class LinkFunction = IdentityFunction<OutputType>, class LossFunction = L2Loss<OutputType>>
-class GradientDescentSolver : public GradientDescentSolverBase<InputType, OutputType, WeightsType, BatchInputType, BatchOutputType, LinkFunction, LossFunction>
+template<typename InputType = Eigen::VectorXd, typename OutputType = Eigen::VectorXd, typename WeightsType = Eigen::MatrixXd, typename BatchInputType = Eigen::MatrixXd, typename BatchOutputType = Eigen::MatrixXd, class ActivationFunction = IdentityFunction<OutputType>, class LossFunction = L2Loss<OutputType>>
+class GradientDescentSolver : public GradientDescentSolverBase<InputType, OutputType, WeightsType, BatchInputType, BatchOutputType, ActivationFunction, LossFunction>
 {
 public:
-	typedef  GradientDescentSolverBase<InputType, OutputType, WeightsType, BatchInputType, BatchOutputType, LinkFunction, LossFunction> BaseType;
+	typedef  GradientDescentSolverBase<InputType, OutputType, WeightsType, BatchInputType, BatchOutputType, ActivationFunction, LossFunction> BaseType;
 
 	void Initialize(int szi = 1, int szo = 1)
 	{
@@ -181,11 +181,11 @@ public:
 	double decay = 1.;
 };
 
-template<class LinkFunction, class LossFunction>
-class GradientDescentSolver<double, double, double, Eigen::RowVectorXd, Eigen::RowVectorXd, LinkFunction, LossFunction> : public GradientDescentSolverBase<double, double, double, Eigen::RowVectorXd, Eigen::RowVectorXd, LinkFunction, LossFunction>
+template<class ActivationFunction, class LossFunction>
+class GradientDescentSolver<double, double, double, Eigen::RowVectorXd, Eigen::RowVectorXd, ActivationFunction, LossFunction> : public GradientDescentSolverBase<double, double, double, Eigen::RowVectorXd, Eigen::RowVectorXd, ActivationFunction, LossFunction>
 {
 public:
-	typedef GradientDescentSolverBase<double, double, double, Eigen::RowVectorXd, Eigen::RowVectorXd, LinkFunction, LossFunction> BaseType;
+	typedef GradientDescentSolverBase<double, double, double, Eigen::RowVectorXd, Eigen::RowVectorXd, ActivationFunction, LossFunction> BaseType;
 
 	void Initialize(int szi = 1, int szo = 1)
 	{
@@ -213,11 +213,11 @@ public:
 
 
 
-template<typename InputType = Eigen::VectorXd, typename OutputType = Eigen::VectorXd, typename WeightsType = Eigen::MatrixXd, typename BatchInputType = Eigen::MatrixXd, typename BatchOutputType = Eigen::MatrixXd, class LinkFunction = IdentityFunction<OutputType>, class LossFunction = L2Loss<OutputType>>
-class MomentumSolver : public GradientDescentSolverBase<InputType, OutputType, WeightsType, BatchInputType, BatchOutputType, LinkFunction, LossFunction>
+template<typename InputType = Eigen::VectorXd, typename OutputType = Eigen::VectorXd, typename WeightsType = Eigen::MatrixXd, typename BatchInputType = Eigen::MatrixXd, typename BatchOutputType = Eigen::MatrixXd, class ActivationFunction = IdentityFunction<OutputType>, class LossFunction = L2Loss<OutputType>>
+class MomentumSolver : public GradientDescentSolverBase<InputType, OutputType, WeightsType, BatchInputType, BatchOutputType, ActivationFunction, LossFunction>
 {
 public:
-	typedef  GradientDescentSolverBase<InputType, OutputType, WeightsType, BatchInputType, BatchOutputType, LinkFunction, LossFunction> BaseType;
+	typedef  GradientDescentSolverBase<InputType, OutputType, WeightsType, BatchInputType, BatchOutputType, ActivationFunction, LossFunction> BaseType;
 
 	void Initialize(int szi = 1, int szo = 1)
 	{
@@ -246,11 +246,11 @@ protected:
 	OutputType mb;
 };
 
-template<class LinkFunction, class LossFunction>
-class MomentumSolver<double, double, double, Eigen::RowVectorXd, Eigen::RowVectorXd, LinkFunction, LossFunction> : public GradientDescentSolverBase<double, double, double, Eigen::RowVectorXd, Eigen::RowVectorXd, LinkFunction, LossFunction>
+template<class ActivationFunction, class LossFunction>
+class MomentumSolver<double, double, double, Eigen::RowVectorXd, Eigen::RowVectorXd, ActivationFunction, LossFunction> : public GradientDescentSolverBase<double, double, double, Eigen::RowVectorXd, Eigen::RowVectorXd, ActivationFunction, LossFunction>
 {
 public:
-	typedef GradientDescentSolverBase<double, double, double, Eigen::RowVectorXd, Eigen::RowVectorXd, LinkFunction, LossFunction> BaseType;
+	typedef GradientDescentSolverBase<double, double, double, Eigen::RowVectorXd, Eigen::RowVectorXd, ActivationFunction, LossFunction> BaseType;
 
 	void Initialize(int szi = 1, int szo = 1)
 	{
@@ -295,11 +295,11 @@ protected:
 
 
 
-template<typename InputType = Eigen::VectorXd, typename OutputType = Eigen::VectorXd, typename WeightsType = Eigen::MatrixXd, typename BatchInputType = Eigen::MatrixXd, typename BatchOutputType = Eigen::MatrixXd, class LinkFunction = IdentityFunction<OutputType>, class LossFunction = L2Loss<OutputType>>
-class AdaGradSolver : public GradientDescentSolverBase<InputType, OutputType, WeightsType, BatchInputType, BatchOutputType, LinkFunction, LossFunction>
+template<typename InputType = Eigen::VectorXd, typename OutputType = Eigen::VectorXd, typename WeightsType = Eigen::MatrixXd, typename BatchInputType = Eigen::MatrixXd, typename BatchOutputType = Eigen::MatrixXd, class ActivationFunction = IdentityFunction<OutputType>, class LossFunction = L2Loss<OutputType>>
+class AdaGradSolver : public GradientDescentSolverBase<InputType, OutputType, WeightsType, BatchInputType, BatchOutputType, ActivationFunction, LossFunction>
 {
 public:
-	typedef  GradientDescentSolverBase<InputType, OutputType, WeightsType, BatchInputType, BatchOutputType, LinkFunction, LossFunction> BaseType;
+	typedef  GradientDescentSolverBase<InputType, OutputType, WeightsType, BatchInputType, BatchOutputType, ActivationFunction, LossFunction> BaseType;
 
 	void Initialize(int szi = 1, int szo = 1)
 	{
@@ -328,11 +328,11 @@ protected:
 	OutputType sb;
 };
 
-template<class LinkFunction, class LossFunction>
-class AdaGradSolver<double, double, double, Eigen::RowVectorXd, Eigen::RowVectorXd, LinkFunction, LossFunction> : public GradientDescentSolverBase<double, double, double, Eigen::RowVectorXd, Eigen::RowVectorXd, LinkFunction, LossFunction>
+template<class ActivationFunction, class LossFunction>
+class AdaGradSolver<double, double, double, Eigen::RowVectorXd, Eigen::RowVectorXd, ActivationFunction, LossFunction> : public GradientDescentSolverBase<double, double, double, Eigen::RowVectorXd, Eigen::RowVectorXd, ActivationFunction, LossFunction>
 {
 public:
-	typedef GradientDescentSolverBase<double, double, double, Eigen::RowVectorXd, Eigen::RowVectorXd, LinkFunction, LossFunction> BaseType;
+	typedef GradientDescentSolverBase<double, double, double, Eigen::RowVectorXd, Eigen::RowVectorXd, ActivationFunction, LossFunction> BaseType;
 
 	void Initialize(int szi = 1, int szo = 1)
 	{
@@ -375,11 +375,11 @@ protected:
 
 
 
-template<typename InputType = Eigen::VectorXd, typename OutputType = Eigen::VectorXd, typename WeightsType = Eigen::MatrixXd, typename BatchInputType = Eigen::MatrixXd, typename BatchOutputType = Eigen::MatrixXd, class LinkFunction = IdentityFunction<OutputType>, class LossFunction = L2Loss<OutputType>>
-class RMSPropSolver : public GradientDescentSolverBase<InputType, OutputType, WeightsType, BatchInputType, BatchOutputType, LinkFunction, LossFunction>
+template<typename InputType = Eigen::VectorXd, typename OutputType = Eigen::VectorXd, typename WeightsType = Eigen::MatrixXd, typename BatchInputType = Eigen::MatrixXd, typename BatchOutputType = Eigen::MatrixXd, class ActivationFunction = IdentityFunction<OutputType>, class LossFunction = L2Loss<OutputType>>
+class RMSPropSolver : public GradientDescentSolverBase<InputType, OutputType, WeightsType, BatchInputType, BatchOutputType, ActivationFunction, LossFunction>
 {
 public:
-	typedef  GradientDescentSolverBase<InputType, OutputType, WeightsType, BatchInputType, BatchOutputType, LinkFunction, LossFunction> BaseType;
+	typedef  GradientDescentSolverBase<InputType, OutputType, WeightsType, BatchInputType, BatchOutputType, ActivationFunction, LossFunction> BaseType;
 
 	void Initialize(int szi = 1, int szo = 1)
 	{
@@ -410,11 +410,11 @@ protected:
 	OutputType sb;
 };
 
-template<class LinkFunction, class LossFunction>
-class RMSPropSolver<double, double, double, Eigen::RowVectorXd, Eigen::RowVectorXd, LinkFunction, LossFunction> : public GradientDescentSolverBase<double, double, double, Eigen::RowVectorXd, Eigen::RowVectorXd, LinkFunction, LossFunction>
+template<class ActivationFunction, class LossFunction>
+class RMSPropSolver<double, double, double, Eigen::RowVectorXd, Eigen::RowVectorXd, ActivationFunction, LossFunction> : public GradientDescentSolverBase<double, double, double, Eigen::RowVectorXd, Eigen::RowVectorXd, ActivationFunction, LossFunction>
 {
 public:
-	typedef GradientDescentSolverBase<double, double, double, Eigen::RowVectorXd, Eigen::RowVectorXd, LinkFunction, LossFunction> BaseType;
+	typedef GradientDescentSolverBase<double, double, double, Eigen::RowVectorXd, Eigen::RowVectorXd, ActivationFunction, LossFunction> BaseType;
 
 	void Initialize(int szi = 1, int szo = 1)
 	{
@@ -457,11 +457,11 @@ protected:
 //*************************************************************************************************************************************************************************************************************************************************************************************************************
 
 
-template<typename InputType = Eigen::VectorXd, typename OutputType = Eigen::VectorXd, typename WeightsType = Eigen::MatrixXd, typename BatchInputType = Eigen::MatrixXd, typename BatchOutputType = Eigen::MatrixXd, class LinkFunction = IdentityFunction<OutputType>, class LossFunction = L2Loss<OutputType>>
-class AdamSolver : public GradientDescentSolverBase<InputType, OutputType, WeightsType, BatchInputType, BatchOutputType, LinkFunction, LossFunction>
+template<typename InputType = Eigen::VectorXd, typename OutputType = Eigen::VectorXd, typename WeightsType = Eigen::MatrixXd, typename BatchInputType = Eigen::MatrixXd, typename BatchOutputType = Eigen::MatrixXd, class ActivationFunction = IdentityFunction<OutputType>, class LossFunction = L2Loss<OutputType>>
+class AdamSolver : public GradientDescentSolverBase<InputType, OutputType, WeightsType, BatchInputType, BatchOutputType, ActivationFunction, LossFunction>
 {
 public:
-	typedef  GradientDescentSolverBase<InputType, OutputType, WeightsType, BatchInputType, BatchOutputType, LinkFunction, LossFunction> BaseType;
+	typedef  GradientDescentSolverBase<InputType, OutputType, WeightsType, BatchInputType, BatchOutputType, ActivationFunction, LossFunction> BaseType;
 
 	void Initialize(int szi = 1, int szo = 1)
 	{
@@ -512,11 +512,11 @@ protected:
 	OutputType mb;
 };
 
-template<class LinkFunction, class LossFunction>
-class AdamSolver<double, double, double, Eigen::RowVectorXd, Eigen::RowVectorXd, LinkFunction, LossFunction> : public GradientDescentSolverBase<double, double, double, Eigen::RowVectorXd, Eigen::RowVectorXd, LinkFunction, LossFunction>
+template<class ActivationFunction, class LossFunction>
+class AdamSolver<double, double, double, Eigen::RowVectorXd, Eigen::RowVectorXd, ActivationFunction, LossFunction> : public GradientDescentSolverBase<double, double, double, Eigen::RowVectorXd, Eigen::RowVectorXd, ActivationFunction, LossFunction>
 {
 public:
-	typedef GradientDescentSolverBase<double, double, double, Eigen::RowVectorXd, Eigen::RowVectorXd, LinkFunction, LossFunction> BaseType;
+	typedef GradientDescentSolverBase<double, double, double, Eigen::RowVectorXd, Eigen::RowVectorXd, ActivationFunction, LossFunction> BaseType;
 
 	void Initialize(int szi = 1, int szo = 1)
 	{
