@@ -32,7 +32,8 @@ public:
 
 		std::random_device rd;
 		std::mt19937 rde(/*42*/rd());
-		std::uniform_real_distribution<> dist(-1, 1);
+		const double x = 1. / sqrt(szi);
+		std::uniform_real_distribution<> dist(-x, x);
 		for (int i = 0; i < szo; ++i)
 			for (int j = 0; j < szi; ++j)
 				W(i, j) = dist(rde);
