@@ -6,7 +6,7 @@ bool NeuralNetworksTests()
 	std::default_random_engine rde(42);
 	std::uniform_int_distribution<> distBool(0, 1);
 
-	const double alpha = 0.2;
+	const double alpha = 0.3;
 
 	const double beta1 = 0.7;
 	const double beta2 = 0.9;
