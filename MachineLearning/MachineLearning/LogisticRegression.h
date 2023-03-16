@@ -22,11 +22,11 @@ public:
 	typedef GeneralizedLinearModel<InputType, OutputType, WeightsType, Solver, BatchInputType, BatchOutputType> baseType;
 
 	LogisticRegression(int szi = 1, int szo = 1)
+		: baseType(szi, szo)
 	{
-		baseType::Initialize(szi, szo);
 		// W was initialized to some values between -1 and 1, translate them to values between 0 and 1
-		baseType::W += WeightsType::Ones(baseType::W.rows(), baseType::W.cols());
-		baseType::W *= 0.5;
+		//baseType::W += WeightsType::Ones(baseType::W.rows(), baseType::W.cols());
+		//baseType::W *= 0.5;
 	}
 };
 

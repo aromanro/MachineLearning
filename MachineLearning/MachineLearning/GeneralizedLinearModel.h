@@ -1,9 +1,11 @@
 #pragma once
 
+#include <random>
+
 #include "ActivationFunctions.h"
 #include "CostFunctions.h"
 
-template<typename InputType = Eigen::VectorXd, typename OutputType = Eigen::VectorXd, typename WeigthsType = Eigen::MatrixXd, class Solver = AdamSolver<>, class BatchInputType = Eigen::MatrixXd, class BatchOutputType = BatchInputType>
+template<typename InputType = Eigen::VectorXd, typename OutputType = Eigen::VectorXd, typename WeightsType = Eigen::MatrixXd, class Solver = AdamSolver<>, class BatchInputType = Eigen::MatrixXd, class BatchOutputType = BatchInputType>
 class GeneralizedLinearModel
 {
 public:
@@ -18,7 +20,23 @@ public:
 	{
 		solver.Initialize(szi, szo);
 		// TODO: provide initializers!
-		W = WeigthsType::Random(szo, szi); // random between -1 and 1 by default
+
+		//W = WeightsType::Random(szo, szi);
+
+		W = WeightsType::Zero(szo, szi); 
+		
+		// Eigen has a Random generator, but for now I'll stick with this one:
+		// it's easier to reproduce issues this way, too
+		
+		// random between -1 and 1 by default
+
+		std::random_device rd;
+		std::mt19937 rde(/*42*/rd());
+		std::uniform_real_distribution<> dist(-1, 1);
+		for (int i = 0; i < szo; ++i)
+			for (int j = 0; j < szi; ++j)
+				W(i, j) = dist(rde);
+		
 		b = OutputType::Zero(szo);
 	}
 
@@ -80,7 +98,7 @@ public:
 	}
 
 protected:
-	WeigthsType W;
+	WeightsType W;
 	OutputType b;
 
 public:

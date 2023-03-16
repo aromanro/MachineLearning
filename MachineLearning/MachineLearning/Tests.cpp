@@ -28,6 +28,10 @@ double polyFunction(double x)
 
 bool AllTests()
 {
+//#define ONLY_NEURAL 1
+#ifdef ONLY_NEURAL
+	return NeuralNetworksTests();
+#else
 	bool res = SimpleLinearRegressionTests();
 
 	if (res)
@@ -52,4 +56,5 @@ bool AllTests()
 	}
 
 	return res;
+#endif	
 }
