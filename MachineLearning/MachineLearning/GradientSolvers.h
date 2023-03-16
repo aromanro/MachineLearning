@@ -1,7 +1,7 @@
 #pragma once
 
 #include <Eigen/eigen>
-#include <unsupported/Eigen/MatrixFunctions>
+//#include <unsupported/Eigen/MatrixFunctions>
 
 #include "ActivationFunctions.h"
 #include "CostFunctions.h"
@@ -10,14 +10,30 @@
 
 const double eps = 1E-10;
 
+template<class ActivationFunction = IdentityFunction<Eigen::VectorXd>, class LossFunction = L2Loss<Eigen::VectorXd>>
+class GradientDescentSolverCommonImpl
+{
+public:
+	bool lastLayer = true;
+	bool firstLayer = true;
+
+	double alpha = 0.001;
+	double lim = 20.;
+
+	ActivationFunction activationFunction;
+	LossFunction lossFunction;
+};
+
+
 //*************************************************************************************************************************************************************************************************************************************************************************************************************
 // Base class for all
 //*************************************************************************************************************************************************************************************************************************************************************************************************************
 
 template<typename InputType = Eigen::VectorXd, typename OutputType = Eigen::VectorXd, typename WeightsType = Eigen::MatrixXd, typename BatchInputType = Eigen::MatrixXd, typename BatchOutputType = Eigen::MatrixXd, class ActivationFunction = IdentityFunction<OutputType>, class LossFunction = L2Loss<OutputType>>
-class GradientDescentSolverBase
+class GradientDescentSolverBase : public GradientDescentSolverCommonImpl<ActivationFunction, LossFunction>
 {
 public:
+	typedef GradientDescentSolverCommonImpl<ActivationFunction, LossFunction> baseType;
 
 	void AddBatch(const BatchInputType& batchInput, const BatchOutputType& batchOutput)
 	{
@@ -32,6 +48,11 @@ public:
 		pred = output;
 	}
 
+	BatchOutputType getPrediction() const
+	{
+		return pred;
+	}
+
 	void setLinearPrediction(const BatchOutputType& output) // before calling the link function
 	{
 		linpred = output;
@@ -42,29 +63,25 @@ public:
 		double cost = 0;
 
 		for (int c = 0; c < target.cols(); ++c)
-			cost += lossFunction(pred.col(c), target.col(c)).sum();
+			cost += baseType::lossFunction(pred.col(c), target.col(c)).sum();
 
 		return cost;
 	}
 
-	double alpha = 0.001;
-	double lim = 20.;
-
 protected:
 	inline BatchOutputType getGrad()
 	{
-		BatchOutputType lossLinkGrad;
-		lossLinkGrad.resize(target.rows(), target.cols());
+		BatchOutputType lossLinkGrad(target.rows(), target.cols());
 		
 		const double norm = 1. / input.cols();
 
 		for (int c = 0; c < target.cols(); ++c)
 		{
-			lossLinkGrad.col(c) = norm * activationFunction.derivative(linpred.col(c)).cwiseProduct(lossFunction.derivative(pred.col(c), target.col(c)));
+			lossLinkGrad.col(c) = norm * baseType::activationFunction.derivative(linpred.col(c)).cwiseProduct(baseType::lastLayer ? baseType::lossFunction.derivative(pred.col(c), target.col(c)) : target.col(c));
 			// clip it if necessary
 			const double n = sqrt(lossLinkGrad.col(c).cwiseProduct(lossLinkGrad.col(c)).sum());
-			if (n > lim)
-				lossLinkGrad.col(c) *= lim / n;
+			if (n > baseType::lim)
+				lossLinkGrad.col(c) *= baseType::lim / n;
 		}
 
 		return lossLinkGrad;
@@ -75,17 +92,15 @@ protected:
 
 	BatchInputType input;
 	BatchOutputType target;
-
-public:
-	ActivationFunction activationFunction;
-	LossFunction lossFunction;
 };
 
 
 template<class ActivationFunction, class LossFunction>
 class GradientDescentSolverBase<double, double, double, Eigen::RowVectorXd, Eigen::RowVectorXd, ActivationFunction, LossFunction>
+	: public GradientDescentSolverCommonImpl<ActivationFunction, LossFunction>
 {
 public:
+	typedef GradientDescentSolverCommonImpl<ActivationFunction, LossFunction> baseType;
 
 	void AddBatch(const Eigen::RowVectorXd& batchInput, const Eigen::RowVectorXd& batchOutput)
 	{
@@ -100,6 +115,11 @@ public:
 		pred = output;
 	}
 
+	Eigen::RowVectorXd getPrediction() const
+	{
+		return pred;
+	}
+
 	void setLinearPrediction(const Eigen::RowVectorXd& output) // before calling the link function
 	{
 		linpred = output;
@@ -110,13 +130,10 @@ public:
 		double cost = 0;
 
 		for (int c = 0; c < target.cols(); ++c)
-			cost += lossFunction(pred(c), target(c));
+			cost += baseType::lossFunction(pred(c), target(c));
 
 		return cost;
 	}
-
-	double alpha = 0.001;
-	double lim = 20.;
 
 protected:
 	inline Eigen::RowVectorXd getGrad()
@@ -128,11 +145,11 @@ protected:
 
 		for (int c = 0; c < target.cols(); ++c)
 		{
-			lossLinkGrad(c) = norm * activationFunction.derivative(linpred(c)) * lossFunction.derivative(pred(c), target(c));
+			lossLinkGrad(c) = norm * baseType::activationFunction.derivative(linpred(c)) * (baseType::lastLayer ? baseType::lossFunction.derivative(pred(c), target(c)) : target(c));
 			// clip it if necessary
 			const double n = sqrt(lossLinkGrad(c) * lossLinkGrad(c));
-			if (n > lim)
-				lossLinkGrad(c) *= lim / n;
+			if (n > baseType::lim)
+				lossLinkGrad(c) *= baseType::lim / n;
 		}
 
 		return lossLinkGrad;
@@ -143,10 +160,6 @@ protected:
 
 	Eigen::RowVectorXd input;
 	Eigen::RowVectorXd target;
-
-public:
-	ActivationFunction activationFunction;
-	LossFunction lossFunction;
 };
 
 
@@ -165,7 +178,7 @@ public:
 	{
 	}
 
-	void getWeightsAndBias(WeightsType& w, OutputType& b)
+	BatchOutputType getWeightsAndBias(WeightsType& w, OutputType& b)
 	{
 		const BatchOutputType lossLinkGrad = BaseType::getGrad();
 
@@ -175,6 +188,8 @@ public:
 		w -= BaseType::alpha * wAdj;
 
 		BaseType::alpha *= decay; //learning rate could decrease over time
+
+		return lossLinkGrad;
 	}
 
 
@@ -191,7 +206,7 @@ public:
 	{
 	}
 
-	void getWeightsAndBias(double& w, double& b)
+	double getWeightsAndBias(double& w, double& b)
 	{
 		const double lossLinkGrad = BaseType::getGrad();
 
@@ -201,6 +216,8 @@ public:
 		w -= BaseType::alpha * wAdj;
 
 		BaseType::alpha *= decay; //learning rate could decrease over time
+
+		return lossLinkGrad;
 	}
 
 	double decay = 1.;
@@ -225,7 +242,7 @@ public:
 		mb = OutputType::Zero(szo);
 	}
 
-	void getWeightsAndBias(WeightsType& w, OutputType& b)
+	BatchOutputType getWeightsAndBias(WeightsType& w, OutputType& b)
 	{
 		const BatchOutputType lossLinkGrad = BaseType::getGrad();
 
@@ -237,6 +254,8 @@ public:
 		mW = beta * mW - BaseType::alpha * wAdj;
 
 		w += mW;
+
+		return lossLinkGrad;
 	}
 
 	double beta = 0.5;
@@ -258,7 +277,7 @@ public:
 		mb = 0;
 	}
 
-	void getWeightsAndBias(double& w, double& b)
+	Eigen::RowVectorXd getWeightsAndBias(double& w, double& b)
 	{
 		const Eigen::RowVectorXd lossLinkGrad = BaseType::getGrad();
 	
@@ -269,6 +288,8 @@ public:
 		mW = beta * mW - BaseType::alpha * wAdj;
 
 		w += mW;
+
+		return lossLinkGrad;
 	}
 
 	double getLoss() const
@@ -307,7 +328,7 @@ public:
 		sb = OutputType::Zero(szo);
 	}
 
-	void getWeightsAndBias(WeightsType& w, OutputType& b)
+	BatchOutputType getWeightsAndBias(WeightsType& w, OutputType& b)
 	{
 		const BatchOutputType lossLinkGrad = BaseType::getGrad();
 
@@ -321,6 +342,8 @@ public:
 
 		const WeightsType sWa = sW + WeightsType::Constant(sW.rows(), sW.cols(), eps);
 		w -= BaseType::alpha * wAdj.cwiseProduct(sWa.cwiseSqrt().cwiseInverse());
+
+		return lossLinkGrad;
 	}
 
 protected:
@@ -340,7 +363,7 @@ public:
 		sb = 0;
 	}
 
-	void getWeightsAndBias(double& w, double& b)
+	Eigen::RowVectorXd getWeightsAndBias(double& w, double& b)
 	{
 		const Eigen::RowVectorXd lossLinkGrad = BaseType::getGrad();
 
@@ -351,6 +374,8 @@ public:
 		sW += wAdj * wAdj;
 
 		w -= BaseType::alpha * wAdj / sqrt(sW + eps);
+
+		return lossLinkGrad;
 	}
 
 	double getLoss() const
@@ -387,7 +412,7 @@ public:
 		sb = OutputType::Zero(szo);
 	}
 
-	void getWeightsAndBias(WeightsType& w, OutputType& b)
+	BatchOutputType getWeightsAndBias(WeightsType& w, OutputType& b)
 	{
 		const BatchOutputType lossLinkGrad = BaseType::getGrad();
 
@@ -401,6 +426,8 @@ public:
 
 		const WeightsType sWa = sW + WeightsType::Constant(sW.rows(), sW.cols(), eps);
 		w -= BaseType::alpha * wAdj.cwiseProduct(sWa.cwiseSqrt().cwiseInverse());
+
+		return lossLinkGrad;
 	}
 
 	double beta = 0.5;
@@ -422,7 +449,7 @@ public:
 		sb = 0;
 	}
 
-	void getWeightsAndBias(double& w, double& b)
+	Eigen::RowVectorXd getWeightsAndBias(double& w, double& b)
 	{
 		const Eigen::RowVectorXd lossLinkGrad = BaseType::getGrad();
 
@@ -433,6 +460,8 @@ public:
 		sW = beta * sW + (1. - beta) * wAdj * wAdj;
 
 		w -= BaseType::alpha * wAdj / sqrt(sW + eps);
+
+		return lossLinkGrad;
 	}
 
 	double getLoss() const
@@ -472,7 +501,7 @@ public:
 		step = 0;
 	}
 
-	void getWeightsAndBias(WeightsType& w, OutputType& b)
+	BatchOutputType getWeightsAndBias(WeightsType& w, OutputType& b)
 	{
 		++step;
 		const BatchOutputType lossLinkGrad = BaseType::getGrad();
@@ -497,6 +526,8 @@ public:
 
 		const WeightsType sWa = sW + WeightsType::Constant(sW.rows(), sW.cols(), eps);
 		w += BaseType::alpha * mW.cwiseProduct(sWa.cwiseSqrt().cwiseInverse());
+
+		return lossLinkGrad;
 	}
 
 	double beta1 = 0.9;
@@ -527,7 +558,7 @@ public:
 		step = 0;
 	}
 
-	void getWeightsAndBias(double& w, double& b)
+	Eigen::RowVectorXd getWeightsAndBias(double& w, double& b)
 	{
 		++step;
 		const Eigen::RowVectorXd lossLinkGrad = BaseType::getGrad();
@@ -550,6 +581,8 @@ public:
 		sW *= div2;
 
 		w += BaseType::alpha * mW / sqrt(sW + eps);
+
+		return lossLinkGrad;
 	}
 
 	double beta1 = 0.9;

@@ -1,7 +1,7 @@
 #pragma once
 
 #include <Eigen/eigen>
-#include <unsupported/Eigen/MatrixFunctions>
+//#include <unsupported/Eigen/MatrixFunctions>
 
 template<typename OutputType = Eigen::VectorXd> class L2Loss
 {
@@ -79,9 +79,17 @@ public:
 	{
 		static const double eps = 1E-10;
 		const OutputType ones = OutputType::Ones(output.size());
-		const OutputType epsv = OutputType::Constant(output.size(), eps);
+		
+		OutputType l1(output.size());
+		OutputType l2(output.size());
 
-		return -(target.cwiseProduct((output + epsv).log()) + (ones - target).cwiseProduct((ones + epsv - output).log()));
+		for (int i = 0; i < output.size(); ++i)
+		{
+			l1(i) = log(output(i) + eps);
+			l2(i) = log(1 + eps - output(i));
+		}
+
+		return -(target.cwiseProduct(l1) + (ones - target).cwiseProduct(l2));
 	}
 
 	OutputType derivative(const OutputType& output, const OutputType& target) const

@@ -41,6 +41,13 @@ bool AllTests()
 			std::cout << std::endl << "Logistic regression: " << std::endl << std::endl;
 
 			res = LogisticRegressionTests();
+
+			if (res)
+			{
+				std::cout << std::endl << "Neural: " << std::endl << std::endl;
+
+				res = NeuralNetworksTests();
+			}
 		}
 	}
 

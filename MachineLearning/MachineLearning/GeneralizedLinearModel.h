@@ -3,7 +3,7 @@
 #include "ActivationFunctions.h"
 #include "CostFunctions.h"
 
-template<typename InputType, typename OutputType, typename WeigthsType, class Solver, class BatchInputType = Eigen::MatrixXd, class BatchOutputType = BatchInputType>
+template<typename InputType = Eigen::VectorXd, typename OutputType = Eigen::VectorXd, typename WeigthsType = Eigen::MatrixXd, class Solver = AdamSolver<>, class BatchInputType = Eigen::MatrixXd, class BatchOutputType = BatchInputType>
 class GeneralizedLinearModel
 {
 public:
@@ -22,7 +22,7 @@ public:
 		b = OutputType::Zero(szo);
 	}
 
-	virtual const OutputType Predict(const InputType& input)
+	virtual OutputType Predict(const InputType& input) const
 	{
 		return solver.activationFunction(W * input + b);
 	}
@@ -31,8 +31,8 @@ public:
 	{
 		solver.AddBatch(batchInput, batchOutput);
 
-		BatchOutputType pred = BatchOutputType::Zero(batchOutput.rows(), batchOutput.cols());
-		BatchOutputType linpred = BatchOutputType::Zero(batchOutput.rows(), batchOutput.cols());
+		BatchOutputType pred(batchOutput.rows(), batchOutput.cols());
+		BatchOutputType linpred(batchOutput.rows(), batchOutput.cols());
 
 		for (unsigned int i = 0; i < batchInput.cols(); ++i)
 		{
@@ -44,16 +44,39 @@ public:
 		solver.setPrediction(pred);
 	}
 
-	virtual void AddBatch(const BatchInputType& batchInput, const BatchOutputType& batchOutput)
+	BatchOutputType getPrediction() const
+	{
+		return solver.getPrediction();
+	}
+
+
+	virtual BatchOutputType AddBatch(const BatchInputType& batchInput, const BatchOutputType& batchOutput)
 	{
 		AddBatchNoParamsAdjustment(batchInput, batchOutput);
 
-		solver.getWeightsAndBias(W, b);
+		return solver.getWeightsAndBias(W, b);
 	}
 
 	double getLoss() const
 	{
 		return solver.getLoss();
+	}
+
+	InputType Backpropagate(const OutputType& grad) const
+	{
+		return W.transpose() * grad;
+	}
+
+	BatchInputType BackpropagateBatch(const BatchOutputType& grad) const
+	{
+		InputType firstCol = Backpropagate(grad.col(0));
+		BatchInputType res(firstCol.size(), grad.cols());
+
+		res.col(0) = firstCol;
+		for (int i = 1; i < grad.cols(); ++i)
+			res.col(i) = Backpropagate(grad.col(i));
+
+		return res;
 	}
 
 protected:
@@ -82,7 +105,7 @@ public:
 		solver.Initialize(szi, szo);
 	}
 
-	virtual const double Predict(const double& input)
+	virtual double Predict(const double& input) const
 	{
 		return solver.activationFunction(W * input + b);
 	}
@@ -91,8 +114,8 @@ public:
 	{
 		solver.AddBatch(batchInput, batchOutput);
 
-		Eigen::RowVectorXd pred = Eigen::RowVectorXd::Zero(batchOutput.cols());
-		Eigen::RowVectorXd linpred = Eigen::RowVectorXd::Zero(batchOutput.cols());
+		Eigen::RowVectorXd pred(batchOutput.cols());
+		Eigen::RowVectorXd linpred(batchOutput.cols());
 
 		for (unsigned int i = 0; i < batchInput.cols(); ++i)
 		{
@@ -104,16 +127,36 @@ public:
 		solver.setPrediction(pred);
 	}
 
-	virtual void AddBatch(const Eigen::RowVectorXd& batchInput, const Eigen::RowVectorXd& batchOutput)
+	Eigen::RowVectorXd getPrediction() const
+	{
+		return solver.getPrediction();
+	}
+
+	virtual Eigen::RowVectorXd AddBatch(const Eigen::RowVectorXd& batchInput, const Eigen::RowVectorXd& batchOutput)
 	{
 		AddBatchNoParamsAdjustment(batchInput, batchOutput);
 
-		solver.getWeightsAndBias(W, b);
+		return solver.getWeightsAndBias(W, b);
 	}
 
 	double getLoss() const
 	{
 		return solver.getLoss();
+	}
+
+	double Backpropagate(const double& grad) const
+	{
+		return W * grad;
+	}
+
+	Eigen::RowVectorXd BackpropagateBatch(const Eigen::RowVectorXd& grad) const
+	{
+		Eigen::RowVectorXd res(grad.size());
+
+		for (int i = 0; i < grad.size(); ++i)
+			res(i) = Backpropagate(grad(i));
+
+		return res;
 	}
 
 protected:

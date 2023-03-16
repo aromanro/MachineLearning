@@ -14,7 +14,7 @@ public:
 	{
 	}
 
-	const double Predict(const double& input) override
+	double Predict(const double& input) const override
 	{
 		return baseType::W * input + baseType::b;
 	}
@@ -38,7 +38,7 @@ public:
 		baseType::b = Eigen::VectorXd::Zero(szo);
 	}
 
-	const Eigen::VectorXd Predict(const InputType& input) override
+	Eigen::VectorXd Predict(const InputType& input) const override
 	{
 		return baseType::W.cwiseProduct(input) + baseType::b;
 	}
@@ -46,14 +46,16 @@ public:
 	IdentityFunction<Eigen::VectorXd> activationFunction;
 };
 
-template<> class MultivariateSimpleLinearRegression<double> : public GeneralizedLinearModel<double, Eigen::VectorXd, Eigen::MatrixXd, SimpleLinearRegressionSolver<double, Eigen::VectorXd, Eigen::MatrixXd, Eigen::VectorXd, Eigen::MatrixXd>, Eigen::MatrixXd>
+
+template<> class MultivariateSimpleLinearRegression<double> : public GeneralizedLinearModel<double, Eigen::VectorXd, Eigen::MatrixXd, SimpleLinearRegressionSolver<double, Eigen::VectorXd, Eigen::MatrixXd, Eigen::RowVectorXd, Eigen::MatrixXd>, Eigen::RowVectorXd, Eigen::MatrixXd>
 {
 public:
-	typedef GeneralizedLinearModel<double, Eigen::VectorXd, Eigen::MatrixXd, SimpleLinearRegressionSolver<double, Eigen::VectorXd, Eigen::MatrixXd, Eigen::VectorXd, Eigen::MatrixXd>, Eigen::MatrixXd> baseType;
+	typedef GeneralizedLinearModel<double, Eigen::VectorXd, Eigen::MatrixXd, SimpleLinearRegressionSolver<double, Eigen::VectorXd, Eigen::MatrixXd, Eigen::RowVectorXd, Eigen::MatrixXd>, Eigen::RowVectorXd, Eigen::MatrixXd> baseType;
 
 	MultivariateSimpleLinearRegression(int szi = 1, int szo = 1) : baseType(szi, szo)
 	{
 	}
 };
+
 
 

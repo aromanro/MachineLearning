@@ -1,7 +1,6 @@
 #pragma once
 
 #include <Eigen/eigen>
-#include <unsupported/Eigen/MatrixFunctions>
 
 #include "ActivationFunctions.h"
 
@@ -42,14 +41,16 @@ public:
 	{
 	}
 
-	void getWeightsAndBias(WeightsType& w, OutputType& b) const
+	Eigen::MatrixXd getWeightsAndBias(WeightsType& w, OutputType& b) const
 	{
 		if (!count)
-			return;
+			return Eigen::MatrixXd();
 
 		const WeightsType wi = (count * xyaccum - xaccum.cwiseProduct(yaccum)).cwiseProduct((count * x2accum - xaccum.cwiseProduct(xaccum)).cwiseInverse());
 		w = wi;
 		b = (yaccum - wi.cwiseProduct(xaccum)) / count;
+
+		return Eigen::MatrixXd(); // an empty matrix, no need of it, it won't be used
 	}
 
 	const long long int getSize() const
@@ -96,7 +97,7 @@ public:
 };
 
 
-template<> class SimpleLinearRegressionSolver<double, Eigen::VectorXd, Eigen::MatrixXd, Eigen::VectorXd, Eigen::MatrixXd> {
+template<> class SimpleLinearRegressionSolver<double, Eigen::VectorXd, Eigen::MatrixXd, Eigen::RowVectorXd, Eigen::MatrixXd> {
 public:
 	SimpleLinearRegressionSolver(int szi = 1, int szo = 1)
 	{
@@ -132,13 +133,15 @@ public:
 	{
 	}
 
-	void getWeightsAndBias(Eigen::MatrixXd& w, Eigen::VectorXd& b) const
+	Eigen::MatrixXd getWeightsAndBias(Eigen::MatrixXd& w, Eigen::VectorXd& b) const
 	{
 		if (!count)
-			return;
+			return Eigen::MatrixXd();
 
 		w = (count * xyaccum - xaccum * yaccum) / (count * x2accum - xaccum * xaccum);
 		b = (yaccum - w * xaccum) / count;
+
+		return Eigen::MatrixXd();
 	}
 
 	const long long int getSize() const
@@ -217,15 +220,17 @@ public:
 	{
 	}
 
-	void getWeightsAndBias(double& w, double& b) const
+	Eigen::RowVectorXd getWeightsAndBias(double& w, double& b) const
 	{
 		if (!count) {
 			w = b = 0;
-			return;
+			return Eigen::RowVectorXd();
 		}
 
 		w = (count * xyaccum - xaccum * yaccum) / (count * x2accum - xaccum * xaccum);
 		b = (yaccum - w * xaccum) / count;
+
+		return Eigen::RowVectorXd();
 	}
 
 	const long long int getSize() const

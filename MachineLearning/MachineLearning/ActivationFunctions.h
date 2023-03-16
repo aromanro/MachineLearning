@@ -1,9 +1,10 @@
 #pragma once
 
-#include <Eigen/eigen>
-#include <unsupported/Eigen/MatrixFunctions>
+#include <cmath>
 
-#include <math.h>
+
+#include <Eigen/eigen>
+//#include <unsupported/Eigen/MatrixFunctions>
 
 template<typename InputOutputType = Eigen::VectorXd> class IdentityFunction
 {
@@ -34,7 +35,7 @@ public:
 };
 
 
-template<typename InputOutputType, typename WeightsType> class SigmoidFunction
+template<typename InputOutputType = Eigen::VectorXd, typename WeightsType = InputOutputType> class SigmoidFunction
 {
 public:
 	SigmoidFunction(int size = 1)
@@ -51,14 +52,20 @@ public:
 
 	const InputOutputType operator()(const InputOutputType& input) const
 	{
-		return (InputOutputType::Ones(input.size()) + (-(beta.cwiseProduct(input) + beta0)).exp()).cwiseInverse();
+		InputOutputType v(input.rows(), input.cols());
+		
+		for (int i = 0; i < input.rows(); ++i)
+			for (int j = 0; j < input.cols(); ++j)
+				v(i, j) = exp(-(beta(i, j) * input(i , j) + beta0(i,j)));
+
+		return (InputOutputType::Ones(input.rows(), input.cols()) + v).cwiseInverse();
 	}
 
 	const InputOutputType derivative(const InputOutputType& input) const
 	{
 		const InputOutputType fx = operator()(input);
 
-		return fx.cwiseProduct(InputOutputType::Ones(fx.size()) - fx);
+		return fx.cwiseProduct(InputOutputType::Ones(fx.rows(), fx.cols()) - fx);
 	}
 
 protected:
@@ -97,7 +104,9 @@ protected:
 	double beta;
 };
 
-template<typename InputOutputType, typename WeightsType> class TanhFunction
+
+
+template<typename InputOutputType = Eigen::VectorXd> class TanhFunction
 {
 public:
 	TanhFunction(int size = 1)
@@ -106,18 +115,20 @@ public:
 
 	const InputOutputType operator()(const InputOutputType& input) const
 	{
-		return input.tanh();
+		const SigmoidFunction<InputOutputType, InputOutputType> sigmoid(static_cast<int>(input.size()));
+
+		return 2. * sigmoid(2. * input) - InputOutputType::Ones(input.rows(), input.cols());
 	}
 
 	const InputOutputType derivative(const InputOutputType& input) const
 	{
 		const InputOutputType fx = operator()(input);
 
-		return 1. - fx.cwiseProduct(fx);
+		return InputOutputType::Ones(fx.rows(), fx.cols()) - fx.cwiseProduct(fx);
 	}
 };
 
-template<> class TanhFunction<double, double>
+template<> class TanhFunction<double>
 {
 public:
 	TanhFunction()
@@ -137,7 +148,7 @@ public:
 	}
 };
 
-template<typename InputOutputType, typename WeightsType> class SoftplusFunction
+template<typename InputOutputType = Eigen::VectorXd> class SoftplusFunction
 {
 public:
 	SoftplusFunction(int size = 1)
@@ -157,7 +168,7 @@ public:
 	}
 };
 
-template<> class SoftplusFunction<double, double>
+template<> class SoftplusFunction<double>
 {
 public:
 	SoftplusFunction()
@@ -179,7 +190,7 @@ public:
 
 
 
-template<typename InputOutputType> class RELUFunction
+template<typename InputOutputType = Eigen::VectorXd> class RELUFunction
 {
 public:
 	RELUFunction()
@@ -227,7 +238,7 @@ public:
 };
 
 
-template<typename InputOutputType> class LeakyRELUFunction
+template<typename InputOutputType = Eigen::VectorXd> class LeakyRELUFunction
 {
 public:
 	LeakyRELUFunction()
@@ -244,7 +255,7 @@ public:
 		InputOutputType out = input;
 
 		for (unsigned int i = 0; i < out.size(); ++i)
-			out(i) *= (out(i) < 0) ? alpha : 1.;
+			out(i) *= ((out(i) < 0) ? alpha : 1.);
 
 		return out;
 	}
