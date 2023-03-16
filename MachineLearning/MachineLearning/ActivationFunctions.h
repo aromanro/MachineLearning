@@ -157,7 +157,13 @@ public:
 
 	const InputOutputType operator()(const InputOutputType& input) const
 	{
-		return input.exp() + 1.;
+		InputOutputType v(input.rows(), input.cols());
+
+		for (int i = 0; i < input.rows(); ++i)
+			for (int j = 0; j < input.cols(); ++j)
+				v(i, j) = exp(input(i, j)) + 1;
+
+		return v;
 	}
 
 	const InputOutputType derivative(const InputOutputType& input) const
