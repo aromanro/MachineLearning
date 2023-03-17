@@ -166,6 +166,7 @@
     <ClInclude Include="ActivationFunctions.h" />
     <ClInclude Include="SimpleLinearRegression.h" />
     <ClInclude Include="Tests.h" />
+    <ClInclude Include="WeightsInitializer.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

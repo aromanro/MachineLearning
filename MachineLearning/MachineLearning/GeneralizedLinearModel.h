@@ -4,6 +4,7 @@
 
 #include "ActivationFunctions.h"
 #include "CostFunctions.h"
+#include "WeightsInitializer.h"
 
 template<typename InputType = Eigen::VectorXd, typename OutputType = Eigen::VectorXd, typename WeightsType = Eigen::MatrixXd, class Solver = AdamSolver<>, class BatchInputType = Eigen::MatrixXd, class BatchOutputType = BatchInputType>
 class GeneralizedLinearModel
@@ -39,6 +40,13 @@ public:
 				W(i, j) = dist(rde);
 		
 		b = OutputType::Zero(szo);
+	}
+
+	void Initialize(WeightsInitializerInterface& initializer)
+	{
+		for (int i = 0; i < W.rows(); ++i)
+			for (int j = 0; j < W.cols(); ++j)
+				W(i, j) = initializer.get();
 	}
 
 	virtual OutputType Predict(const InputType& input) const
