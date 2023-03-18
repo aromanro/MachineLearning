@@ -1,6 +1,8 @@
 #include "Tests.h"
 
-bool LogisticRegressionTests()
+
+
+bool SimpleLogisticRegressionTest()
 {
 	std::default_random_engine rde(42);
 	std::normal_distribution<double> dist(0., 10.);
@@ -21,8 +23,6 @@ bool LogisticRegressionTests()
 
 		std::vector<double> fx(nrPoints);
 		std::vector<double> fy(nrPoints);
-
-
 
 		for (int i = 0; i < nrPoints; ++i)
 		{
@@ -115,13 +115,26 @@ bool LogisticRegressionTests()
 		}
 		theFile.AddDataset(d1x, d1y);
 		theFile.AddDataset(d2x, d2y);
-
 	}
 
 	plot.setType(Gnuplot::ChartType::logisticRegression);
 	plot.setCmdFileName("plot4.plt");
 	plot.setDataFileName("data4.txt");
 	plot.Execute();
+
+	return true;
+}
+
+bool MoreComplexLogisticRegressionTest()
+{
+	std::default_random_engine rde(42);
+	std::normal_distribution<double> dist(0., 10.);
+
+	int nrPoints = 100;
+
+	std::uniform_int_distribution<> distInt(0, nrPoints - 1);
+
+	Gnuplot plot;
 
 	// a more complex case for the logistic regression, generate a 2d gaussian distribution and pretend that the points inside some radius are one class and the ones outside are the other
 
@@ -284,7 +297,6 @@ bool LogisticRegressionTests()
 
 		theFile.AddDataset(d1x, d1y);
 		theFile.AddDataset(d2x, d2y);
-
 	}
 
 	plot.setType(Gnuplot::ChartType::logisticRegression);
@@ -293,4 +305,9 @@ bool LogisticRegressionTests()
 	plot.Execute();
 
 	return true;
+}
+
+bool LogisticRegressionTests()
+{
+	return SimpleLogisticRegressionTest() && MoreComplexLogisticRegressionTest();
 }

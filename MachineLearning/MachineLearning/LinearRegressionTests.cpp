@@ -1,7 +1,6 @@
 #include "Tests.h"
 
-
-bool LinearRegressionTests()
+bool Test1()
 {
 	std::default_random_engine rde(42);
 	std::normal_distribution<double> dist(0., 10.);
@@ -75,6 +74,20 @@ bool LinearRegressionTests()
 	plot.setDataFileName("data1.txt");
 	plot.Execute();
 
+	return true;
+}
+
+bool Test2()
+{
+	std::default_random_engine rde(42);
+	std::normal_distribution<double> dist(0., 10.);
+
+	int nrPoints = 100;
+
+	std::uniform_int_distribution<> distInt(0, nrPoints - 1);
+
+	Gnuplot plot;
+
 	{
 		std::vector<int> xvals(nrPoints);
 		std::vector<double> yvals(nrPoints);
@@ -132,6 +145,20 @@ bool LinearRegressionTests()
 
 		std::cout << "General linear: Prediction for 12 is: (" << res(0) << ", " << res(1) << ", " << res(2) << ") generating value: (" << linearFunction(12) << ", " << linearFunction2(12) << ", " << linearFunction3(12) << ")" << std::endl;
 	}
+
+	return true;
+}
+
+bool Test3()
+{
+	std::default_random_engine rde(42);
+	std::normal_distribution<double> dist(0., 10.);
+
+	int nrPoints = 100;
+
+	std::uniform_int_distribution<> distInt(0, nrPoints - 1);
+
+	Gnuplot plot;
 
 	{
 		std::vector<double> xvals(nrPoints);
@@ -209,11 +236,23 @@ bool LinearRegressionTests()
 		theFile.AddDataset(xvals, yvals);
 	}
 
-
 	plot.setCmdFileName("plot2.plt");
 	plot.setDataFileName("data2.txt");
 	plot.Execute();
 
+	return true;
+}
+
+bool Test4()
+{
+	std::default_random_engine rde(42);
+	std::normal_distribution<double> dist(0., 10.);
+
+	int nrPoints = 100;
+
+	std::uniform_int_distribution<> distInt(0, nrPoints - 1);
+
+	Gnuplot plot;
 
 	// the division with 100 below is for scaling things down, otherwise the stochastic gradient descent will have a hard time finding the solution
 	// normally it will be scaled by standard deviation or the size of the interval, but that should be enough for tests
@@ -318,4 +357,9 @@ bool LinearRegressionTests()
 	plot.Execute();
 
 	return true;
+}
+
+bool LinearRegressionTests()
+{
+	return Test1() && Test2() && Test3() && Test4();
 }
