@@ -144,7 +144,7 @@ bool NeuralNetworksTests()
 
 		//if (lowLoss < 5) return false;
 
-		if (lowLoss < 5) ++failures;
+		if (lowLoss <= 5) ++failures;
 	}
 
 	std::cout << std::endl << "Failures: " << failures << std::endl;
@@ -214,9 +214,11 @@ bool NeuralNetworksTests()
 		in(0) = 1;
 		in(1) = 1;
 		std::cout << "XOR 1 1 = " << neuralNetwork.Predict(in)(0) << std::endl;
+
+		if (lowLoss <= 5) ++failures;
 	}
 	
 	std::cout << std::endl << "Failures: " << failures << std::endl;
 
-	return failures_first > 0 || failures > 0;
+	return failures_first == 0 && failures == 0;
 }
