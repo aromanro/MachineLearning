@@ -87,7 +87,7 @@ public:
 			hiddenLayers[i].Initialize(initializer);
 	}
 
-	Eigen::VectorXd Predict(const Eigen::VectorXd& input)
+	Eigen::VectorXd Predict(const Eigen::VectorXd& input) const
 	{
 		Eigen::VectorXd v = input;
 
@@ -95,6 +95,11 @@ public:
 			v = hiddenLayers[i].Predict(v);
 
 		return lastLayer.Predict(v);
+	}
+
+	double getLoss() const
+	{
+		return lastLayer.getLoss();
 	}
 
 	void ForwardBackwardStep(const Eigen::MatrixXd& input, const Eigen::MatrixXd& target)
@@ -110,30 +115,18 @@ public:
 			inp = hiddenLayers[i].getPrediction();
 		}
 
-		// forward and backward for the last layer:
-		Eigen::MatrixXd grad = lastLayer.AddBatch(inp, target);
+		// forward and backward for the last layer and backpropagate the gradient to the last hidden layer
+		Eigen::MatrixXd grad = lastLayer.BackpropagateBatch(lastLayer.AddBatch(inp, target));
 
-		// now backpropagate the gradient to previous layer:
-		grad = lastLayer.BackpropagateBatch(grad);
+		// now backpropagate the gradient htrought the hidden layers:
 
-		// now backpropagate the gradient to previous layer:
 		for (int i = static_cast<int>(hiddenLayers.size() - 1); i > 0; --i)
-		{
-			// now do the adjustments as well
-			hiddenLayers[i].AddBatch(hiddenLayers[i].getInput(), grad);
-
-			// backpropagate
-			grad = hiddenLayers[i].BackpropagateBatch(grad);
-		}
+			// now do the adjustments of the parameters as well and backpropagate for each hidden layer
+			grad = hiddenLayers[i].BackpropagateBatch(hiddenLayers[i].AddBatch(hiddenLayers[i].getInput(), grad));
 
 		// the first layer does not need to backpropagate gradient to the output layer, that one cannot be adjusted
 		if (!hiddenLayers.empty())
 			hiddenLayers[0].AddBatch(hiddenLayers[0].getInput(), grad);
-	}
-
-	double getLoss() const
-	{
-		return lastLayer.getLoss();
 	}
 
 protected:
