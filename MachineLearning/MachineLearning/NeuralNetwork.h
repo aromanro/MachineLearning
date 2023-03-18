@@ -9,7 +9,7 @@
 
 
 // the LastSolver is here to be able to provide a different method for the last layer
-// not necesarily some other stochastic gradient descent, but through the solver the activation and cost functions can be specified 
+// not necessarily some other stochastic gradient descent, but through the solver the activation and cost functions can be specified 
 // and that one can be different for the last layer
 
 // for the hidden layer, by default use an adam solver with a leaky RELU activation (the cost does not matter, it's computed for the output of the last layer only)
@@ -23,7 +23,7 @@ class MultilayerPerceptron
 {
 public:
 	// neurons contains the number of neurons in each layer including the input layer 
-	// which is not explicitely represented in the implementation, but the number is used for the number of inputs
+	// which is not explicitly represented in the implementation, but the number is used for the number of inputs
 	MultilayerPerceptron(const std::vector<int>& neurons)
 	{
 		if (neurons.empty()) return;
