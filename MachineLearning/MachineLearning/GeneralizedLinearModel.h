@@ -6,41 +6,17 @@
 #include "CostFunctions.h"
 #include "WeightsInitializer.h"
 
-template<typename InputType = Eigen::VectorXd, typename OutputType = Eigen::VectorXd, typename WeightsType = Eigen::MatrixXd, class Solver = AdamSolver<>, class BatchInputType = Eigen::MatrixXd, class BatchOutputType = BatchInputType>
+template<typename InputType = Eigen::VectorXd, typename OutputType = Eigen::VectorXd, typename WeightsType = Eigen::MatrixXd, class Solver = AdamSolver<>, class BatchInputType = Eigen::MatrixXd, class BatchOutputType = Eigen::MatrixXd>
 class GeneralizedLinearModel
 {
 public:
 	GeneralizedLinearModel(int szi = 1, int szo = 1)
+		: inputs(szi), outputs(szo)
 	{
 		Initialize(szi, szo);
 	}
 
 	virtual ~GeneralizedLinearModel() {}
-
-	void Initialize(int szi = 1, int szo = 1)
-	{
-		solver.Initialize(szi, szo);
-		// TODO: provide initializers!
-
-		//W = WeightsType::Random(szo, szi);
-
-		W = WeightsType::Zero(szo, szi); 
-		
-		// Eigen has a Random generator, but for now I'll stick with this one:
-		// it's easier to reproduce issues this way, too
-		
-		// random between -1 and 1 by default
-
-		std::random_device rd;
-		std::mt19937 rde(/*42*/rd());
-		const double x = 1. / sqrt(szi);
-		std::uniform_real_distribution<> dist(-x, x);
-		for (int i = 0; i < szo; ++i)
-			for (int j = 0; j < szi; ++j)
-				W(i, j) = dist(rde);
-		
-		b = OutputType::Zero(szo);
-	}
 
 	void Initialize(WeightsInitializerInterface& initializer)
 	{
@@ -76,6 +52,10 @@ public:
 		return solver.getPrediction();
 	}
 
+	BatchInputType getInput() const
+	{
+		return solver.getInput();
+	}
 
 	virtual BatchOutputType AddBatch(const BatchInputType& batchInput, const BatchOutputType& batchOutput)
 	{
@@ -106,9 +86,46 @@ public:
 		return res;
 	}
 
+	int getNrInputs() const
+	{
+		return inputs;
+	}
+
+	int getNrOutputs() const
+	{
+		return outputs;
+	}
+
 protected:
+	void Initialize(int szi = 1, int szo = 1)
+	{
+		solver.Initialize(szi, szo);
+
+		//W = WeightsType::Random(szo, szi);
+
+		W.resize(szo, szi);
+
+		// Eigen has a Random generator, but for now I'll stick with this one:
+		// it's easier to reproduce issues this way, too
+
+		// random between -1 and 1 by default
+
+		std::random_device rd;
+		std::mt19937 rde(/*42*/rd());
+		const double x = 1. / sqrt(szi);
+		std::uniform_real_distribution<> dist(-x, x);
+		for (int i = 0; i < szo; ++i)
+			for (int j = 0; j < szi; ++j)
+				W(i, j) = dist(rde);
+
+		b = OutputType::Zero(szo);
+	}
+
 	WeightsType W;
 	OutputType b;
+
+	int inputs;
+	int outputs;
 
 public:
 	Solver solver;
@@ -119,6 +136,7 @@ class GeneralizedLinearModel<double, double, double, Solver, Eigen::RowVectorXd,
 {
 public:
 	GeneralizedLinearModel(int szi = 1, int szo = 1)
+		: inputs(szi), outputs(szo)
 	{
 		Initialize(szi, szo);
 		W = 0;
@@ -127,10 +145,7 @@ public:
 
 	virtual ~GeneralizedLinearModel() {}
 
-	void Initialize(int szi = 1, int szo = 1)
-	{
-		solver.Initialize(szi, szo);
-	}
+
 
 	virtual double Predict(const double& input) const
 	{
@@ -157,6 +172,11 @@ public:
 	Eigen::RowVectorXd getPrediction() const
 	{
 		return solver.getPrediction();
+	}
+
+	Eigen::RowVectorXd getInput() const
+	{
+		return solver.getInput();
 	}
 
 	virtual Eigen::RowVectorXd AddBatch(const Eigen::RowVectorXd& batchInput, const Eigen::RowVectorXd& batchOutput)
@@ -186,9 +206,27 @@ public:
 		return res;
 	}
 
+	int getNrInputs() const
+	{
+		return inputs;
+	}
+
+	int getNrOutputs() const
+	{
+		return outputs;
+	}
+
 protected:
+	void Initialize(int szi = 1, int szo = 1)
+	{
+		solver.Initialize(szi, szo);
+	}
+
 	double W;
 	double b;
+
+	int inputs;
+	int outputs;
 
 public:
 	Solver solver;

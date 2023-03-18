@@ -33,7 +33,7 @@ bool LinearRegressionTests()
 
 		// a simple linear regression, but with gradient descent
 		//GeneralLinearModel<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, GradientDescentSolver<>, Eigen::MatrixXd> generalLinearModel;
-		GeneralizedLinearModel<double, double, double, AdamSolver<double, double, double, Eigen::RowVectorXd, Eigen::RowVectorXd, IdentityFunction<double>, L2Loss<double>>, Eigen::RowVectorXd> generalLinearModel;
+		GeneralizedLinearModel<double, double, double, AdamSolver<double, double, double, Eigen::RowVectorXd, Eigen::RowVectorXd, IdentityFunction<double>, L2Loss<double>>, Eigen::RowVectorXd, Eigen::RowVectorXd> generalLinearModel;
 		generalLinearModel.solver.alpha = 0.03;
 		generalLinearModel.solver.beta1 = 0.7;
 		generalLinearModel.solver.beta2 = 0.9;

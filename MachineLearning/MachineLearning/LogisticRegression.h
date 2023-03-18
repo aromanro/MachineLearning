@@ -15,7 +15,7 @@ typedef RMSPropSolver<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, Eigen::
 typedef AdamSolver<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, Eigen::MatrixXd, Eigen::MatrixXd, SigmoidFunction<Eigen::VectorXd, Eigen::MatrixXd>, LogLoss<Eigen::VectorXd>> LogisticRegressionAdamSolver;
 
 
-template<typename InputType = Eigen::VectorXd, typename OutputType = Eigen::VectorXd, typename WeightsType = Eigen::MatrixXd, class Solver = LogisticRegressionAdamSolver, class BatchInputType = Eigen::MatrixXd, class BatchOutputType = BatchInputType> class LogisticRegression
+template<typename InputType = Eigen::VectorXd, typename OutputType = Eigen::VectorXd, typename WeightsType = Eigen::MatrixXd, class Solver = LogisticRegressionAdamSolver, class BatchInputType = Eigen::MatrixXd, class BatchOutputType = Eigen::MatrixXd> class LogisticRegression
 	: public GeneralizedLinearModel<InputType, OutputType, WeightsType, Solver, BatchInputType, BatchOutputType>
 {
 public:

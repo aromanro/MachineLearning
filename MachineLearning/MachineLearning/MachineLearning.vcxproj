@@ -160,11 +160,15 @@
     <ClInclude Include="GeneralizedLinearModel.h" />
     <ClInclude Include="Gnuplot.h" />
     <ClInclude Include="GradientSolvers.h" />
+    <ClInclude Include="NeuralLayer.h" />
     <ClInclude Include="LogisticRegression.h" />
+    <ClInclude Include="NeuralNetwork.h" />
+    <ClInclude Include="Neuron.h" />
     <ClInclude Include="Normalizer.h" />
     <ClInclude Include="SimpleLinearRegressionSolvers.h" />
     <ClInclude Include="ActivationFunctions.h" />
     <ClInclude Include="SimpleLinearRegression.h" />
+    <ClInclude Include="NeuralSublayer.h" />
     <ClInclude Include="Tests.h" />
     <ClInclude Include="WeightsInitializer.h" />
   </ItemGroup>

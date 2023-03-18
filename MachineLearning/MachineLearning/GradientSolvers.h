@@ -14,6 +14,19 @@ template<class ActivationFunction = IdentityFunction<Eigen::VectorXd>, class Los
 class GradientDescentSolverCommonImpl
 {
 public:
+	int setParams(const std::vector<double>& p)
+	{
+		if (p.empty()) return 0;
+
+		alpha = p[0];
+
+		if (p.size() < 2) return 1;
+
+		lim = p[1];
+
+		return 2;
+	}
+
 	bool lastLayer = true;
 	bool firstLayer = true;
 
@@ -51,6 +64,11 @@ public:
 	BatchOutputType getPrediction() const
 	{
 		return pred;
+	}
+
+	BatchInputType getInput() const
+	{
+		return input;
 	}
 
 	void setLinearPrediction(const BatchOutputType& output) // before calling the link function
@@ -192,6 +210,16 @@ public:
 		return lossLinkGrad;
 	}
 
+	int setParams(const std::vector<double>& p)
+	{
+		int i = BaseType::setParams(p);
+
+		if (p.size() <= i) return i;
+
+		decay = p[i];
+
+		return i + 1;
+	}
 
 	double decay = 1.;
 };
@@ -218,6 +246,17 @@ public:
 		BaseType::alpha *= decay; //learning rate could decrease over time
 
 		return lossLinkGrad;
+	}
+
+	int setParams(const std::vector<double>& p)
+	{
+		int i = BaseType::setParams(p);
+
+		if (p.size() <= i) return i;
+
+		decay = p[i];
+
+		return i + 1;
 	}
 
 	double decay = 1.;
@@ -256,6 +295,17 @@ public:
 		w += mW;
 
 		return lossLinkGrad;
+	}
+
+	int setParams(const std::vector<double>& p)
+	{
+		int i = BaseType::setParams(p);
+
+		if (p.size() <= i) return i;
+
+		beta = p[i];
+
+		return i + 1;
 	}
 
 	double beta = 0.5;
@@ -300,6 +350,17 @@ public:
 			cost += BaseType::lossFunction(BaseType::pred(c), BaseType::target(c));
 
 		return cost;
+	}
+
+	int setParams(const std::vector<double>& p)
+	{
+		int i = BaseType::setParams(p);
+
+		if (p.size() <= i) return i;
+
+		beta = p[i];
+
+		return i + 1;
 	}
 
 	double beta = 0.5;
@@ -357,12 +418,6 @@ class AdaGradSolver<double, double, double, Eigen::RowVectorXd, Eigen::RowVector
 public:
 	typedef GradientDescentSolverBase<double, double, double, Eigen::RowVectorXd, Eigen::RowVectorXd, ActivationFunction, LossFunction> BaseType;
 
-	void Initialize(int szi = 1, int szo = 1)
-	{
-		sW = 0;
-		sb = 0;
-	}
-
 	Eigen::RowVectorXd getWeightsAndBias(double& w, double& b)
 	{
 		const Eigen::RowVectorXd lossLinkGrad = BaseType::getGrad();
@@ -389,6 +444,12 @@ public:
 	}
 
 protected:
+	void Initialize(int szi = 1, int szo = 1)
+	{
+		sW = 0;
+		sb = 0;
+	}
+
 	double sW;
 	double sb;
 };
@@ -428,6 +489,17 @@ public:
 		w -= BaseType::alpha * wAdj.cwiseProduct(sWa.cwiseSqrt().cwiseInverse());
 
 		return lossLinkGrad;
+	}
+
+	int setParams(const std::vector<double>& p)
+	{
+		int i = BaseType::setParams(p);
+
+		if (p.size() <= i) return i;
+
+		beta = p[i];
+
+		return i + 1;
 	}
 
 	double beta = 0.5;
@@ -472,6 +544,17 @@ public:
 			cost += BaseType::lossFunction(BaseType::pred(c), BaseType::target(c));
 
 		return cost;
+	}
+
+	int setParams(const std::vector<double>& p)
+	{
+		int i = BaseType::setParams(p);
+
+		if (p.size() <= i) return i;
+
+		beta = p[i];
+
+		return i + 1;
 	}
 
 	double beta = 0.5;
@@ -530,6 +613,23 @@ public:
 		return lossLinkGrad;
 	}
 
+	int setParams(const std::vector<double>& p)
+	{
+		step = 0;
+
+		int i = BaseType::setParams(p);
+
+		if (p.size() <= i) return i;
+
+		beta1 = p[i];
+		++i;
+		if (p.size() <= i) return i;
+
+		beta2 = p[i];
+
+		return i + 1;
+	}
+
 	double beta1 = 0.9;
 	double beta2 = 0.995;
 
@@ -548,7 +648,7 @@ class AdamSolver<double, double, double, Eigen::RowVectorXd, Eigen::RowVectorXd,
 {
 public:
 	typedef GradientDescentSolverBase<double, double, double, Eigen::RowVectorXd, Eigen::RowVectorXd, ActivationFunction, LossFunction> BaseType;
-
+	
 	void Initialize(int szi = 1, int szo = 1)
 	{
 		sW = 0;
@@ -583,6 +683,21 @@ public:
 		w += BaseType::alpha * mW / sqrt(sW + eps);
 
 		return lossLinkGrad;
+	}
+
+	int setParams(const std::vector<double>& p)
+	{
+		int i = BaseType::setParams(p);
+
+		if (p.size() <= i) return i;
+
+		beta1 = p[i];
+		++i;
+		if (p.size() <= i) return i;
+
+		beta2 = p[i];
+
+		return i + 1;
 	}
 
 	double beta1 = 0.9;
