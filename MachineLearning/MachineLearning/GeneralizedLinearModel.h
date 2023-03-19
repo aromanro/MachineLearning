@@ -7,7 +7,7 @@
 #include "WeightsInitializer.h"
 #include "GradientSolvers.h"
 
-template<typename InputType = Eigen::VectorXd, typename OutputType = Eigen::VectorXd, typename WeightsType = Eigen::MatrixXd, class Solver = AdamSolver<>, class BatchInputType = Eigen::MatrixXd, class BatchOutputType = BatchInputType>
+template<class DerivedClass, typename InputType = Eigen::VectorXd, typename OutputType = Eigen::VectorXd, typename WeightsType = Eigen::MatrixXd, class Solver = AdamSolver<>, class BatchInputType = Eigen::MatrixXd, class BatchOutputType = BatchInputType>
 class GeneralizedLinearModelBase
 {
 public:
@@ -21,6 +21,13 @@ public:
 	virtual OutputType Predict(const InputType& input) const
 	{
 		return solver.activationFunction(W * input + b);
+	}
+
+	virtual BatchOutputType AddBatch(const BatchInputType& batchInput, const BatchOutputType& batchOutput)
+	{
+		static_cast<DerivedClass*>(this)->AddBatchNoParamsAdjustment(batchInput, batchOutput);
+
+		return solver.getWeightsAndBias(W, b);
 	}
 
 	BatchOutputType getPrediction() const
@@ -62,13 +69,12 @@ public:
 
 
 template<typename InputType = Eigen::VectorXd, typename OutputType = Eigen::VectorXd, typename WeightsType = Eigen::MatrixXd, class Solver = AdamSolver<>, class BatchInputType = Eigen::MatrixXd, class BatchOutputType = BatchInputType>
-class GeneralizedLinearModel : public GeneralizedLinearModelBase<InputType, OutputType, WeightsType, Solver, BatchInputType, BatchOutputType>
+class GeneralizedLinearModel : public GeneralizedLinearModelBase<GeneralizedLinearModel<InputType, OutputType, WeightsType, Solver, BatchInputType, BatchOutputType>, InputType, OutputType, WeightsType, Solver, BatchInputType, BatchOutputType>
 {
 public:
-	typedef GeneralizedLinearModelBase<InputType, OutputType, WeightsType, Solver, BatchInputType, BatchOutputType> BaseType;
+	typedef GeneralizedLinearModelBase<GeneralizedLinearModel<InputType, OutputType, WeightsType, Solver, BatchInputType, BatchOutputType>, InputType, OutputType, WeightsType, Solver, BatchInputType, BatchOutputType> BaseType;
 
-	GeneralizedLinearModel(int szi = 1, int szo = 1)
-		: BaseType(szi, szo)
+	GeneralizedLinearModel(int szi = 1, int szo = 1) : BaseType(szi, szo) 
 	{
 		Initialize(szi, szo);
 	}
@@ -96,13 +102,6 @@ public:
 
 		BaseType::solver.setLinearPrediction(linpred);
 		BaseType::solver.setPrediction(pred);
-	}
-
-	virtual BatchOutputType AddBatch(const BatchInputType& batchInput, const BatchOutputType& batchOutput)
-	{
-		AddBatchNoParamsAdjustment(batchInput, batchOutput);
-
-		return BaseType::solver.getWeightsAndBias(BaseType::W, BaseType::b);
 	}
 
 	BatchInputType BackpropagateBatch(const BatchOutputType& grad) const
@@ -147,17 +146,14 @@ protected:
 };
 
 template<class Solver>
-class GeneralizedLinearModel<double, double, double, Solver, Eigen::RowVectorXd> : public GeneralizedLinearModelBase<double, double, double, Solver, Eigen::RowVectorXd>
+class GeneralizedLinearModel<double, double, double, Solver, Eigen::RowVectorXd> : public GeneralizedLinearModelBase<GeneralizedLinearModel<double, double, double, Solver, Eigen::RowVectorXd>, double, double, double, Solver, Eigen::RowVectorXd>
 {
 public:
-	typedef GeneralizedLinearModelBase<double, double, double, Solver, Eigen::RowVectorXd> BaseType;
+	typedef GeneralizedLinearModelBase<GeneralizedLinearModel<double, double, double, Solver, Eigen::RowVectorXd>, double, double, double, Solver, Eigen::RowVectorXd> BaseType;
 
-	GeneralizedLinearModel(int szi = 1, int szo = 1)
-		: BaseType(szi, szo)
+	GeneralizedLinearModel(int szi = 1, int szo = 1) : BaseType(szi, szo) 
 	{
 		Initialize(szi, szo);
-		BaseType::W = 0;
-		BaseType::b = 0;
 	}
 
 	void Initialize(WeightsInitializerInterface& initializer)
@@ -182,13 +178,6 @@ public:
 		BaseType::solver.setPrediction(pred);
 	}
 
-	virtual Eigen::RowVectorXd AddBatch(const Eigen::RowVectorXd& batchInput, const Eigen::RowVectorXd& batchOutput)
-	{
-		AddBatchNoParamsAdjustment(batchInput, batchOutput);
-
-		return BaseType::solver.getWeightsAndBias(BaseType::W, BaseType::b);
-	}
-
 	Eigen::RowVectorXd BackpropagateBatch(const Eigen::RowVectorXd& grad) const
 	{
 		Eigen::RowVectorXd res(grad.size());
@@ -203,6 +192,8 @@ protected:
 	void Initialize(int szi = 1, int szo = 1)
 	{
 		BaseType::solver.Initialize(szi, szo);
+		BaseType::W = 0;
+		BaseType::b = 0;
 	}
 
 	double BackpropagateGradient(const double& grad) const
