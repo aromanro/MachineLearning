@@ -8,10 +8,10 @@ template<class Solver = AdamSolver<>>
 class Neuron : public NeuralSublayer<Solver>
 {
 public:
-	typedef NeuralSublayer<Solver> baseType;
+	typedef NeuralSublayer<Solver> BaseType;
 
 	Neuron(int szi = 1) 
-		: baseType(szi, 1)
+		: BaseType(szi, 1)
 	{
 	}
 };

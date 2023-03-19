@@ -15,35 +15,35 @@ template<class Solver = AdamSolver<>>
 class NeuralSublayer : public GeneralizedLinearModel<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, Solver>
 {
 public:
-	typedef GeneralizedLinearModel<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, Solver> baseType;
+	typedef GeneralizedLinearModel<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, Solver> BaseType;
 
-	NeuralSublayer(int szi = 1, int szo = 1) : baseType(szi, szo)
+	NeuralSublayer(int szi = 1, int szo = 1) : BaseType(szi, szo)
 	{
 	}
 
 	void setLastLayer(bool last = true)
 	{
-		baseType::solver.lastLayer = last;
+		BaseType::solver.lastLayer = last;
 	}
 
 	bool getLastLayer() const
 	{
-		return baseType::solver.lastLayer;
+		return BaseType::solver.lastLayer;
 	}
 
 	void setFirstLayer(bool first = true)
 	{
-		baseType::solver.firstLayer = first;
+		BaseType::solver.firstLayer = first;
 	}
 
 	bool getFirstLayer() const
 	{
-		return baseType::solver.firstLayer;
+		return BaseType::solver.firstLayer;
 	}
 
 	void setParams(const std::vector<double>& params)
 	{
-		baseType::solver.setParams(params);
+		BaseType::solver.setParams(params);
 	}
 };
 

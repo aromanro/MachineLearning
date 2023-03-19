@@ -24,6 +24,19 @@ protected:
 	std::mt19937 rde;
 };
 
+// Warnging: do not use this for a neural network! Symmetry must be broken by random initialization!
+class WeightsInitializerZero : public WeightsInitializerImpl
+{
+public:
+	WeightsInitializerZero()
+	{
+	}
+
+	double get() override
+	{
+		return 0;
+	}
+};
 
 class WeightsInitializerForXorNetwork : public WeightsInitializerImpl
 {
@@ -51,4 +64,21 @@ public:
 protected:
 	std::uniform_real_distribution<> dist;
 	unsigned long long int neg;
+};
+
+class WeightsInitializerUniform : public WeightsInitializerImpl
+{
+public:
+	WeightsInitializerUniform(double low = -1., double high = 1.)
+		: dist(low, high)
+	{
+	}
+
+	double get() override
+	{
+		return dist(rde);
+	}
+
+protected:
+	std::uniform_real_distribution<> dist;
 };

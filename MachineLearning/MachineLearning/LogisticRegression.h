@@ -15,18 +15,18 @@ typedef RMSPropSolver<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, Eigen::
 typedef AdamSolver<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, Eigen::MatrixXd, Eigen::MatrixXd, SigmoidFunction<Eigen::VectorXd, Eigen::MatrixXd>, LogLoss<Eigen::VectorXd>> LogisticRegressionAdamSolver;
 
 
-template<typename InputType = Eigen::VectorXd, typename OutputType = Eigen::VectorXd, typename WeightsType = Eigen::MatrixXd, class Solver = LogisticRegressionAdamSolver, class BatchInputType = Eigen::MatrixXd, class BatchOutputType = Eigen::MatrixXd> class LogisticRegression
+template<typename InputType = Eigen::VectorXd, typename OutputType = InputType, typename WeightsType = Eigen::MatrixXd, class Solver = LogisticRegressionAdamSolver, class BatchInputType = Eigen::MatrixXd, class BatchOutputType = BatchInputType> class LogisticRegression
 	: public GeneralizedLinearModel<InputType, OutputType, WeightsType, Solver, BatchInputType, BatchOutputType>
 {
 public:
-	typedef GeneralizedLinearModel<InputType, OutputType, WeightsType, Solver, BatchInputType, BatchOutputType> baseType;
+	typedef GeneralizedLinearModel<InputType, OutputType, WeightsType, Solver, BatchInputType, BatchOutputType> BaseType;
 
 	LogisticRegression(int szi = 1, int szo = 1)
-		: baseType(szi, szo)
+		: BaseType(szi, szo)
 	{
 		// W was initialized to some values between -1 and 1, translate them to values between 0 and 1
-		//baseType::W += WeightsType::Ones(baseType::W.rows(), baseType::W.cols());
-		//baseType::W *= 0.5;
+		//BaseType::W += WeightsType::Ones(BaseType::W.rows(), BaseType::W.cols());
+		//BaseType::W *= 0.5;
 	}
 };
 

@@ -115,32 +115,48 @@ bool NeuralNetworksTests()
 			}
 		}
 
-		if (lowLoss < 5)
+		if (lowLoss <= 5)
 			std::cout << "Failure to converge!" << std::endl;
 
 		in(0) = 0;
 		in(1) = 0;
 
 		x = hiddenLayerModel.Predict(in);
-		std::cout << "XOR 0 0 = " << modelLastLayer.Predict(x)(0) << std::endl;
+		double res = modelLastLayer.Predict(x)(0);
+		std::cout << "XOR 0 0 = " << res << std::endl;
+
+		if (lowLoss > 5 && res >= 0.5)
+			lowLoss = 0;
 
 		in(0) = 0;
 		in(1) = 1;
 
 		x = hiddenLayerModel.Predict(in);
-		std::cout << "XOR 0 1 = " << modelLastLayer.Predict(x)(0) << std::endl;
+		res = modelLastLayer.Predict(x)(0);
+		std::cout << "XOR 0 1 = " << res << std::endl;
+
+		if (res <= 0.5)
+			lowLoss = 0;
 
 		in(0) = 1;
 		in(1) = 0;
 
 		x = hiddenLayerModel.Predict(in);
-		std::cout << "XOR 1 0 = " << modelLastLayer.Predict(x)(0) << std::endl;
+		res = modelLastLayer.Predict(x)(0);
+		std::cout << "XOR 1 0 = " << res << std::endl;
+
+		if (res <= 0.5)
+			lowLoss = 0;
 
 		in(0) = 1;
 		in(1) = 1;
 
 		x = hiddenLayerModel.Predict(in);
-		std::cout << "XOR 1 1 = " << modelLastLayer.Predict(x)(0) << std::endl;
+		res = modelLastLayer.Predict(x)(0);
+		std::cout << "XOR 1 1 = " << res << std::endl;
+
+		if (res >= 0.5)
+			lowLoss = 0;
 
 		//if (lowLoss < 5) return false;
 
@@ -197,24 +213,40 @@ bool NeuralNetworksTests()
 			}
 		}
 
-		if (lowLoss < 5)
+		if (lowLoss <= 5)
 			std::cout << "Failure to converge!" << std::endl;
 
 		in(0) = 0;
 		in(1) = 0;
-		std::cout << "XOR 0 0 = " << neuralNetwork.Predict(in)(0) << std::endl;
+		double res = neuralNetwork.Predict(in)(0);
+		std::cout << "XOR 0 0 = " << res << std::endl;
+
+		if (res >= 0.5)
+			lowLoss = 0;
 
 		in(0) = 0;
 		in(1) = 1;
-		std::cout << "XOR 0 1 = " << neuralNetwork.Predict(in)(0) << std::endl;
+		res = neuralNetwork.Predict(in)(0);
+		std::cout << "XOR 0 1 = " << res << std::endl;
+
+		if (res <= 0.5)
+			lowLoss = 0;
 
 		in(0) = 1;
 		in(1) = 0;
-		std::cout << "XOR 1 0 = " << neuralNetwork.Predict(in)(0) << std::endl;
+		res = neuralNetwork.Predict(in)(0);
+		std::cout << "XOR 1 0 = " << res << std::endl;
+
+		if (res <= 0.5)
+			lowLoss = 0;
 
 		in(0) = 1;
 		in(1) = 1;
-		std::cout << "XOR 1 1 = " << neuralNetwork.Predict(in)(0) << std::endl;
+		res = neuralNetwork.Predict(in)(0);
+		std::cout << "XOR 1 1 = " << res << std::endl;
+
+		if (res >= 0.5)
+			lowLoss = 0;
 
 		if (lowLoss <= 5) ++failures;
 	}

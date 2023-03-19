@@ -11,6 +11,8 @@ bool Test1()
 
 	Gnuplot plot;
 
+	WeightsInitializerZero initializer;
+
 	{
 		DataFileWriter theFile("../../data/data1.txt");
 
@@ -37,6 +39,8 @@ bool Test1()
 		generalLinearModel.solver.beta1 = 0.7;
 		generalLinearModel.solver.beta2 = 0.9;
 		generalLinearModel.solver.lim = 20;
+
+		generalLinearModel.Initialize(initializer);
 
 		Eigen::RowVectorXd x, y;
 		const int batchSize = 32;
@@ -88,6 +92,8 @@ bool Test2()
 
 	Gnuplot plot;
 
+	WeightsInitializerZero initializer;
+
 	{
 		std::vector<int> xvals(nrPoints);
 		std::vector<double> yvals(nrPoints);
@@ -106,6 +112,8 @@ bool Test2()
 		generalLinearModel.solver.beta1 = 0.7;
 		generalLinearModel.solver.beta2 = 0.9;
 		generalLinearModel.solver.lim = 200;
+
+		generalLinearModel.Initialize(initializer);
 
 		Eigen::MatrixXd x, y;
 		const int batchSize = 32;
@@ -160,6 +168,8 @@ bool Test3()
 
 	Gnuplot plot;
 
+	WeightsInitializerZero initializer;
+
 	{
 		std::vector<double> xvals(nrPoints);
 		std::vector<double> yvals(nrPoints);
@@ -186,8 +196,10 @@ bool Test3()
 		typedef AdamSolver<> theSolver;
 		GeneralizedLinearModel<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, theSolver> generalLinearModel(2, 1);
 
-		generalLinearModel.solver.alpha = 0.02;
-		generalLinearModel.solver.beta1 = 0.7;
+		generalLinearModel.Initialize(initializer);
+
+		generalLinearModel.solver.alpha = 0.1;
+		generalLinearModel.solver.beta1 = 0.8;
 		generalLinearModel.solver.beta2 = 0.9;
 		generalLinearModel.solver.lim = 2000;
 
@@ -254,6 +266,8 @@ bool Test4()
 
 	Gnuplot plot;
 
+	WeightsInitializerZero initializer;
+
 	// the division with 100 below is for scaling things down, otherwise the stochastic gradient descent will have a hard time finding the solution
 	// normally it will be scaled by standard deviation or the size of the interval, but that should be enough for tests
 
@@ -296,6 +310,8 @@ bool Test4()
 		generalLinearModel.solver.beta1 = 0.9;
 		generalLinearModel.solver.beta2 = 0.9;
 		generalLinearModel.solver.lim = 2000;
+
+		generalLinearModel.Initialize(initializer);
 
 		Eigen::MatrixXd x, y;
 		const int batchSize = 32;

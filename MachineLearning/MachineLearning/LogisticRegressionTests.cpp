@@ -13,6 +13,8 @@ bool SimpleLogisticRegressionTest()
 
 	Gnuplot plot;
 
+	WeightsInitializerZero initializer;
+
 	// very simple case, every point that's above the line is the '1' class, everything else is the '0' class
 	{
 		DataFileWriter theFile("../../data/data4.txt");
@@ -47,6 +49,8 @@ bool SimpleLogisticRegressionTest()
 		logisticModel.solver.beta1 = 0.7;
 		logisticModel.solver.beta2 = 0.9;
 		logisticModel.solver.lim = 2000;
+
+		logisticModel.Initialize(initializer);
 
 		Eigen::MatrixXd x, y;
 		const int batchSize = 32;
@@ -136,6 +140,8 @@ bool MoreComplexLogisticRegressionTest()
 
 	Gnuplot plot;
 
+	WeightsInitializerZero initializer;
+
 	// a more complex case for the logistic regression, generate a 2d gaussian distribution and pretend that the points inside some radius are one class and the ones outside are the other
 
 	{
@@ -220,6 +226,8 @@ bool MoreComplexLogisticRegressionTest()
 		logisticModel.solver.beta1 = 0.8;
 		logisticModel.solver.beta2 = 0.9;
 		logisticModel.solver.lim = 200;
+
+		logisticModel.Initialize(initializer);
 
 		const int batchSize = 32;
 

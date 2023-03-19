@@ -4,7 +4,7 @@
 
 #include "ActivationFunctions.h"
 
-template<typename InputType = Eigen::VectorXd, typename OutputType = Eigen::VectorXd, typename WeightsType = Eigen::MatrixXd, typename BatchInputType = Eigen::MatrixXd, typename BatchOutputType = Eigen::MatrixXd> 
+template<typename InputType = Eigen::VectorXd, typename OutputType = InputType, typename WeightsType = Eigen::MatrixXd, typename BatchInputType = Eigen::MatrixXd, typename BatchOutputType = BatchInputType>
 class SimpleLinearRegressionSolver {
 public:
 	SimpleLinearRegressionSolver(int szi = 1, int szo = 1)
@@ -184,7 +184,7 @@ public:
 	L2Loss<Eigen::VectorXd> lossFunction;
 };
 
-template<> class SimpleLinearRegressionSolver<double, double, double, Eigen::RowVectorXd, Eigen::RowVectorXd> 
+template<> class SimpleLinearRegressionSolver<double, double, double, Eigen::RowVectorXd> 
 {
 public:
 	SimpleLinearRegressionSolver() :
