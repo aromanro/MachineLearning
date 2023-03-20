@@ -4,36 +4,41 @@
 #include <iostream>
 #include <filesystem>
 
-void Gnuplot::Execute()
+namespace Utils
 {
-	std::string cmdPath = relPath;
-	
+
+	void Gnuplot::Execute()
 	{
-		std::filesystem::path p = std::filesystem::current_path();
-		if (cmdPath[0] != '/' && cmdPath[0] != '\\')
-			p += '/';
+		std::string cmdPath = relPath;
 
-		p += relPath;
-		p += dataFileName;
-
-		if (cmdPath[cmdPath.length() - 1] != '/' && cmdPath[cmdPath.length() - 1] != '\\')
-			cmdPath += "/";
-		
-		cmdPath += cmdFileName;
-
-		std::ofstream cmdf(cmdPath);
-
-		if (ctype == ChartType::logisticRegression)
 		{
-			cmdf << "plot " << p << " index 0 u 1:2 w l lt 1 lw 2 lc rgb \"blue\" title \"Generating Boundary\", " << p << " index 1 u 1:2 w p pt 7 ps 1 lc rgb \"green\" title \"Data Points First Class\", " << p << " index 2 u 1:2 w p pt 7 ps 1 lc rgb \"red\" title \"Data Points Second Class\"" << std::endl;
+			std::filesystem::path p = std::filesystem::current_path();
+			if (cmdPath[0] != '/' && cmdPath[0] != '\\')
+				p += '/';
+
+			p += relPath;
+			p += dataFileName;
+
+			if (cmdPath[cmdPath.length() - 1] != '/' && cmdPath[cmdPath.length() - 1] != '\\')
+				cmdPath += "/";
+
+			cmdPath += cmdFileName;
+
+			std::ofstream cmdf(cmdPath);
+
+			if (ctype == ChartType::logisticRegression)
+			{
+				cmdf << "plot " << p << " index 0 u 1:2 w l lt 1 lw 2 lc rgb \"blue\" title \"Generating Boundary\", " << p << " index 1 u 1:2 w p pt 7 ps 1 lc rgb \"green\" title \"Data Points First Class\", " << p << " index 2 u 1:2 w p pt 7 ps 1 lc rgb \"red\" title \"Data Points Second Class\"" << std::endl;
+			}
+			else
+			{
+				cmdf << "plot " << p << " index 0 u 1:2 w l lt 1 lw 2 lc rgb \"blue\" title \"Generating Function\", " << p << " index 1 u 1:2 w p pt 7 ps 1 lc rgb \"green\" title \"Data Points\", " << p << " index 2 u 1:2 w l lt 1 lw 2 lc rgb \"red\" title \"Regression\"" << std::endl;
+			}
 		}
-		else
-		{
-			cmdf << "plot " << p << " index 0 u 1:2 w l lt 1 lw 2 lc rgb \"blue\" title \"Generating Function\", " << p << " index 1 u 1:2 w p pt 7 ps 1 lc rgb \"green\" title \"Data Points\", " << p << " index 2 u 1:2 w l lt 1 lw 2 lc rgb \"red\" title \"Regression\"" << std::endl;
-		}
+
+		std::string cmd = std::string("start /b gnuplot ") + cmdPath;
+
+		system(cmd.c_str());
 	}
 
-	std::string cmd = std::string("start /b gnuplot ") + cmdPath;
-
-	system(cmd.c_str());
 }

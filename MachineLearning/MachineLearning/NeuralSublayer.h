@@ -5,45 +5,51 @@
 #include "GradientSolvers.h"
 #include "GeneralizedLinearModel.h"
 
-// it's just a generalized linear model, represents a bunch of neurons to be put in a layer
-// but to simplify things, I won't allow anything than defaults with Eigen matrices/vectors for implementation
-
-// the only thing that can be changed is the solver, either to an entirely different one 
-// or just by specifying the activation and/or cost functions
-
-template<class Solver = AdamSolver<>>
-class NeuralSublayer : public GeneralizedLinearModel<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, Solver>
+namespace NeuralNetworks
 {
-public:
-	typedef GeneralizedLinearModel<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, Solver> BaseType;
 
-	NeuralSublayer(int szi = 1, int szo = 1) : BaseType(szi, szo)
-	{
-	}
+	// it's just a generalized linear model, represents a bunch of neurons to be put in a layer
+	// but to simplify things, I won't allow anything than defaults with Eigen matrices/vectors for implementation
 
-	void setLastLayer(bool last = true)
-	{
-		BaseType::solver.lastLayer = last;
-	}
+	// the only thing that can be changed is the solver, either to an entirely different one 
+	// or just by specifying the activation and/or cost functions
 
-	bool getLastLayer() const
+	template<class Solver = SGD::AdamSolver<>>
+	class NeuralSublayer : public GLM::GeneralizedLinearModel<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, Solver>
 	{
-		return BaseType::solver.lastLayer;
-	}
+	public:
+		typedef GLM::GeneralizedLinearModel<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, Solver> BaseType;
 
-	void setFirstLayer(bool first = true)
-	{
-		BaseType::solver.firstLayer = first;
-	}
+		NeuralSublayer(int szi = 1, int szo = 1) : BaseType(szi, szo)
+		{
+		}
 
-	bool getFirstLayer() const
-	{
-		return BaseType::solver.firstLayer;
-	}
+		void setLastLayer(bool last = true)
+		{
+			BaseType::solver.lastLayer = last;
+		}
 
-	void setParams(const std::vector<double>& params)
-	{
-		BaseType::solver.setParams(params);
-	}
-};
+		bool getLastLayer() const
+		{
+			return BaseType::solver.lastLayer;
+		}
+
+		void setFirstLayer(bool first = true)
+		{
+			BaseType::solver.firstLayer = first;
+		}
+
+		bool getFirstLayer() const
+		{
+			return BaseType::solver.firstLayer;
+		}
+
+		void setParams(const std::vector<double>& params)
+		{
+			BaseType::solver.setParams(params);
+		}
+	};
+
+}
+
 

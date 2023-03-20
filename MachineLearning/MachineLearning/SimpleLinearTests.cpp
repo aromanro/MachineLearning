@@ -10,10 +10,8 @@ bool SimpleLinearRegressionTests()
 
 	std::uniform_int_distribution<> distInt(0, nrPoints - 1);
 
-	Gnuplot plot;
-
 	{
-		SimpleLinearRegression simpleLinearRegression;
+		GLM::SimpleLinearRegression simpleLinearRegression;
 
 		Eigen::RowVectorXd x, y;
 		x.resize(nrPoints);
@@ -37,7 +35,7 @@ bool SimpleLinearRegressionTests()
 
 
 	{
-		MultivariateSimpleLinearRegression<double> multivariateSimpleLinearRegression(1, 3);
+		GLM::MultivariateSimpleLinearRegression<double> multivariateSimpleLinearRegression(1, 3);
 
 		Eigen::MatrixXd x, y;
 		x.resize(1, nrPoints);
@@ -65,7 +63,7 @@ bool SimpleLinearRegressionTests()
 	// the above can be also done like this (it's more useful if x values are different for the different simple linear regressions):
 
 	{
-		MultivariateSimpleLinearRegression<> multivariateSimpleLinearRegression(3, 3);
+		GLM::MultivariateSimpleLinearRegression<> multivariateSimpleLinearRegression(3, 3);
 
 		Eigen::MatrixXd x, y;
 		x.resize(3, nrPoints);

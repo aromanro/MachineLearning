@@ -11,13 +11,13 @@ bool SimpleLogisticRegressionTest()
 
 	std::uniform_int_distribution<> distInt(0, nrPoints - 1);
 
-	Gnuplot plot;
+	Utils::Gnuplot plot;
 
-	WeightsInitializerZero initializer;
+	Initializers::WeightsInitializerZero initializer;
 
 	// very simple case, every point that's above the line is the '1' class, everything else is the '0' class
 	{
-		DataFileWriter theFile("../../data/data4.txt");
+		Utils::DataFileWriter theFile("../../data/data4.txt");
 
 		std::vector<double> xvals(nrPoints);
 		std::vector<double> yvals(nrPoints);
@@ -38,7 +38,7 @@ bool SimpleLogisticRegressionTest()
 
 		theFile.AddDataset(fx, fy);
 
-		LogisticRegression<> logisticModel(2, 1);
+		GLM::LogisticRegression<> logisticModel(2, 1);
 
 		//logisticModel.solver.alpha = 0.01;
 		//logisticModel.solver.lim = 100;
@@ -121,7 +121,7 @@ bool SimpleLogisticRegressionTest()
 		theFile.AddDataset(d2x, d2y);
 	}
 
-	plot.setType(Gnuplot::ChartType::logisticRegression);
+	plot.setType(Utils::Gnuplot::ChartType::logisticRegression);
 	plot.setCmdFileName("plot4.plt");
 	plot.setDataFileName("data4.txt");
 	plot.Execute();
@@ -138,16 +138,16 @@ bool MoreComplexLogisticRegressionTest()
 
 	std::uniform_int_distribution<> distInt(0, nrPoints - 1);
 
-	Gnuplot plot;
+	Utils::Gnuplot plot;
 
-	WeightsInitializerZero initializer;
+	Initializers::WeightsInitializerZero initializer;
 
 	// a more complex case for the logistic regression, generate a 2d gaussian distribution and pretend that the points inside some radius are one class and the ones outside are the other
 
 	{
 		nrPoints = 1000; // looks nicer and it's better with more points than 100
 
-		DataFileWriter theFile("../../data/data5.txt");
+		Utils::DataFileWriter theFile("../../data/data5.txt");
 
 		std::vector<double> xvals(nrPoints);
 		std::vector<double> yvals(nrPoints);
@@ -157,7 +157,7 @@ bool MoreComplexLogisticRegressionTest()
 		std::vector<double> fy(nrPoints);
 
 		// this is done like this because I also want to test the normalizer class
-		Normalizer normalizer(2, 1);
+		Norm::Normalizer normalizer(2, 1);
 
 		Eigen::MatrixXd x, y;
 		x.resize(2, nrPoints);
@@ -220,7 +220,7 @@ bool MoreComplexLogisticRegressionTest()
 		}
 
 
-		LogisticRegression<> logisticModel(2, 1);
+		GLM::LogisticRegression<> logisticModel(2, 1);
 
 		logisticModel.solver.alpha = 0.001;
 		logisticModel.solver.beta1 = 0.8;
@@ -307,7 +307,7 @@ bool MoreComplexLogisticRegressionTest()
 		theFile.AddDataset(d2x, d2y);
 	}
 
-	plot.setType(Gnuplot::ChartType::logisticRegression);
+	plot.setType(Utils::Gnuplot::ChartType::logisticRegression);
 	plot.setCmdFileName("plot5.plt");
 	plot.setDataFileName("data5.txt");
 	plot.Execute();

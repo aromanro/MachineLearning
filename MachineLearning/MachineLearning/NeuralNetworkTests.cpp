@@ -11,7 +11,7 @@ bool NeuralNetworksTests()
 	// this alleviates the convergence issue
 	// there are 16 local minima for xor where the 3 neurons network could get 'stuck'
 	// ocassionally it might reach one but from my tests it can sometimes get out of it
-	WeightsInitializerForXorNetwork weightsInitializer;
+	Initializers::WeightsInitializerForXorNetwork weightsInitializer;
 
 	const double alpha = 0.01;
 	const double beta1 = 0.7;
@@ -41,10 +41,10 @@ bool NeuralNetworksTests()
 		// RMSProp or momentum also work
 
 		// works with some other last neuron, such as one that has a tanh activation function, but I like the logistic one more
-		//typedef AdamSolver<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, Eigen::MatrixXd, Eigen::MatrixXd, TanhFunction<>> LastLayerRegressionAdamSolver;
+		//typedef SGD::AdamSolver<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, Eigen::MatrixXd, Eigen::MatrixXd, ActivationFunctions::TanhFunction<>> LastLayerRegressionAdamSolver;
 		//GeneralizedLinearModel<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, LastLayerRegressionAdamSolver> modelLastLayer(2, 1);
 
-		LogisticRegression<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, LogisticRegressionAdamSolver> modelLastLayer(numHiddenNeurons, 1);
+		GLM::LogisticRegression<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, SGD::LogisticRegressionAdamSolver> modelLastLayer(numHiddenNeurons, 1);
 
 		modelLastLayer.solver.alpha = alpha;
 		//modelLastLayer.solver.beta = beta1; // for RMSPropSolver set alpha to 0.001, otherwise it can stick into a local minimum, for momentum alpha = 0.1 seems to work
@@ -56,9 +56,9 @@ bool NeuralNetworksTests()
 
 		// kind of works with tanh as well, it just seems to have a bigger chance to end up in a local minimum
 		// works with others, too, but they might need some other parameters (for example, smaller aplha)
-		//typedef AdamSolver<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, Eigen::MatrixXd, Eigen::MatrixXd, LeakyRELUFunction<>> HiddenLayerRegressionAdamSolver;
-		typedef AdamSolver<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, Eigen::MatrixXd, Eigen::MatrixXd, LeakyRELUFunction<>> HiddenLayerRegressionAdamSolver;
-		GeneralizedLinearModel<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, HiddenLayerRegressionAdamSolver> hiddenLayerModel(2, numHiddenNeurons);
+		//typedef SGD::AdamSolver<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, Eigen::MatrixXd, Eigen::MatrixXd, ActivationFunctions::LeakyRELUFunction<>> HiddenLayerRegressionAdamSolver;
+		typedef SGD::AdamSolver<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, Eigen::MatrixXd, Eigen::MatrixXd, ActivationFunctions::LeakyRELUFunction<>> HiddenLayerRegressionAdamSolver;
+		GLM::GeneralizedLinearModel<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, HiddenLayerRegressionAdamSolver> hiddenLayerModel(2, numHiddenNeurons);
 
 		hiddenLayerModel.solver.alpha = alpha;
 		//hiddenLayerModel.solver.beta = beta1; // for RMSPropSolver set alpha to 0.001, otherwise it can stick into a local minimum, for momentum alpha = 0.1 seems to work
@@ -180,7 +180,7 @@ bool NeuralNetworksTests()
 
 		// with more neurons and even more layers it still works, for example { 2, 7, 5, 1 }, for some complex setup the initialization of weigths should probably left to default
 
-		MultilayerPerceptron<> neuralNetwork({2, numHiddenNeurons, 1});
+		NeuralNetworks::MultilayerPerceptron<> neuralNetwork({2, numHiddenNeurons, 1});
 		neuralNetwork.setParams({ alpha, lim, beta1, beta2 });
 		neuralNetwork.InitializHiddenLayers(weightsInitializer);
 

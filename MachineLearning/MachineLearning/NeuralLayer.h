@@ -2,93 +2,99 @@
 
 #include "NeuralSublayer.h"
 
-// to keep things simple, at least for a while it will simply use a singe 'neural sublayer'
-
-template<class Solver = AdamSolver<>>
-class NeuralLayer
+namespace NeuralNetworks
 {
-public:
-	NeuralLayer(int szi = 1, int szo = 1)
-		: layer(szi, szo)
-	{
-	}
 
-	void setLastLayer(bool last = true)
-	{
-		layer.solver.lastLayer = last;
-	}
+	// to keep things simple, at least for a while it will simply use a single 'neural sublayer'
 
-	bool getLastLayer() const
+	template<class Solver = SGD::AdamSolver<>>
+	class NeuralLayer
 	{
-		return layer.solver.lastLayer;
-	}
+	public:
+		NeuralLayer(int szi = 1, int szo = 1)
+			: layer(szi, szo)
+		{
+		}
 
-	void setFirstLayer(bool first = true)
-	{
-		layer.solver.firstLayer = first;
-	}
+		void setLastLayer(bool last = true)
+		{
+			layer.solver.lastLayer = last;
+		}
 
-	bool getFirstLayer() const
-	{
-		return layer.solver.firstLayer;
-	}
+		bool getLastLayer() const
+		{
+			return layer.solver.lastLayer;
+		}
 
-	void setParams(const std::vector<double>& params)
-	{
-		layer.setParams(params);
-	}
+		void setFirstLayer(bool first = true)
+		{
+			layer.solver.firstLayer = first;
+		}
 
-	void Initialize(WeightsInitializerInterface& initializer)
-	{
-		layer.Initialize(initializer);
-	}
+		bool getFirstLayer() const
+		{
+			return layer.solver.firstLayer;
+		}
 
-	Eigen::VectorXd Predict(const Eigen::VectorXd& input) const
-	{
-		return layer.Predict(input);
-	}
+		void setParams(const std::vector<double>& params)
+		{
+			layer.setParams(params);
+		}
 
-	double getLoss() const
-	{
-		return layer.getLoss();
-	}
+		void Initialize(Initializers::WeightsInitializerInterface& initializer)
+		{
+			layer.Initialize(initializer);
+		}
 
-	int getNrOutputs() const
-	{
-		return layer.getNrOutputs();
-	}
+		Eigen::VectorXd Predict(const Eigen::VectorXd& input) const
+		{
+			return layer.Predict(input);
+		}
 
-	int getNrInputs() const
-	{
-		return layer.getNrInputs();
-	}
+		double getLoss() const
+		{
+			return layer.getLoss();
+		}
 
-	void AddBatchNoParamsAdjustment(const Eigen::MatrixXd& batchInput, const Eigen::MatrixXd& batchOutput)
-	{
-		layer.AddBatchNoParamsAdjustment(batchInput, batchOutput);
-	}
+		int getNrOutputs() const
+		{
+			return layer.getNrOutputs();
+		}
 
-	Eigen::MatrixXd AddBatch(const Eigen::MatrixXd& batchInput, const Eigen::MatrixXd& batchOutput)
-	{
-		return layer.AddBatch(batchInput, batchOutput);
-	}
+		int getNrInputs() const
+		{
+			return layer.getNrInputs();
+		}
 
-	Eigen::MatrixXd getPrediction() const
-	{
-		return layer.getPrediction();
-	}
+		void AddBatchNoParamsAdjustment(const Eigen::MatrixXd& batchInput, const Eigen::MatrixXd& batchOutput)
+		{
+			layer.AddBatchNoParamsAdjustment(batchInput, batchOutput);
+		}
 
-	Eigen::MatrixXd getInput() const
-	{
-		return layer.getInput();
-	}
+		Eigen::MatrixXd AddBatch(const Eigen::MatrixXd& batchInput, const Eigen::MatrixXd& batchOutput)
+		{
+			return layer.AddBatch(batchInput, batchOutput);
+		}
 
-	Eigen::MatrixXd BackpropagateBatch(const Eigen::MatrixXd& grad) const
-	{
-		return layer.BackpropagateBatch(grad);
-	}
+		Eigen::MatrixXd getPrediction() const
+		{
+			return layer.getPrediction();
+		}
 
-protected:
-	NeuralSublayer<Solver> layer;
-};
+		Eigen::MatrixXd getInput() const
+		{
+			return layer.getInput();
+		}
+
+		Eigen::MatrixXd BackpropagateBatch(const Eigen::MatrixXd& grad) const
+		{
+			return layer.BackpropagateBatch(grad);
+		}
+
+	protected:
+		NeuralSublayer<Solver> layer;
+	};
+
+}
+
 

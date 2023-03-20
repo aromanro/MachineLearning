@@ -9,12 +9,12 @@ bool Test1()
 
 	std::uniform_int_distribution<> distInt(0, nrPoints - 1);
 
-	Gnuplot plot;
+	Utils::Gnuplot plot;
 
-	WeightsInitializerZero initializer;
+	Initializers::WeightsInitializerZero initializer;
 
 	{
-		DataFileWriter theFile("../../data/data1.txt");
+		Utils::DataFileWriter theFile("../../data/data1.txt");
 
 		std::vector<int> xvals(nrPoints);
 		std::vector<double> yvals(nrPoints);
@@ -33,8 +33,8 @@ bool Test1()
 		theFile.AddDataset(xvals, yvals);
 
 		// a simple linear regression, but with gradient descent
-		//GeneralLinearModel<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, GradientDescentSolver<>, Eigen::MatrixXd> generalLinearModel;
-		GeneralizedLinearModel<double, double, double, AdamSolver<double, double, double, Eigen::RowVectorXd, Eigen::RowVectorXd, IdentityFunction<double>, L2Loss<double>>, Eigen::RowVectorXd, Eigen::RowVectorXd> generalLinearModel;
+		//GeneralLinearModel<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, SGD::GradientDescentSolver<>, Eigen::MatrixXd> generalLinearModel;
+		GLM::GeneralizedLinearModel<double, double, double, SGD::AdamSolver<double, double, double, Eigen::RowVectorXd, Eigen::RowVectorXd, ActivationFunctions::IdentityFunction<double>, LossFunctions::L2Loss<double>>, Eigen::RowVectorXd, Eigen::RowVectorXd> generalLinearModel;
 		generalLinearModel.solver.alpha = 0.03;
 		generalLinearModel.solver.beta1 = 0.7;
 		generalLinearModel.solver.beta2 = 0.9;
@@ -90,9 +90,7 @@ bool Test2()
 
 	std::uniform_int_distribution<> distInt(0, nrPoints - 1);
 
-	Gnuplot plot;
-
-	WeightsInitializerZero initializer;
+	Initializers::WeightsInitializerZero initializer;
 
 	{
 		std::vector<int> xvals(nrPoints);
@@ -107,7 +105,7 @@ bool Test2()
 			yvals3[i] = linearFunction3(i) + dist(rde);
 		}
 
-		GeneralizedLinearModel<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, AdamSolver<>> generalLinearModel(3, 3);
+		GLM::GeneralizedLinearModel<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, SGD::AdamSolver<>> generalLinearModel(3, 3);
 		generalLinearModel.solver.alpha = 0.02;
 		generalLinearModel.solver.beta1 = 0.7;
 		generalLinearModel.solver.beta2 = 0.9;
@@ -166,15 +164,15 @@ bool Test3()
 
 	std::uniform_int_distribution<> distInt(0, nrPoints - 1);
 
-	Gnuplot plot;
+	Utils::Gnuplot plot;
 
-	WeightsInitializerZero initializer;
+	Initializers::WeightsInitializerZero initializer;
 
 	{
 		std::vector<double> xvals(nrPoints);
 		std::vector<double> yvals(nrPoints);
 
-		DataFileWriter theFile("../../data/data2.txt");
+		Utils::DataFileWriter theFile("../../data/data2.txt");
 
 		// the division with 100 below is for scaling things down, otherwise the stochastic gradient descent will have a hard time finding the solution
 		// normally it will be scaled by standard deviation or the size of the interval, but that should be enough for tests
@@ -191,10 +189,10 @@ bool Test3()
 			yvals[i] = (quadraticFunction(i) + dist(rde)) / 100;
 		theFile.AddDataset(xvals, yvals);
 
-		//typedef AdamSolver<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, Eigen::MatrixXd, Eigen::MatrixXd, IdentityFunction<Eigen::VectorXd>, L1Loss<Eigen::VectorXd>> theSolver;
-		//typedef GradientDescentSolver<> theSolver;
-		typedef AdamSolver<> theSolver;
-		GeneralizedLinearModel<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, theSolver> generalLinearModel(2, 1);
+		//typedef SGD::AdamSolver<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, Eigen::MatrixXd, Eigen::MatrixXd, IdentityFunction<Eigen::VectorXd>, LossFunctions::L1Loss<Eigen::VectorXd>> theSolver;
+		//typedef SGD::GradientDescentSolver<> theSolver;
+		typedef SGD::AdamSolver<> theSolver;
+		GLM::GeneralizedLinearModel<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, theSolver> generalLinearModel(2, 1);
 
 		generalLinearModel.Initialize(initializer);
 
@@ -264,9 +262,9 @@ bool Test4()
 
 	std::uniform_int_distribution<> distInt(0, nrPoints - 1);
 
-	Gnuplot plot;
+	Utils::Gnuplot plot;
 
-	WeightsInitializerZero initializer;
+	Initializers::WeightsInitializerZero initializer;
 
 	// the division with 100 below is for scaling things down, otherwise the stochastic gradient descent will have a hard time finding the solution
 	// normally it will be scaled by standard deviation or the size of the interval, but that should be enough for tests
@@ -276,7 +274,7 @@ bool Test4()
 		std::vector<double> xvals(nrPoints);
 		std::vector<double> yvals(nrPoints);
 
-		DataFileWriter theFile("../../data/data3.txt");
+		Utils::DataFileWriter theFile("../../data/data3.txt");
 
 		// a dataset for the function (for charting):
 		for (int i = 0; i < nrPoints; ++i)
@@ -290,16 +288,16 @@ bool Test4()
 			yvals[i] = (polyFunction(i) + dist(rde)) / 100;
 		theFile.AddDataset(xvals, yvals);
 
-		//typedef GradientDescentSolver<> theSolver;
-		//typedef MomentumSolver<> theSolver;
-		//typedef AdaGradSolver<> theSolver;
-		//typedef RMSPropSolver<> theSolver;
+		//typedef SGD::GradientDescentSolver<> theSolver;
+		//typedef SGD::MomentumSolver<> theSolver;
+		//typedef SGD::AdaGradSolver<> theSolver;
+		//typedef SGD::RMSPropSolver<> theSolver;
 
 		// for testing with L1 loss
-		//typedef AdamSolver<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, Eigen::MatrixXd, Eigen::MatrixXd, IdentityFunction<Eigen::VectorXd>, L1Loss<Eigen::VectorXd>> theSolver;
+		//typedef SGD::AdamSolver<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, Eigen::MatrixXd, Eigen::MatrixXd, IdentityFunction<Eigen::VectorXd>, LossFunctions::L1Loss<Eigen::VectorXd>> theSolver;
 
-		typedef AdamSolver<> theSolver;
-		GeneralizedLinearModel<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, theSolver> generalLinearModel(3, 1);
+		typedef SGD::AdamSolver<> theSolver;
+		GLM::GeneralizedLinearModel<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, theSolver> generalLinearModel(3, 1);
 
 		//generalLinearModel.solver.alpha = 0.01;
 		//generalLinearModel.solver.lim = 100;
