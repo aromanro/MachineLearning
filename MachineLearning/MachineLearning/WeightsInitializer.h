@@ -53,10 +53,9 @@ namespace Initializers
 		{
 			double v = dist(rde);
 
-			// there are 4 weights in the hidden layer for the minimal xor solving neural network
-			unsigned long long int r = neg % 4;
+			const unsigned long long int r = neg % 2;
 
-			if (r <= 1)
+			if (r)
 				v *= -1;
 
 			++neg;

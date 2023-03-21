@@ -84,8 +84,8 @@ namespace GLM {
 
 		void Initialize(Initializers::WeightsInitializerInterface& initializer)
 		{
-			for (int i = 0; i < BaseType::W.rows(); ++i)
-				for (int j = 0; j < BaseType::W.cols(); ++j)
+			for (int j = 0; j < BaseType::W.cols(); ++j)
+				for (int i = 0; i < BaseType::W.rows(); ++i)
 					BaseType::W(i, j) = initializer.get();
 		}
 

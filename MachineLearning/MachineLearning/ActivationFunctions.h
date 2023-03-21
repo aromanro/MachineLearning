@@ -57,8 +57,8 @@ namespace ActivationFunctions
 		{
 			InputOutputType v(input.rows(), input.cols());
 
-			for (int i = 0; i < input.rows(); ++i)
-				for (int j = 0; j < input.cols(); ++j)
+			for (int j = 0; j < input.cols(); ++j)
+				for (int i = 0; i < input.rows(); ++i)
 					v(i, j) = exp(-(beta(i, j) * input(i, j) + beta0(i, j)));
 
 			return (InputOutputType::Ones(input.rows(), input.cols()) + v).cwiseInverse();
@@ -162,8 +162,8 @@ namespace ActivationFunctions
 		{
 			InputOutputType v(input.rows(), input.cols());
 
-			for (int i = 0; i < input.rows(); ++i)
-				for (int j = 0; j < input.cols(); ++j)
+			for (int j = 0; j < input.cols(); ++j)			
+				for (int i = 0; i < input.rows(); ++i)
 					v(i, j) = exp(input(i, j)) + 1;
 
 			return v;
