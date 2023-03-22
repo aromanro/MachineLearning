@@ -134,6 +134,10 @@ bool MoreComplexLogisticRegressionTest()
 	std::default_random_engine rde(42);
 	std::normal_distribution<double> dist(0., 10.);
 
+	// for test points generation, it does not need to be the same distribution as the learning one
+	std::normal_distribution<double> distgx(0., 16.);
+	std::normal_distribution<double> distgy(0., 8.);
+
 	int nrPoints = 100;
 
 	std::uniform_int_distribution<> distInt(0, nrPoints - 1);
@@ -194,19 +198,24 @@ bool MoreComplexLogisticRegressionTest()
 		normalizer.AddBatch(x, y);
 
 		// now convert the points using the normalizer
-		Eigen::MatrixXd avgi = normalizer.getAverageInput();
-		Eigen::MatrixXd istdi = normalizer.getVarianceInput().cwiseSqrt().cwiseInverse();
+		const Eigen::MatrixXd avgi = normalizer.getAverageInput();
+		const Eigen::MatrixXd istdi = normalizer.getVarianceInput().cwiseSqrt().cwiseInverse();
 
 		std::cout << std::endl << "Averages for input:" << std::endl << avgi << std::endl << std::endl;
 		std::cout << "Inverse of std for input:" << std::endl << istdi << std::endl << std::endl;
 
-		std::cout << "Averages should be close to 100 and 180 respectively, while 1/std should be aproximately equal with 1/10" << std::endl << std::endl;
+		std::cout << "Averages should be close to 100 and 180 respectively, while 1/std should be aproximately equal with 1/10 and 1/20 respectively" << std::endl << std::endl;
 
 		// normalize
 		for (int i = 0; i < nrPoints; ++i)
 		{
 			x.col(i) -= avgi;
 			x.col(i) = x.col(i).cwiseProduct(istdi);
+
+			// I know them exactly, this is for tests:
+			//x(0, i) -= centerX;
+			//x(1, i) -= centerY;
+			//x.col(i) *= 1. / 10;
 		}
 
 		// now convert the data fed into the logistic model to polar coordinates:
@@ -266,9 +275,10 @@ bool MoreComplexLogisticRegressionTest()
 
 		for (int i = 0; i < nrPoints; ++i)
 		{
-			// generate them in the cartesian coordinates, the same way as before
-			const double xorig = centerX + dist(rde);
-			const double yorig = centerY + dist(rde);
+			// generate them in the cartesian coordinates
+			// the distribution for test points can be whatever we'd like
+			const double xorig = centerX + distgx(rde);
+			const double yorig = centerY + distgy(rde);
 
 			in(0) = xorig;
 			in(1) = yorig;
@@ -276,6 +286,11 @@ bool MoreComplexLogisticRegressionTest()
 			// normalize them
 			in -= avgi;
 			in = in.cwiseProduct(istdi);
+
+			// I know them exactly, this is for tests:
+			//in(0) -= centerX;
+			//in(1) -= centerY;
+			//in *= 1. / 10;
 
 			// now convert them to cartesian coordinates
 			const double xv = in(0);

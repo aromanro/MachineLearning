@@ -45,7 +45,7 @@ namespace Initializers
 	{
 	public:
 		WeightsInitializerForXorNetwork()
-			: dist(0.55, 0.95), neg(0)
+			: dist(0.6, 0.9), neg(0)
 		{
 		}
 

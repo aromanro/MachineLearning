@@ -402,7 +402,7 @@ namespace SGD
 
 			sb += lossLinkGrad.cwiseProduct(lossLinkGrad).rowwise().sum();
 
-			const OutputType sba = sb + OutputType::Constant(sb.rows(), sb.cols(), eps);
+			const OutputType sba = sb + OutputType::Constant(sb.size(), eps);
 			b -= BaseType::alpha * lossLinkGrad.rowwise().sum().cwiseProduct(sba.cwiseSqrt().cwiseInverse());
 
 			const WeightsType wAdj = lossLinkGrad * BaseType::input.transpose();
@@ -486,7 +486,7 @@ namespace SGD
 
 			sb = beta * sb + (1. - beta) * lossLinkGrad.cwiseProduct(lossLinkGrad).rowwise().sum();
 
-			const OutputType sba = sb + OutputType::Constant(sb.rows(), sb.cols(), eps);
+			const OutputType sba = sb + OutputType::Constant(sb.size(), eps);
 			b -= BaseType::alpha * lossLinkGrad.rowwise().sum().cwiseProduct(sba.cwiseSqrt().cwiseInverse());
 
 			const WeightsType wAdj = lossLinkGrad * BaseType::input.transpose();
@@ -605,7 +605,7 @@ namespace SGD
 			sb = beta2 * sb + (1. - beta2) * lossLinkGrad.cwiseProduct(lossLinkGrad).rowwise().sum();
 			sb *= div2;
 
-			const OutputType sba = sb + OutputType::Constant(sb.rows(), sb.cols(), eps);
+			const OutputType sba = sb + OutputType::Constant(sb.size(), eps);
 			b += BaseType::alpha * mb.cwiseProduct(sba.cwiseSqrt().cwiseInverse());
 
 			const WeightsType wAdj = lossLinkGrad * BaseType::input.transpose();
