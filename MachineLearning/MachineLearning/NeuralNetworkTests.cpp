@@ -179,9 +179,9 @@ bool NeuralNetworksTests()
 		std::cout << std::endl << "Trial: " << trial << std::endl << std::endl;
 
 		// with more neurons and even more layers it still works, for example { 2, 7, 5, 1 }, for some complex setup the initialization of weigths should probably left to default
-
 		NeuralNetworks::MultilayerPerceptron<> neuralNetwork({2, numHiddenNeurons, 1});
-		neuralNetwork.setParams({ alpha, lim, beta1, beta2 });
+
+		neuralNetwork.setParams({alpha, lim, beta1, beta2});
 		neuralNetwork.InitializHiddenLayers(weightsInitializer);
 
 		int lowLoss = 0;

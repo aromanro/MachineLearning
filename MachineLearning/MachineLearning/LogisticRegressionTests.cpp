@@ -5,7 +5,7 @@
 bool SimpleLogisticRegressionTest()
 {
 	std::default_random_engine rde(42);
-	std::normal_distribution<double> dist(0., 10.);
+	std::normal_distribution<double> dist(0., 30.);
 
 	int nrPoints = 100;
 
@@ -164,28 +164,29 @@ bool MoreComplexLogisticRegressionTest()
 		y.resize(1, nrPoints);
 
 		const double radius = 10;
+		const double centerX = 100;
+		const double centerY = 180;
+
 		for (int i = 0; i < nrPoints; ++i)
 		{
 			double xv = dist(rde);
 			double yv = dist(rde);
 			const double r = sqrt(xv * xv + yv * yv);
 
-			xv += 100.;
-			yv += 180.;
+			xv += centerX;
+			yv += centerY;
 
-			xvals[i] = xv;
-			yvals[i] = yv;
-
-			x(0, i) = xv;
-			x(1, i) = yv;
+			x(0, i) = xvals[i] = xv;
+			x(1, i) = yvals[i] = yv;
 
 			if (r <= radius) ovals[i] = 1.;
 			else ovals[i] = 0;
 
 			y(0, i) = ovals[i];
 
-			fx[i] = 100. + cos(2. * M_PI / nrPoints * i) * radius;
-			fy[i] = 180. + sin(2. * M_PI / nrPoints * i) * radius;
+			// the data for drawing the circle for the boundary
+			fx[i] = centerX + cos(2. * M_PI / nrPoints * i) * radius;
+			fy[i] = centerY + sin(2. * M_PI / nrPoints * i) * radius;
 		}
 
 		theFile.AddDataset(fx, fy);
@@ -201,6 +202,7 @@ bool MoreComplexLogisticRegressionTest()
 
 		std::cout << "Averages should be close to 100 and 180 respectively, while 1/std should be aproximately equal with 1/10" << std::endl << std::endl;
 
+		// normalize
 		for (int i = 0; i < nrPoints; ++i)
 		{
 			x.col(i) -= avgi;
@@ -212,11 +214,9 @@ bool MoreComplexLogisticRegressionTest()
 		{
 			const double xv = x(0, i);
 			const double yv = x(1, i);
-			const double r = sqrt(xv * xv + yv * yv);
-			const double t = atan2(yv, xv);
 
-			xvals[i] = r;
-			yvals[i] = t;
+			xvals[i] = sqrt(xv * xv + yv * yv);
+			yvals[i] = atan2(yv, xv);
 		}
 
 
@@ -267,12 +267,11 @@ bool MoreComplexLogisticRegressionTest()
 		for (int i = 0; i < nrPoints; ++i)
 		{
 			// generate them in the cartesian coordinates, the same way as before
-			in(0) = dist(rde) + 100;
-			in(1) = dist(rde) + 180;
+			const double xorig = centerX + dist(rde);
+			const double yorig = centerY + dist(rde);
 
-
-			const double savex = in(0);
-			const double savey = in(1);
+			in(0) = xorig;
+			in(1) = yorig;
 
 			// normalize them
 			in -= avgi;
@@ -281,24 +280,22 @@ bool MoreComplexLogisticRegressionTest()
 			// now convert them to cartesian coordinates
 			const double xv = in(0);
 			const double yv = in(1);
-			const double r = sqrt(xv * xv + yv * yv);
-			const double t = atan2(yv, xv);
 
-			in(0) = r;
-			in(1) = t;
+			in(0) = sqrt(xv * xv + yv * yv);
+			in(1) = atan2(yv, xv);
 
 			// predict
 			Eigen::VectorXd res = logisticModel.Predict(in);
 
 			if (res(0) > 0.5)
 			{
-				d1x.push_back(savex);
-				d1y.push_back(savey);
+				d1x.push_back(xorig);
+				d1y.push_back(yorig);
 			}
 			else
 			{
-				d2x.push_back(savex);
-				d2y.push_back(savey);
+				d2x.push_back(xorig);
+				d2y.push_back(yorig);
 			}
 		}
 
