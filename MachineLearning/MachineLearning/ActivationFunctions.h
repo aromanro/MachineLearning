@@ -317,10 +317,12 @@ namespace ActivationFunctions
 			InputOutputType output;
 			output.resize(input.size());
 
+			const double m = input.max();
+
 			double sum = 0;
 			for (int i = 0; i < input.size(); ++i)
 			{
-				const double v = exp(input(i));
+				const double v = exp(input(i) - m);
 				output(i) = v;
 				sum += v;
 			}
