@@ -89,5 +89,11 @@
     <ClInclude Include="NeuralLayer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="CSVDataFile.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DataFileBase.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

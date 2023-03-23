@@ -156,7 +156,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CostFunctions.h" />
+    <ClInclude Include="CSVDataFile.h" />
     <ClInclude Include="DataFile.h" />
+    <ClInclude Include="DataFileBase.h" />
     <ClInclude Include="GeneralizedLinearModel.h" />
     <ClInclude Include="Gnuplot.h" />
     <ClInclude Include="GradientSolvers.h" />

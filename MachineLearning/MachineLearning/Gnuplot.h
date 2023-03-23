@@ -2,10 +2,12 @@
 
 #include <string>
 
+#include "DataFileBase.h"
+
 namespace Utils
 {
 
-	class Gnuplot
+	class Gnuplot : public DataFileBase
 	{
 	public:
 		enum class ChartType : int
@@ -15,20 +17,6 @@ namespace Utils
 		};
 
 		void Execute();
-
-		void setRelativePath(const std::string& p)
-		{
-			relPath = p;
-			if (relPath.empty()) return;
-
-			if (relPath[relPath.length() - 1] != '/' && relPath[relPath.length() - 1] != '\\')
-				relPath += "/";
-		}
-
-		void setDataFileName(const std::string& d)
-		{
-			dataFileName = d;
-		}
 
 		void setCmdFileName(const std::string& c)
 		{
@@ -42,8 +30,6 @@ namespace Utils
 
 	protected:
 		ChartType ctype = ChartType::linearRegression;
-		std::string relPath = "../../data/";
-		std::string dataFileName = "data.txt";
 		std::string cmdFileName = "plot.plt";
 	};
 
