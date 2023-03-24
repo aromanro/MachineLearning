@@ -97,7 +97,13 @@ namespace LossFunctions
 
 		OutputType derivative(const OutputType& output, const OutputType& target) const
 		{
-			return output - target;
+			static const double eps = 1E-10;
+			OutputType d(output.size());
+
+			for (int i = 0; i < output.size(); ++i)
+				d(i) = 1. / (output(i) * (1. + eps - output(i)));
+
+			return (output - target).cwiseProduct(d);
 		}
 	};
 
@@ -113,9 +119,35 @@ namespace LossFunctions
 
 		double derivative(const double& output, const double& target) const
 		{
-			return output - target;
+			static const double eps = 1E-10;
+
+			return (output - target) / (output * (1. + eps - output));
 		}
 	};
+
+
+	template<typename OutputType = Eigen::VectorXd> class CrossEntropyLoss
+	{
+	public:
+		OutputType operator()(const OutputType& output, const OutputType& target) const
+		{
+			static const double eps = 1E-10;
+
+			OutputType l1(output.size());
+			for (int i = 0; i < output.size(); ++i)
+				l1(i) = log(output(i) + eps);
+	
+			return -target.cwiseProduct(l1);
+		}
+
+		OutputType derivative(const OutputType& output, const OutputType& target) const
+		{
+			static const double eps = 1E-10;
+
+			return -target / (output + eps);
+		}
+	};
+
 
 }
 
