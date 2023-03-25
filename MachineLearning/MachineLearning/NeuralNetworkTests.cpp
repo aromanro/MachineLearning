@@ -359,7 +359,7 @@ bool IrisNeuralNetworkTest()
 		testSet[i] = std::make_tuple(x(0, 0), x(1, 0), x(2, 0), x(3, 0), std::get<4>(testSet[i]));
 	}
 
-	NeuralNetworks::MultilayerPerceptron<> neuralNetwork({ 4, 80, 20, nrOutputs });
+	NeuralNetworks::MultilayerPerceptron<> neuralNetwork({ 4, 27, 9, nrOutputs });
 
 	const double alpha = 0.001;
 	const double beta1 = 0.7;
