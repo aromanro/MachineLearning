@@ -24,7 +24,7 @@ namespace Utils
 
 			cmdPath += cmdFileName;
 
-			std::ofstream cmdf(cmdPath);
+			std::ofstream cmdf(cmdPath, std::ios::out | std::ios::trunc);
 
 			if (ctype == ChartType::logisticRegression)
 			{
