@@ -47,7 +47,7 @@ namespace NeuralNetworks
 
 				inputs = outputs;
 			}
-			hiddenLayers.front().setFirstLayer();
+			if (!hiddenLayers.empty()) hiddenLayers.front().setFirstLayer();
 
 			lastLayer = NeuralLayer<LastSolver>(inputs, neurons.back());
 			lastLayer.setLastLayer();
@@ -89,7 +89,7 @@ namespace NeuralNetworks
 				hiddenLayers[i].Initialize(initializer);
 		}
 
-		Eigen::VectorXd Predict(const Eigen::VectorXd& input) const
+		Eigen::VectorXd Predict(const Eigen::VectorXd& input)
 		{
 			Eigen::VectorXd v = input;
 

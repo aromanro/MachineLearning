@@ -12,12 +12,16 @@ namespace ActivationFunctions
 	template<typename InputOutputType = Eigen::VectorXd> class IdentityFunction
 	{
 	public:
+		IdentityFunction(int size = 1)
+		{
+		}
+
 		const InputOutputType& operator()(const InputOutputType& input) const
 		{
 			return input;
 		}
 
-		const InputOutputType derivative(const InputOutputType& input) const
+		InputOutputType derivative(const InputOutputType& input) const
 		{
 			return InputOutputType::Ones(input.size());
 		}
@@ -26,6 +30,10 @@ namespace ActivationFunctions
 	template<> class IdentityFunction<double>
 	{
 	public:
+		IdentityFunction(int size = 1)
+		{
+		}
+
 		const double& operator()(const double& input) const
 		{
 			return input;
@@ -53,18 +61,23 @@ namespace ActivationFunctions
 			beta = b;
 		}
 
-		const InputOutputType operator()(const InputOutputType& input) const
+		InputOutputType operator()(const InputOutputType& input)
 		{
-			InputOutputType v(input.rows(), input.cols());
+			if (beta0.size() != input.size() || beta.size() != input.size())
+			{
+				beta0 = InputOutputType::Zero(input.size());
+				beta = InputOutputType::Ones(input.size());
+			}
 
-			for (int j = 0; j < input.cols(); ++j)
-				for (int i = 0; i < input.rows(); ++i)
-					v(i, j) = exp(-(beta(i, j) * input(i, j) + beta0(i, j)));
+			InputOutputType v(input.size());
 
-			return (InputOutputType::Ones(input.rows(), input.cols()) + v).cwiseInverse();
+			for (int i = 0; i < input.size(); ++i)
+				v(i) = exp(-(beta(i) * input(i) + beta0(i)));
+
+			return (InputOutputType::Ones(input.size()) + v).cwiseInverse();
 		}
 
-		const InputOutputType derivative(const InputOutputType& input) const
+		InputOutputType derivative(const InputOutputType& input)
 		{
 			const InputOutputType fx = operator()(input);
 
@@ -72,14 +85,14 @@ namespace ActivationFunctions
 		}
 
 	protected:
-		WeightsType beta0;
-		WeightsType beta;
+		InputOutputType beta0;
+		InputOutputType beta;
 	};
 
 	template<> class SigmoidFunction<double, double>
 	{
 	public:
-		SigmoidFunction()
+		SigmoidFunction(int size = 1)
 			: beta0(0), beta(1)
 		{
 		}
@@ -90,12 +103,12 @@ namespace ActivationFunctions
 			beta = b;
 		}
 
-		const double operator()(const double& input) const
+		double operator()(const double& input)
 		{
 			return 1. / (1. + exp(-(input * beta + beta0)));
 		}
 
-		const double derivative(const double& input) const
+		double derivative(const double& input)
 		{
 			const double fx = operator()(input);
 
@@ -116,14 +129,14 @@ namespace ActivationFunctions
 		{
 		}
 
-		const InputOutputType operator()(const InputOutputType& input) const
+		InputOutputType operator()(const InputOutputType& input) const
 		{
 			const SigmoidFunction<InputOutputType, InputOutputType> sigmoid(static_cast<int>(input.size()));
 
 			return 2. * sigmoid(2. * input) - InputOutputType::Ones(input.rows(), input.cols());
 		}
 
-		const InputOutputType derivative(const InputOutputType& input) const
+		InputOutputType derivative(const InputOutputType& input) const
 		{
 			const InputOutputType fx = operator()(input);
 
@@ -134,16 +147,16 @@ namespace ActivationFunctions
 	template<> class TanhFunction<double>
 	{
 	public:
-		TanhFunction()
+		TanhFunction(int size = 1)
 		{
 		}
 
-		const double operator()(const double& input) const
+		double operator()(const double& input) const
 		{
 			return tanh(input);
 		}
 
-		const double derivative(const double& input) const
+		double derivative(const double& input) const
 		{
 			const double fx = operator()(input);
 
@@ -158,18 +171,17 @@ namespace ActivationFunctions
 		{
 		}
 
-		const InputOutputType operator()(const InputOutputType& input) const
+		InputOutputType operator()(const InputOutputType& input) const
 		{
-			InputOutputType v(input.rows(), input.cols());
+			InputOutputType v(input.size());
 
-			for (int j = 0; j < input.cols(); ++j)			
-				for (int i = 0; i < input.rows(); ++i)
-					v(i, j) = exp(input(i, j)) + 1;
+			for (int i = 0; i < input.size(); ++i)			
+				v(i) = exp(input(i)) + 1;
 
 			return v;
 		}
 
-		const InputOutputType derivative(const InputOutputType& input) const
+		InputOutputType derivative(const InputOutputType& input) const
 		{
 			const InputOutputType fx = operator()(-input);
 
@@ -180,16 +192,16 @@ namespace ActivationFunctions
 	template<> class SoftplusFunction<double>
 	{
 	public:
-		SoftplusFunction()
+		SoftplusFunction(int size = 1)
 		{
 		}
 
-		const double operator()(const double& input) const
+		double operator()(const double& input) const
 		{
 			return 1. + exp(input);
 		}
 
-		const double derivative(const double& input) const
+		double derivative(const double& input) const
 		{
 			const double fx = operator()(-input);
 
@@ -202,11 +214,11 @@ namespace ActivationFunctions
 	template<typename InputOutputType = Eigen::VectorXd> class RELUFunction
 	{
 	public:
-		RELUFunction()
+		RELUFunction(int size = 1)
 		{
 		}
 
-		const InputOutputType operator()(const InputOutputType& input) const
+		InputOutputType operator()(const InputOutputType& input) const
 		{
 			InputOutputType out = input;
 
@@ -216,7 +228,7 @@ namespace ActivationFunctions
 			return out;
 		}
 
-		const InputOutputType derivative(const InputOutputType& input) const
+		InputOutputType derivative(const InputOutputType& input) const
 		{
 			InputOutputType out = input;
 
@@ -231,16 +243,16 @@ namespace ActivationFunctions
 	template<> class RELUFunction<double>
 	{
 	public:
-		RELUFunction()
+		RELUFunction(int size = 1)
 		{
 		}
 
-		const double operator()(const double& input) const
+		double operator()(const double& input) const
 		{
 			return (input < 0) ? 0 : input;
 		}
 
-		const double derivative(const double& input) const
+		double derivative(const double& input) const
 		{
 			return (input < 0) ? 0 : 1;
 		}
@@ -250,7 +262,7 @@ namespace ActivationFunctions
 	template<typename InputOutputType = Eigen::VectorXd> class LeakyRELUFunction
 	{
 	public:
-		LeakyRELUFunction()
+		LeakyRELUFunction(int size = 1)
 		{
 		}
 
@@ -259,7 +271,7 @@ namespace ActivationFunctions
 			alpha = a;
 		}
 
-		const InputOutputType operator()(const InputOutputType& input) const
+		InputOutputType operator()(const InputOutputType& input) const
 		{
 			InputOutputType out = input;
 
@@ -269,7 +281,7 @@ namespace ActivationFunctions
 			return out;
 		}
 
-		const InputOutputType derivative(const InputOutputType& input) const
+		InputOutputType derivative(const InputOutputType& input) const
 		{
 			InputOutputType out = input;
 
@@ -286,7 +298,7 @@ namespace ActivationFunctions
 	template<> class LeakyRELUFunction<double>
 	{
 	public:
-		LeakyRELUFunction()
+		LeakyRELUFunction(int size = 1)
 		{
 		}
 
@@ -295,12 +307,12 @@ namespace ActivationFunctions
 			alpha = a;
 		}
 
-		const double operator()(const double& input) const
+		double operator()(const double& input) const
 		{
 			return ((input < 0) ? alpha : 1.) * input;
 		}
 
-		const double derivative(const double& input) const
+		double derivative(const double& input) const
 		{
 			return (input < 0) ? alpha : 1.;
 		}
@@ -312,12 +324,15 @@ namespace ActivationFunctions
 	template<typename InputOutputType = Eigen::VectorXd> class SoftmaxFunction
 	{
 	public:
-		const InputOutputType& operator()(const InputOutputType& input) const
+		SoftmaxFunction(int size = 1)
 		{
-			InputOutputType output;
-			output.resize(input.size());
+		}
 
-			const double m = input.max();
+		InputOutputType operator()(const InputOutputType& input) const
+		{
+			InputOutputType output(input.size());
+
+			const double m = input.maxCoeff();
 
 			double sum = 0;
 			for (int i = 0; i < input.size(); ++i)
@@ -330,15 +345,14 @@ namespace ActivationFunctions
 			return output / sum;
 		}
 
-		const Eigen::MatrixXd derivative(const InputOutputType& input) const
+		Eigen::MatrixXd derivative(const InputOutputType& input) const
 		{
-			Eigen::MatrixXd output;
-			output.resize(input.size(), input.size());
+			Eigen::MatrixXd output(input.size(), input.size());
 
 			InputOutputType fx = operator()(input);
 
-			for (int i = 0; i < input.size(); ++i)
-				for (int j = 0; j < input.size(); ++j)
+			for (int j = 0; j < input.size(); ++j)
+				for (int i = 0; i < input.size(); ++i)
 					output(i, j) = fx(i) * (((i == j) ? 1. : 0.) - fx(j));
 
 			return output;

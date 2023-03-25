@@ -18,8 +18,8 @@ namespace SLRS
 		void Initialize(int szi = 1, int szo = 1)
 		{
 			size = szo;
-			xaccum = InputType::Zero(size);
-			x2accum = InputType::Zero(size);
+			xaccum = InputType::Zero(szi);
+			x2accum = InputType::Zero(szi);
 			xyaccum = InputType::Zero(size);
 			yaccum = OutputType::Zero(size);
 			count = 0;
@@ -49,9 +49,18 @@ namespace SLRS
 			if (!count)
 				return Eigen::MatrixXd();
 
-			const WeightsType wi = (count * xyaccum - xaccum.cwiseProduct(yaccum)).cwiseProduct((count * x2accum - xaccum.cwiseProduct(xaccum)).cwiseInverse());
+			WeightsType wi;
+			if (xaccum.size() == 1)
+				wi = (count * xyaccum - xaccum(0) * yaccum) / (count * x2accum(0) - xaccum(0) * xaccum(0));
+			else
+				wi = (count * xyaccum - xaccum.cwiseProduct(yaccum)).cwiseProduct((count * x2accum - xaccum.cwiseProduct(xaccum)).cwiseInverse());
+
 			w = wi;
-			b = (yaccum - wi.cwiseProduct(xaccum)) / count;
+
+			if (xaccum.size() == 1)
+				b = (yaccum - wi * xaccum(0)) / count;
+			else
+				b = (yaccum - wi.cwiseProduct(xaccum)) / count;
 
 			return Eigen::MatrixXd(); // an empty matrix, no need of it, it won't be used
 		}
@@ -78,7 +87,10 @@ namespace SLRS
 
 			x2accum += input.cwiseProduct(input);
 
-			xyaccum += input.cwiseProduct(output);
+			if (input.size() == 1)
+				xyaccum += input(0) * output;
+			else
+				xyaccum += input.cwiseProduct(output);
 
 			yaccum += output;
 			++count;

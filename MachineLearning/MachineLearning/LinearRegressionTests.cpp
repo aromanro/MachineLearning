@@ -14,7 +14,7 @@ bool Test1()
 	Initializers::WeightsInitializerZero initializer;
 
 	{
-		Utils::DataFileWriter theFile("../../data/data1.txt");
+		Utils::DataFileWriter theFile("../../data/LinearRegression.txt");
 
 		std::vector<int> xvals(nrPoints);
 		std::vector<double> yvals(nrPoints);
@@ -74,8 +74,8 @@ bool Test1()
 		theFile.AddDataset(xvals, yvals);
 	}
 
-	plot.setCmdFileName("plot1.plt");
-	plot.setDataFileName("data1.txt");
+	plot.setCmdFileName("LinearRegression.plt");
+	plot.setDataFileName("LinearRegression.txt");
 	plot.Execute();
 
 	return true;
@@ -172,7 +172,7 @@ bool Test3()
 		std::vector<double> xvals(nrPoints);
 		std::vector<double> yvals(nrPoints);
 
-		Utils::DataFileWriter theFile("../../data/data2.txt");
+		Utils::DataFileWriter theFile("../../data/PolynomialRegressionQuadratic.txt");
 
 		// the division with 100 below is for scaling things down, otherwise the stochastic gradient descent will have a hard time finding the solution
 		// normally it will be scaled by standard deviation or the size of the interval, but that should be enough for tests
@@ -246,8 +246,8 @@ bool Test3()
 		theFile.AddDataset(xvals, yvals);
 	}
 
-	plot.setCmdFileName("plot2.plt");
-	plot.setDataFileName("data2.txt");
+	plot.setCmdFileName("PolynomialRegressionQuadratic.plt");
+	plot.setDataFileName("PolynomialRegressionQuadratic.txt");
 	plot.Execute();
 
 	return true;
@@ -274,7 +274,7 @@ bool Test4()
 		std::vector<double> xvals(nrPoints);
 		std::vector<double> yvals(nrPoints);
 
-		Utils::DataFileWriter theFile("../../data/data3.txt");
+		Utils::DataFileWriter theFile("../../data/PolynomialRegressionQuartic.txt");
 
 		// a dataset for the function (for charting):
 		for (int i = 0; i < nrPoints; ++i)
@@ -366,8 +366,8 @@ bool Test4()
 		theFile.AddDataset(xvals, yvals);
 	}
 
-	plot.setCmdFileName("plot3.plt");
-	plot.setDataFileName("data3.txt");
+	plot.setCmdFileName("PolynomialRegressionQuartic.plt");
+	plot.setDataFileName("PolynomialRegressionQuartic.txt");
 	plot.Execute();
 
 	return true;

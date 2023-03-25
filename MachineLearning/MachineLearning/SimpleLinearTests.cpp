@@ -37,13 +37,14 @@ bool SimpleLinearRegressionTests()
 	{
 		GLM::MultivariateSimpleLinearRegression<double> multivariateSimpleLinearRegression(1, 3);
 
-		Eigen::MatrixXd x, y;
-		x.resize(1, nrPoints);
+		Eigen::RowVectorXd x;
+		Eigen::MatrixXd y;
+		x.resize(nrPoints);
 		y.resize(3, nrPoints);
 
 		for (int i = 0; i < nrPoints; ++i)
 		{
-			x(0, i) = i;
+			x(i) = i;
 			y(0, i) = linearFunction(i) + dist(rde);
 			y(1, i) = linearFunction2(i) + dist(rde);
 			y(2, i) = linearFunction3(i) + dist(rde);

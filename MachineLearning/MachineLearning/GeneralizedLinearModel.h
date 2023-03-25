@@ -21,7 +21,7 @@ namespace GLM {
 
 		virtual ~GeneralizedLinearModelBase() {}
 
-		virtual OutputType Predict(const InputType& input) const
+		virtual OutputType Predict(const InputType& input)
 		{
 			return solver.activationFunction(W * input + b);
 		}

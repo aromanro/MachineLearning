@@ -17,17 +17,17 @@ namespace GLM
 		{
 		}
 
-		double Predict(const double& input) const override
+		double Predict(const double& input) override
 		{
 			return BaseType::W * input + BaseType::b;
 		}
 	};
 
 	// to not be confused with the general case, this corresponds to a bunch of simple linear regressions, even if multivariable
-	template<typename InputType = Eigen::VectorXd> class MultivariateSimpleLinearRegression : public GeneralizedLinearModel<InputType, Eigen::VectorXd, Eigen::MatrixXd, SLRS::SimpleLinearRegressionSolver<>, Eigen::MatrixXd>
+	template<typename InputType = Eigen::VectorXd> class MultivariateSimpleLinearRegression : public GeneralizedLinearModel<InputType, Eigen::VectorXd, Eigen::MatrixXd, SLRS::SimpleLinearRegressionSolver<InputType>, Eigen::MatrixXd>
 	{
 	public:
-		typedef GeneralizedLinearModel<InputType, Eigen::VectorXd, Eigen::MatrixXd, SLRS::SimpleLinearRegressionSolver<>, Eigen::MatrixXd> BaseType;
+		typedef GeneralizedLinearModel<InputType, Eigen::VectorXd, Eigen::MatrixXd, SLRS::SimpleLinearRegressionSolver<InputType>, Eigen::MatrixXd> BaseType;
 
 		MultivariateSimpleLinearRegression(int szi = 1, int szo = 1)
 		{
@@ -41,8 +41,11 @@ namespace GLM
 			BaseType::b = Eigen::VectorXd::Zero(szo);
 		}
 
-		Eigen::VectorXd Predict(const InputType& input) const override
+		Eigen::VectorXd Predict(const InputType& input) override
 		{
+			if (input.size() == 1)
+				return BaseType::W * input(0) + BaseType::b;
+
 			return BaseType::W.cwiseProduct(input) + BaseType::b;
 		}
 
@@ -50,10 +53,10 @@ namespace GLM
 	};
 
 
-	template<> class MultivariateSimpleLinearRegression<double> : public GeneralizedLinearModel<double, Eigen::VectorXd, Eigen::MatrixXd, SLRS::SimpleLinearRegressionSolver<double, Eigen::VectorXd, Eigen::MatrixXd, Eigen::RowVectorXd, Eigen::MatrixXd>, Eigen::RowVectorXd>
+	template<> class MultivariateSimpleLinearRegression<double> : public GeneralizedLinearModel<double, Eigen::VectorXd, Eigen::MatrixXd, SLRS::SimpleLinearRegressionSolver<double, Eigen::VectorXd, Eigen::MatrixXd, Eigen::RowVectorXd, Eigen::MatrixXd>, Eigen::RowVectorXd, Eigen::MatrixXd>
 	{
 	public:
-		typedef GeneralizedLinearModel<double, Eigen::VectorXd, Eigen::MatrixXd, SLRS::SimpleLinearRegressionSolver<double, Eigen::VectorXd, Eigen::MatrixXd, Eigen::RowVectorXd, Eigen::MatrixXd>, Eigen::RowVectorXd> BaseType;
+		typedef GeneralizedLinearModel<double, Eigen::VectorXd, Eigen::MatrixXd, SLRS::SimpleLinearRegressionSolver<double, Eigen::VectorXd, Eigen::MatrixXd, Eigen::RowVectorXd, Eigen::MatrixXd>, Eigen::RowVectorXd, Eigen::MatrixXd> BaseType;
 
 		MultivariateSimpleLinearRegression(int szi = 1, int szo = 1) : BaseType(szi, szo)
 		{

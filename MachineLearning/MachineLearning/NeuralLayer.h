@@ -46,7 +46,7 @@ namespace NeuralNetworks
 			layer.Initialize(initializer);
 		}
 
-		Eigen::VectorXd Predict(const Eigen::VectorXd& input) const
+		Eigen::VectorXd Predict(const Eigen::VectorXd& input)
 		{
 			return layer.Predict(input);
 		}

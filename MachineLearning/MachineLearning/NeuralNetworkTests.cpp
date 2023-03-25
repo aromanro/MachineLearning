@@ -1,13 +1,18 @@
 #include "Tests.h"
 #include "WeightsInitializer.h"
 #include "NeuralNetwork.h"
+#include "CSVDataFile.h"
+#include "TestStatistics.h"
+#include "Softmax.h"
 
 
-bool NeuralNetworksTests()
+bool XORNeuralNetworksTests()
 {
 	std::default_random_engine rde(42);
 	std::uniform_int_distribution<> distBool(0, 1);
 	
+	const int nrTests = 3;
+
 	// this alleviates the convergence issue
 	// there are 16 local minima for xor where the 3 neurons network could get 'stuck'
 	// ocassionally it might reach one but from my tests it can sometimes get out of it
@@ -34,7 +39,7 @@ bool NeuralNetworksTests()
 
 	// try a simple neural network to solve the xor:
 	int failures = 0;
-	for (int trial = 0; trial < 10; ++trial)
+	for (int trial = 0; trial < nrTests; ++trial)
 	{
 		std::cout << std::endl << "Trial: " << trial << std::endl << std::endl;
 
@@ -174,7 +179,7 @@ bool NeuralNetworksTests()
 	x.resize(2, batchSize);
 	y.resize(1, batchSize);
 
-	for (int trial = 0; trial < 10; ++trial)
+	for (int trial = 0; trial < nrTests; ++trial)
 	{
 		std::cout << std::endl << "Trial: " << trial << std::endl << std::endl;
 
@@ -254,4 +259,258 @@ bool NeuralNetworksTests()
 	std::cout << std::endl << "Failures: " << failures << std::endl;
 
 	return failures_first == 0 && failures == 0;
+}
+
+
+bool IrisNeuralNetworkTest()
+{
+	std::cout << std::endl << "Neural Network test for the Iris dataset, Setosa is lineary separable from the other two, but the others two cannot be linearly separated" << std::endl << std::endl;
+
+	Utils::IrisDataset irisDataset;
+	irisDataset.setRelativePath("../../Datasets/");
+	irisDataset.setDataFileName("iris.data");
+
+	if (!irisDataset.Open()) return false;
+
+	auto records = irisDataset.getAllRecords();
+	const int nrTraining = 120;
+
+	// shuffle the data
+
+	std::random_device rd;
+	std::mt19937 g(rd());
+
+	// ensure it's shuffled enough to have all enough samples of all classes in the test set
+	for (;;)
+	{
+		int setosa = 0;
+		int versicolor = 0;
+		int virginica = 0;
+
+		std::shuffle(records.begin(), records.end(), g);
+		std::shuffle(records.begin(), records.end(), g);
+		std::shuffle(records.begin(), records.end(), g);
+
+		for (auto it = records.begin() + nrTraining; it != records.end(); ++it)
+		{
+			const auto rec = *it;
+			if (std::get<4>(rec) == "Iris-setosa") ++setosa;
+			if (std::get<4>(rec) == "Iris-versicolor") ++versicolor;
+			if (std::get<4>(rec) == "Iris-virginica") ++virginica;
+		}
+
+		if (setosa > 8 && versicolor > 8 && virginica > 8) break;
+	}
+
+
+	//for (auto rec : records)
+	//	std::cout << std::get<0>(rec) << ", " << std::get<1>(rec) << ", " << std::get<2>(rec) << ", " << std::get<3>(rec) << ", " << std::get<4>(rec) << std::endl;
+
+	// split the data into training and test sets
+	
+	std::vector<Utils::IrisDataset::Record> trainingSet(records.begin(), records.begin() + nrTraining);
+	std::vector<Utils::IrisDataset::Record> testSet(records.begin() + nrTraining, records.end());
+
+	// create the model
+	const int nrOutputs = 3; // 1 only for Setosa, 3 if all three classes are to be predicted
+
+	// normalize the inputs
+	Norm::Normalizer normalizer(4, nrOutputs);
+	Eigen::MatrixXd x(4, nrTraining);
+	Eigen::MatrixXd y(nrOutputs, nrTraining);
+
+	for (int i = 0; i < nrTraining; ++i)
+	{
+		x(0, i) = std::get<0>(trainingSet[i]);
+		x(1, i) = std::get<1>(trainingSet[i]);
+		x(2, i) = std::get<2>(trainingSet[i]);
+		x(3, i) = std::get<3>(trainingSet[i]);
+
+		y(0, i) = (std::get<4>(trainingSet[i]) == "Iris-setosa") ? 1 : 0;
+		if (nrOutputs > 1) y(1, i) = (std::get<4>(trainingSet[i]) == "Iris-versicolor") ? 1 : 0;
+		if (nrOutputs > 2) y(2, i) = (std::get<4>(trainingSet[i]) == "Iris-virginica") ? 1 : 0;
+	}
+
+	normalizer.AddBatch(x, y);
+
+	const Eigen::MatrixXd avgi = normalizer.getAverageInput();
+	const Eigen::MatrixXd istdi = normalizer.getVarianceInput().cwiseSqrt().cwiseInverse();
+
+	for (int i = 0; i < nrTraining; ++i)
+	{
+		x.col(i) -= avgi;
+		x.col(i) = x.col(i).cwiseProduct(istdi);
+
+		trainingSet[i] = std::make_tuple(x(0, i), x(1, i), x(2, i), x(3, i), std::get<4>(trainingSet[i]));
+	}
+
+	x.resize(4, 1);
+	for (int i = 0; i < testSet.size(); ++i)
+	{
+		x(0, 0) = std::get<0>(testSet[i]);
+		x(1, 0) = std::get<1>(testSet[i]);
+		x(2, 0) = std::get<2>(testSet[i]);
+		x(3, 0) = std::get<3>(testSet[i]);
+		
+
+		x.col(0) -= avgi;
+		x.col(0) = x.col(0).cwiseProduct(istdi);
+
+		testSet[i] = std::make_tuple(x(0, 0), x(1, 0), x(2, 0), x(3, 0), std::get<4>(testSet[i]));
+	}
+
+	NeuralNetworks::MultilayerPerceptron<> neuralNetwork({ 4, 80, 20, nrOutputs });
+
+	const double alpha = 0.001;
+	const double beta1 = 0.7;
+	const double beta2 = 0.9;
+	const double lim = 1;
+
+	neuralNetwork.setParams({ alpha, lim, beta1, beta2 });
+
+	//Initializers::WeightsInitializerUniform initializer(-0.01, 0.01);
+	//neuralNetwork.Initialize(initializer);
+
+
+	// train the model
+
+	const int batchSize = 32;
+
+	Eigen::MatrixXd in(4, batchSize);
+	Eigen::MatrixXd out(nrOutputs, batchSize);
+
+	std::default_random_engine rde(42);
+	std::uniform_int_distribution<> distIntBig(0, nrTraining - 1);
+	for (int i = 0; i <= 10000; ++i)
+	{
+		for (int b = 0; b < batchSize; ++b)
+		{
+			const int ind = distIntBig(rde);
+			const auto& record = trainingSet[ind];
+
+			in(0, b) = std::get<0>(record);
+			in(1, b) = std::get<1>(record);
+			in(2, b) = std::get<2>(record);
+			in(3, b) = std::get<3>(record);
+
+			out(0, b) = (std::get<4>(record) == "Iris-setosa") ? 1 : 0;
+			if (nrOutputs > 1) out(1, b) = (std::get<4>(record) == "Iris-versicolor") ? 1 : 0;
+			if (nrOutputs > 2) out(2, b) = (std::get<4>(record) == "Iris-virginica") ? 1 : 0;
+		}
+		neuralNetwork.ForwardBackwardStep(in, out);
+		if (i % 1000 == 0)
+		{
+			double loss = neuralNetwork.getLoss() / batchSize;
+			std::cout << "Loss: " << loss << std::endl;
+		}
+	}
+
+
+	Utils::TestStatistics setosaStats;
+	Utils::TestStatistics versicolorStats;
+	Utils::TestStatistics virginicaStats;
+
+
+	// test the model
+
+	// first, on training set:
+
+	std::cout << std::endl << "Training set:" << std::endl;
+
+	for (const auto& record : trainingSet)
+	{
+		in(0, 0) = std::get<0>(record);
+		in(1, 0) = std::get<1>(record);
+		in(2, 0) = std::get<2>(record);
+		in(3, 0) = std::get<3>(record);
+
+		out(0, 0) = (std::get<4>(record) == "Iris-setosa") ? 1 : 0;
+		if (nrOutputs > 1) out(1, 0) = (std::get<4>(record) == "Iris-versicolor") ? 1 : 0;
+		if (nrOutputs > 2) out(2, 0) = (std::get<4>(record) == "Iris-virginica") ? 1 : 0;
+
+		Eigen::VectorXd res = neuralNetwork.Predict(in.col(0));
+		setosaStats.AddPrediction(res(0) > 0.5, out(0, 0) > 0.5);
+		if (nrOutputs > 1) versicolorStats.AddPrediction(res(1) > 0.5, out(1, 0) > 0.5);
+		if (nrOutputs > 2) virginicaStats.AddPrediction(res(2) > 0.5, out(2, 0) > 0.5);
+	}
+
+	std::cout << std::endl << "Setosa true positives: " << setosaStats.getTruePositives() << ", true negatives: " << setosaStats.getTrueNegatives() << ", false positives: " << setosaStats.getFalsePositives() << ", false negatives: " << setosaStats.getFalseNegatives() << std::endl;
+	if (nrOutputs > 1) std::cout << "Versicolor true positives: " << versicolorStats.getTruePositives() << ", true negatives: " << versicolorStats.getTrueNegatives() << ", false positives: " << versicolorStats.getFalsePositives() << ", false negatives: " << versicolorStats.getFalseNegatives() << std::endl;
+	if (nrOutputs > 2) std::cout << "Virginica true positives: " << virginicaStats.getTruePositives() << ", true negatives: " << virginicaStats.getTrueNegatives() << ", false positives: " << virginicaStats.getFalsePositives() << ", false negatives: " << virginicaStats.getFalseNegatives() << std::endl;
+	std::cout << std::endl;
+
+	std::cout << "Setosa accuracy: " << setosaStats.getAccuracy() << std::endl;
+	if (nrOutputs > 1) std::cout << "Versicolor accuracy: " << versicolorStats.getAccuracy() << std::endl;
+	if (nrOutputs > 2) std::cout << "Virginica accuracy: " << virginicaStats.getAccuracy() << std::endl;
+	std::cout << std::endl;
+
+	std::cout << "Setosa specificity: " << setosaStats.getSpecificity() << std::endl;
+	if (nrOutputs > 1) std::cout << "Versicolor specificity: " << versicolorStats.getSpecificity() << std::endl;
+	if (nrOutputs > 2) std::cout << "Virginica specificity: " << virginicaStats.getSpecificity() << std::endl;
+	std::cout << std::endl;
+
+	std::cout << "Setosa precision: " << setosaStats.getPrecision() << std::endl;
+	if (nrOutputs > 1) std::cout << "Versicolor precision: " << versicolorStats.getPrecision() << std::endl;
+	if (nrOutputs > 2) std::cout << "Virginica precision: " << virginicaStats.getPrecision() << std::endl;
+	std::cout << std::endl;
+
+	std::cout << "Setosa recall: " << setosaStats.getRecall() << std::endl;
+	if (nrOutputs > 1) std::cout << "Versicolor recall: " << versicolorStats.getRecall() << std::endl;
+	if (nrOutputs > 2) std::cout << "Virginica recall: " << virginicaStats.getRecall() << std::endl;
+	std::cout << std::endl;
+
+	setosaStats.Clear();
+	versicolorStats.Clear();
+	virginicaStats.Clear();
+
+	std::cout << std::endl << "Test set:" << std::endl;
+
+	for (const auto& record : testSet)
+	{
+		in(0, 0) = std::get<0>(record);
+		in(1, 0) = std::get<1>(record);
+		in(2, 0) = std::get<2>(record);
+		in(3, 0) = std::get<3>(record);
+
+		out(0, 0) = (std::get<4>(record) == "Iris-setosa") ? 1 : 0;
+		if (nrOutputs > 1) out(1, 0) = (std::get<4>(record) == "Iris-versicolor") ? 1 : 0;
+		if (nrOutputs > 2) out(2, 0) = (std::get<4>(record) == "Iris-virginica") ? 1 : 0;
+
+		Eigen::VectorXd res = neuralNetwork.Predict(in.col(0));
+		setosaStats.AddPrediction(res(0) > 0.5, out(0, 0) > 0.5);
+		if (nrOutputs > 1) versicolorStats.AddPrediction(res(1) > 0.5, out(1, 0) > 0.5);
+		if (nrOutputs > 2) virginicaStats.AddPrediction(res(2) > 0.5, out(2, 0) > 0.5);
+	}
+
+	std::cout << std::endl << "Setosa true positives: " << setosaStats.getTruePositives() << ", true negatives: " << setosaStats.getTrueNegatives() << ", false positives: " << setosaStats.getFalsePositives() << ", false negatives: " << setosaStats.getFalseNegatives() << std::endl;
+	if (nrOutputs > 1) std::cout << "Versicolor true positives: " << versicolorStats.getTruePositives() << ", true negatives: " << versicolorStats.getTrueNegatives() << ", false positives: " << versicolorStats.getFalsePositives() << ", false negatives: " << versicolorStats.getFalseNegatives() << std::endl;
+	if (nrOutputs > 2) std::cout << "Virginica true positives: " << virginicaStats.getTruePositives() << ", true negatives: " << virginicaStats.getTrueNegatives() << ", false positives: " << virginicaStats.getFalsePositives() << ", false negatives: " << virginicaStats.getFalseNegatives() << std::endl;
+    std::cout << std::endl;
+	
+	std::cout << "Setosa accuracy: " << setosaStats.getAccuracy() << std::endl;
+	if (nrOutputs > 1) std::cout << "Versicolor accuracy: " << versicolorStats.getAccuracy() << std::endl;
+	if (nrOutputs > 2) std::cout << "Virginica accuracy: " << virginicaStats.getAccuracy() << std::endl;
+	std::cout << std::endl;
+
+	std::cout << "Setosa specificity: " << setosaStats.getSpecificity() << std::endl;
+	if (nrOutputs > 1) std::cout << "Versicolor specificity: " << versicolorStats.getSpecificity() << std::endl;
+	if (nrOutputs > 2) std::cout << "Virginica specificity: " << virginicaStats.getSpecificity() << std::endl;
+	std::cout << std::endl;
+
+	std::cout << "Setosa precision: " << setosaStats.getPrecision() << std::endl;
+	if (nrOutputs > 1) std::cout << "Versicolor precision: " << versicolorStats.getPrecision() << std::endl;
+	if (nrOutputs > 2) std::cout << "Virginica precision: " << virginicaStats.getPrecision() << std::endl;
+	std::cout << std::endl;
+
+	std::cout << "Setosa recall: " << setosaStats.getRecall() << std::endl;
+	if (nrOutputs > 1) std::cout << "Versicolor recall: " << versicolorStats.getRecall() << std::endl;
+	if (nrOutputs > 2) std::cout << "Virginica recall: " << virginicaStats.getRecall() << std::endl;
+	std::cout << std::endl;
+
+	return true;
+}
+
+bool NeuralNetworksTests()
+{
+	return XORNeuralNetworksTests() && IrisNeuralNetworkTest();
 }

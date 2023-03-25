@@ -80,7 +80,7 @@ namespace LossFunctions
 	public:
 		OutputType operator()(const OutputType& output, const OutputType& target) const
 		{
-			static const double eps = 1E-10;
+			static const double eps = 1E-8;
 			const OutputType ones = OutputType::Ones(output.size());
 
 			OutputType l1(output.size());
@@ -97,7 +97,7 @@ namespace LossFunctions
 
 		OutputType derivative(const OutputType& output, const OutputType& target) const
 		{
-			static const double eps = 1E-10;
+			static const double eps = 1E-8;
 			OutputType d(output.size());
 
 			for (int i = 0; i < output.size(); ++i)
@@ -113,13 +113,13 @@ namespace LossFunctions
 	public:
 		double operator()(const double& output, const double& target) const
 		{
-			static const double eps = 1E-10;
+			static const double eps = 1E-8;
 			return -(target * log(output + eps) + (1. - target) * log(1. + eps - output));
 		}
 
 		double derivative(const double& output, const double& target) const
 		{
-			static const double eps = 1E-10;
+			static const double eps = 1E-8;
 
 			return (output - target) / (output * (1. + eps - output));
 		}
@@ -131,7 +131,7 @@ namespace LossFunctions
 	public:
 		OutputType operator()(const OutputType& output, const OutputType& target) const
 		{
-			static const double eps = 1E-10;
+			static const double eps = 1E-8;
 
 			OutputType l1(output.size());
 			for (int i = 0; i < output.size(); ++i)
@@ -142,9 +142,13 @@ namespace LossFunctions
 
 		OutputType derivative(const OutputType& output, const OutputType& target) const
 		{
-			static const double eps = 1E-10;
+			static const double eps = 1E-8;
 
-			return -target / (output + eps);
+			OutputType res(output.size());
+			for (int i = 0; i < output.size(); ++i)
+				res(i) = -target(i) / (output(i) + eps);
+
+			return res;
 		}
 	};
 

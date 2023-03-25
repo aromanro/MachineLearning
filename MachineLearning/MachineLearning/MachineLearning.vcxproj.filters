@@ -95,5 +95,11 @@
     <ClInclude Include="DataFileBase.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="TestStatistics.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Softmax.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

@@ -171,7 +171,9 @@
     <ClInclude Include="ActivationFunctions.h" />
     <ClInclude Include="SimpleLinearRegression.h" />
     <ClInclude Include="NeuralSublayer.h" />
+    <ClInclude Include="Softmax.h" />
     <ClInclude Include="Tests.h" />
+    <ClInclude Include="TestStatistics.h" />
     <ClInclude Include="WeightsInitializer.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
