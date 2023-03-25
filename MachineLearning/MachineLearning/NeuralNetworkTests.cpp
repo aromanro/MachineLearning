@@ -374,7 +374,7 @@ bool IrisNeuralNetworkTest()
 
 	// train the model
 
-	const int batchSize = 32;
+	const int batchSize = 64;
 
 	Eigen::MatrixXd in(4, batchSize);
 	Eigen::MatrixXd out(nrOutputs, batchSize);
