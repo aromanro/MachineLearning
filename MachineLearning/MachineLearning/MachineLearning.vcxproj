@@ -152,6 +152,7 @@
     <ClCompile Include="MachineLearning.cpp" />
     <ClCompile Include="NeuralNetworkTests.cpp" />
     <ClCompile Include="SimpleLinearTests.cpp" />
+    <ClCompile Include="SoftmaxTests.cpp" />
     <ClCompile Include="Tests.cpp" />
   </ItemGroup>
   <ItemGroup>

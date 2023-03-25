@@ -129,10 +129,9 @@ namespace GLM {
 			BaseType::W.resize(szo, szi);
 
 			// Eigen has a Random generator (random between -1 and 1 by default), but for now I'll stick with this one:
-			// it's easier to reproduce issues this way, too
 
 			std::random_device rd;
-			std::mt19937 rde(/*42*/rd());
+			std::mt19937 rde(rd());
 			const double x = 1. / sqrt(szi);
 			std::uniform_real_distribution<> dist(-x, x);
 			for (int i = 0; i < szo; ++i)

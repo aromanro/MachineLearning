@@ -4,6 +4,7 @@
 
 namespace SGD
 {
+
 	typedef SGD::GradientDescentSolver<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, Eigen::MatrixXd, Eigen::MatrixXd, ActivationFunctions::SoftmaxFunction<Eigen::VectorXd>, LossFunctions::CrossEntropyLoss<Eigen::VectorXd>> SoftmaxRegressionGradientDescentSolver;
 	typedef SGD::MomentumSolver<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, Eigen::MatrixXd, Eigen::MatrixXd, ActivationFunctions::SoftmaxFunction<Eigen::VectorXd>, LossFunctions::CrossEntropyLoss<Eigen::VectorXd>> SoftmaxRegressionMomentumSolver;
 	typedef SGD::AdaGradSolver<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, Eigen::MatrixXd, Eigen::MatrixXd, ActivationFunctions::SoftmaxFunction<Eigen::VectorXd>, LossFunctions::CrossEntropyLoss<Eigen::VectorXd>> SoftmaxRegressionAdaGradSolver;

@@ -48,9 +48,16 @@ bool AllTests()
 
 			if (res)
 			{
-				std::cout << std::endl << "Neural: " << std::endl << std::endl;
+				std::cout << std::endl << "Softmax: " << std::endl << std::endl;
 
-				res = NeuralNetworksTests();
+				res = SoftmaxTests();
+
+				if (res)
+				{
+					std::cout << std::endl << "Neural: " << std::endl << std::endl;
+
+					res = NeuralNetworksTests();
+				}
 			}
 		}
 	}

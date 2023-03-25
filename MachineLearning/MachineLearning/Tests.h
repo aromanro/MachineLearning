@@ -26,6 +26,7 @@ double polyFunction(double x);
 bool SimpleLinearRegressionTests();
 bool LinearRegressionTests();
 bool LogisticRegressionTests();
+bool SoftmaxTests();
 bool NeuralNetworksTests();
 
 bool AllTests();

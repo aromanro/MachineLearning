@@ -468,7 +468,8 @@ namespace SGD
 
 
 
-	template<typename InputType = Eigen::VectorXd, typename OutputType = InputType, typename WeightsType = Eigen::MatrixXd, typename BatchInputType = Eigen::MatrixXd, typename BatchOutputType = BatchInputType, class ActivationFunction = ActivationFunctions::IdentityFunction<OutputType>, class LossFunction = L2Loss<OutputType>>
+	template<typename InputType = Eigen::VectorXd, typename OutputType = InputType, typename WeightsType = Eigen::MatrixXd, typename BatchInputType = Eigen::MatrixXd, typename BatchOutputType = BatchInputType, 
+		class ActivationFunction = ActivationFunctions::IdentityFunction<OutputType>, class LossFunction = LossFunctions::L2Loss<OutputType>>
 	class RMSPropSolver : public GradientDescentSolverBase<InputType, OutputType, WeightsType, BatchInputType, BatchOutputType, ActivationFunction, LossFunction>
 	{
 	public:
