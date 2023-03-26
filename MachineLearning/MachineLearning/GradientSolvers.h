@@ -99,7 +99,13 @@ namespace SGD
 
 			for (int c = 0; c < target.cols(); ++c)
 			{
-				lossLinkGrad.col(c) = norm * BaseType::activationFunction.derivative(linpred.col(c)).cwiseProduct(BaseType::lastLayer ? BaseType::lossFunction.derivative(pred.col(c), target.col(c)) : target.col(c));
+				const OutputType lossDerivative = BaseType::lastLayer ? BaseType::lossFunction.derivative(pred.col(c), target.col(c)) : target.col(c);
+
+				if (BaseType::activationFunction.isDerivativeMatrix())
+					lossLinkGrad.col(c) = norm * BaseType::activationFunction.derivative(linpred.col(c)).transpose() * lossDerivative;
+				else
+					lossLinkGrad.col(c) = norm * BaseType::activationFunction.derivative(linpred.col(c)).cwiseProduct(lossDerivative);
+
 				// clip it if necessary
 				const double n = sqrt(lossLinkGrad.col(c).cwiseProduct(lossLinkGrad.col(c)).sum());
 				if (n > BaseType::lim)

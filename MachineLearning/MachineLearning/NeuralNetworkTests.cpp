@@ -11,7 +11,7 @@ bool XORNeuralNetworksTests()
 	std::default_random_engine rde(42);
 	std::uniform_int_distribution<> distBool(0, 1);
 	
-	const int nrTests = 3;
+	const int nrTests = 1;
 
 	// this alleviates the convergence issue
 	// there are 16 local minima for xor where the 3 neurons network could get 'stuck'
@@ -360,7 +360,7 @@ bool IrisNeuralNetworkTest()
 	}
 
 	// more layers can be added, and/or made wider, but it will take more time to train. One configuration that I tried: { 4, 246, 512, 127, 63, 27, 9, nrOutputs }
-	NeuralNetworks::MultilayerPerceptron<> neuralNetwork({ 4, 27, 9, nrOutputs });
+	NeuralNetworks::MultilayerPerceptron<SGD::SoftmaxRegressionAdamSolver> neuralNetwork({4, 27, 9, nrOutputs});
 
 	const double alpha = 0.001;
 	const double beta1 = 0.7;

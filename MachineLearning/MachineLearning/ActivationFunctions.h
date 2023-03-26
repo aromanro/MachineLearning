@@ -25,6 +25,11 @@ namespace ActivationFunctions
 		{
 			return InputOutputType::Ones(input.size());
 		}
+
+		static bool isDerivativeMatrix()
+		{
+			return false;
+		}
 	};
 
 	template<> class IdentityFunction<double>
@@ -42,6 +47,11 @@ namespace ActivationFunctions
 		const double derivative(const double& input) const
 		{
 			return 1;
+		}
+
+		static bool isDerivativeMatrix()
+		{
+			return false;
 		}
 	};
 
@@ -84,6 +94,11 @@ namespace ActivationFunctions
 			return fx.cwiseProduct(InputOutputType::Ones(fx.rows(), fx.cols()) - fx);
 		}
 
+		static bool isDerivativeMatrix()
+		{
+			return false;
+		}
+
 	protected:
 		InputOutputType beta0;
 		InputOutputType beta;
@@ -115,6 +130,11 @@ namespace ActivationFunctions
 			return fx * (1. - fx);
 		}
 
+		static bool isDerivativeMatrix()
+		{
+			return false;
+		}
+
 	protected:
 		double beta0;
 		double beta;
@@ -142,6 +162,11 @@ namespace ActivationFunctions
 
 			return InputOutputType::Ones(fx.rows(), fx.cols()) - fx.cwiseProduct(fx);
 		}
+
+		static bool isDerivativeMatrix()
+		{
+			return false;
+		}
 	};
 
 	template<> class TanhFunction<double>
@@ -161,6 +186,11 @@ namespace ActivationFunctions
 			const double fx = operator()(input);
 
 			return 1. - fx * fx;
+		}
+
+		static bool isDerivativeMatrix()
+		{
+			return false;
 		}
 	};
 
@@ -187,6 +217,11 @@ namespace ActivationFunctions
 
 			return fx.cwiseInverse();
 		}
+
+		static bool isDerivativeMatrix()
+		{
+			return false;
+		}
 	};
 
 	template<> class SoftplusFunction<double>
@@ -206,6 +241,11 @@ namespace ActivationFunctions
 			const double fx = operator()(-input);
 
 			return 1. / fx;
+		}
+
+		static bool isDerivativeMatrix()
+		{
+			return false;
 		}
 	};
 
@@ -238,6 +278,11 @@ namespace ActivationFunctions
 
 			return out;
 		}
+
+		static bool isDerivativeMatrix()
+		{
+			return false;
+		}
 	};
 
 	template<> class RELUFunction<double>
@@ -255,6 +300,11 @@ namespace ActivationFunctions
 		double derivative(const double& input) const
 		{
 			return (input < 0) ? 0 : 1;
+		}
+
+		bool isDerivativeMatrix() const
+		{
+			return false;
 		}
 	};
 
@@ -291,6 +341,11 @@ namespace ActivationFunctions
 			return out;
 		}
 
+		static bool isDerivativeMatrix()
+		{
+			return false;
+		}
+
 	protected:
 		double alpha = 0.01;
 	};
@@ -315,6 +370,11 @@ namespace ActivationFunctions
 		double derivative(const double& input) const
 		{
 			return (input < 0) ? alpha : 1.;
+		}
+
+		static bool isDerivativeMatrix()
+		{
+			return false;
 		}
 
 	protected:
@@ -356,6 +416,11 @@ namespace ActivationFunctions
 					output(i, j) = fx(i) * (((i == j) ? 1. : 0.) - fx(j));
 
 			return output;
+		}
+
+		static bool isDerivativeMatrix()
+		{
+			return true;
 		}
 	};
 

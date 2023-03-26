@@ -440,7 +440,7 @@ bool IrisLogisticRegressionTest()
 
 	// train the model
 
-	const int batchSize = 32;
+	const int batchSize = 64;
 
 	Eigen::MatrixXd in(4, batchSize);
 	Eigen::MatrixXd out(nrOutputs, batchSize);
@@ -464,7 +464,7 @@ bool IrisLogisticRegressionTest()
 			if (nrOutputs > 2) out(2, b) = (std::get<4>(record) == "Iris-virginica") ? 1 : 0;
 		}
 		logisticModel.AddBatch(in, out);
-		if (i % 10 == 0)
+		if (i % 100 == 0)
 		{
 			double loss = logisticModel.getLoss() / batchSize;
 			std::cout << "Loss: " << loss << std::endl;
