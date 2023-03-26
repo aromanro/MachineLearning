@@ -359,6 +359,7 @@ bool IrisNeuralNetworkTest()
 		testSet[i] = std::make_tuple(x(0, 0), x(1, 0), x(2, 0), x(3, 0), std::get<4>(testSet[i]));
 	}
 
+	// more layers can be added, and/or made wider, but it will take more time to train. One configuration that I tried: { 4, 246, 512, 127, 63, 27, 9, nrOutputs }
 	NeuralNetworks::MultilayerPerceptron<> neuralNetwork({ 4, 27, 9, nrOutputs });
 
 	const double alpha = 0.001;
