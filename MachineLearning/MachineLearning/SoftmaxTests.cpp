@@ -175,29 +175,9 @@ bool SoftmaxTests()
 		if (nrOutputs > 2) virginicaStats.AddPrediction(res(2) > 0.5, out(2, 0) > 0.5);
 	}
 
-	std::cout << std::endl << "Setosa true positives: " << setosaStats.getTruePositives() << ", true negatives: " << setosaStats.getTrueNegatives() << ", false positives: " << setosaStats.getFalsePositives() << ", false negatives: " << setosaStats.getFalseNegatives() << std::endl;
-	if (nrOutputs > 1) std::cout << "Versicolor true positives: " << versicolorStats.getTruePositives() << ", true negatives: " << versicolorStats.getTrueNegatives() << ", false positives: " << versicolorStats.getFalsePositives() << ", false negatives: " << versicolorStats.getFalseNegatives() << std::endl;
-	if (nrOutputs > 2) std::cout << "Virginica true positives: " << virginicaStats.getTruePositives() << ", true negatives: " << virginicaStats.getTrueNegatives() << ", false positives: " << virginicaStats.getFalsePositives() << ", false negatives: " << virginicaStats.getFalseNegatives() << std::endl;
-	std::cout << std::endl;
-
-	std::cout << "Setosa accuracy: " << setosaStats.getAccuracy() << std::endl;
-	if (nrOutputs > 1) std::cout << "Versicolor accuracy: " << versicolorStats.getAccuracy() << std::endl;
-	if (nrOutputs > 2) std::cout << "Virginica accuracy: " << virginicaStats.getAccuracy() << std::endl;
-	std::cout << std::endl;
-
-	std::cout << "Setosa specificity: " << setosaStats.getSpecificity() << std::endl;
-	if (nrOutputs > 1) std::cout << "Versicolor specificity: " << versicolorStats.getSpecificity() << std::endl;
-	if (nrOutputs > 2) std::cout << "Virginica specificity: " << virginicaStats.getSpecificity() << std::endl;
-	std::cout << std::endl;
-
-	std::cout << "Setosa precision: " << setosaStats.getPrecision() << std::endl;
-	if (nrOutputs > 1) std::cout << "Versicolor precision: " << versicolorStats.getPrecision() << std::endl;
-	if (nrOutputs > 2) std::cout << "Virginica precision: " << virginicaStats.getPrecision() << std::endl;
-	std::cout << std::endl;
-
-	std::cout << "Setosa recall: " << setosaStats.getRecall() << std::endl;
-	if (nrOutputs > 1) std::cout << "Versicolor recall: " << versicolorStats.getRecall() << std::endl;
-	if (nrOutputs > 2) std::cout << "Virginica recall: " << virginicaStats.getRecall() << std::endl;
+	setosaStats.PrintStatistics("Setosa");
+	if (nrOutputs > 1) versicolorStats.PrintStatistics("Versicolor");
+	if (nrOutputs > 2) virginicaStats.PrintStatistics("Virginica");
 	std::cout << std::endl;
 
 	setosaStats.Clear();
@@ -223,29 +203,9 @@ bool SoftmaxTests()
 		if (nrOutputs > 2) virginicaStats.AddPrediction(res(2) > 0.5, out(2, 0) > 0.5);
 	}
 
-	std::cout << std::endl << "Setosa true positives: " << setosaStats.getTruePositives() << ", true negatives: " << setosaStats.getTrueNegatives() << ", false positives: " << setosaStats.getFalsePositives() << ", false negatives: " << setosaStats.getFalseNegatives() << std::endl;
-	if (nrOutputs > 1) std::cout << "Versicolor true positives: " << versicolorStats.getTruePositives() << ", true negatives: " << versicolorStats.getTrueNegatives() << ", false positives: " << versicolorStats.getFalsePositives() << ", false negatives: " << versicolorStats.getFalseNegatives() << std::endl;
-	if (nrOutputs > 2) std::cout << "Virginica true positives: " << virginicaStats.getTruePositives() << ", true negatives: " << virginicaStats.getTrueNegatives() << ", false positives: " << virginicaStats.getFalsePositives() << ", false negatives: " << virginicaStats.getFalseNegatives() << std::endl;
-	std::cout << std::endl;
-
-	std::cout << "Setosa accuracy: " << setosaStats.getAccuracy() << std::endl;
-	if (nrOutputs > 1) std::cout << "Versicolor accuracy: " << versicolorStats.getAccuracy() << std::endl;
-	if (nrOutputs > 2) std::cout << "Virginica accuracy: " << virginicaStats.getAccuracy() << std::endl;
-	std::cout << std::endl;
-
-	std::cout << "Setosa specificity: " << setosaStats.getSpecificity() << std::endl;
-	if (nrOutputs > 1) std::cout << "Versicolor specificity: " << versicolorStats.getSpecificity() << std::endl;
-	if (nrOutputs > 2) std::cout << "Virginica specificity: " << virginicaStats.getSpecificity() << std::endl;
-	std::cout << std::endl;
-
-	std::cout << "Setosa precision: " << setosaStats.getPrecision() << std::endl;
-	if (nrOutputs > 1) std::cout << "Versicolor precision: " << versicolorStats.getPrecision() << std::endl;
-	if (nrOutputs > 2) std::cout << "Virginica precision: " << virginicaStats.getPrecision() << std::endl;
-	std::cout << std::endl;
-
-	std::cout << "Setosa recall: " << setosaStats.getRecall() << std::endl;
-	if (nrOutputs > 1) std::cout << "Versicolor recall: " << versicolorStats.getRecall() << std::endl;
-	if (nrOutputs > 2) std::cout << "Virginica recall: " << virginicaStats.getRecall() << std::endl;
+	setosaStats.PrintStatistics("Setosa");
+	if (nrOutputs > 1) versicolorStats.PrintStatistics("Versicolor");
+	if (nrOutputs > 2) virginicaStats.PrintStatistics("Virginica");
 	std::cout << std::endl;
 
 	return true;

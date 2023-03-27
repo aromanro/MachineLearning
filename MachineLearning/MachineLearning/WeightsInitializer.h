@@ -130,20 +130,6 @@ namespace Initializers
 		}
 	};
 
-	class WeightsInitializerLecunUniform : public WeightsInitializerImpl
-	{
-	public:
-		WeightsInitializerLecunUniform()
-		{
-		}
-		double get(int nrIn = 1, int nrOut = 1) override
-		{
-			const double x = sqrt(3. / nrIn);
-			std::uniform_real_distribution<> dist(-x, x);
-			return dist(rde);
-		}
-	};
-
 	class WeightsInitializerXavierNormal : public WeightsInitializerImpl
 	{
 	public:

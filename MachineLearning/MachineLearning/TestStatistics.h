@@ -77,6 +77,18 @@ namespace Utils {
 			falseNegatives = 0;
 		}
 
+		void PrintStatistics(const std::string& name)
+		{
+			std::cout << std::endl << name << " true positives: " << getTruePositives() << ", true negatives: " << getTrueNegatives() << ", false positives: " << getFalsePositives() << ", false negatives: " << getFalseNegatives() << std::endl;
+
+			std::cout << name << " accuracy: " << getAccuracy() << std::endl;
+			std::cout << name << " specificity: " << getSpecificity() << std::endl;
+			std::cout << name << " precision: " << getPrecision() << std::endl;
+			std::cout << name << " recall: " << getRecall() << std::endl;
+
+			std::cout << std::endl;
+		}
+
 	protected:
 		int truePositives = 0;
 		int trueNegatives = 0;
