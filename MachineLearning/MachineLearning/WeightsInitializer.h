@@ -10,7 +10,7 @@ namespace Initializers
 	public:
 		virtual ~WeightsInitializerInterface() {}
 
-		virtual double get() = 0;
+		virtual double get(int nrIn = 1, int nrOut = 1) = 0;
 	};
 
 	class WeightsInitializerImpl : public WeightsInitializerInterface
@@ -35,7 +35,7 @@ namespace Initializers
 		{
 		}
 
-		double get() override
+		double get(int nrIn = 1, int nrOut = 1) override
 		{
 			return 0;
 		}
@@ -49,7 +49,7 @@ namespace Initializers
 		{
 		}
 
-		double get() override
+		double get(int nrIn = 1, int nrOut = 1) override
 		{
 			double v = dist(rde);
 
@@ -76,13 +76,117 @@ namespace Initializers
 		{
 		}
 
-		double get() override
+		double get(int nrIn = 1, int nrOut = 1) override
 		{
 			return dist(rde);
 		}
 
 	protected:
 		std::uniform_real_distribution<> dist;
+	};
+
+	class WeightsInitializerXavierUniform : public WeightsInitializerImpl
+	{
+	public:
+		WeightsInitializerXavierUniform()
+		{
+		}
+		
+		double get(int nrIn = 1, int nrOut = 1) override
+		{
+			const double x = 1. / sqrt(nrIn);
+			std::uniform_real_distribution<> dist(-x, x);
+			return dist(rde);
+		}
+	};
+
+	class WeightsInitializerHeUniform : public WeightsInitializerImpl
+	{
+	public:
+		WeightsInitializerHeUniform()
+		{
+		}
+
+		double get(int nrIn = 1, int nrOut = 1) override
+		{
+			const double x = sqrt(2. / nrIn);
+			std::uniform_real_distribution<> dist(-x, x);
+			return dist(rde);
+		}
+	};
+
+	class WeightsInitializerGlorotUniform : public WeightsInitializerImpl
+	{
+	public:
+		WeightsInitializerGlorotUniform()
+		{
+		}
+
+		double get(int nrIn = 1, int nrOut = 1) override
+		{
+			const double x = sqrt(6. / (nrIn + nrOut));
+			std::uniform_real_distribution<> dist(-x, x);
+			return dist(rde);
+		}
+	};
+
+	class WeightsInitializerLecunUniform : public WeightsInitializerImpl
+	{
+	public:
+		WeightsInitializerLecunUniform()
+		{
+		}
+		double get(int nrIn = 1, int nrOut = 1) override
+		{
+			const double x = sqrt(3. / nrIn);
+			std::uniform_real_distribution<> dist(-x, x);
+			return dist(rde);
+		}
+	};
+
+	class WeightsInitializerXavierNormal : public WeightsInitializerImpl
+	{
+	public:
+		WeightsInitializerXavierNormal()
+		{
+		}
+
+		double get(int nrIn = 1, int nrOut = 1) override
+		{
+			const double x = 1. / sqrt(nrIn);
+			std::normal_distribution<> dist(0, x);
+			return dist(rde);
+		}
+	};
+
+	class WeightsInitializerHeNormal : public WeightsInitializerImpl
+	{
+	public:
+		WeightsInitializerHeNormal()
+		{
+		}
+
+		double get(int nrIn = 1, int nrOut = 1) override
+		{
+			const double x = sqrt(2. / nrIn);
+			std::normal_distribution<> dist(0, x);
+			return dist(rde);
+		}
+	};
+
+	class WeightsInitializerGlorotNormal : public WeightsInitializerImpl
+	{
+	public:
+		WeightsInitializerGlorotNormal()
+		{
+		}
+
+		double get(int nrIn = 1, int nrOut = 1) override
+		{
+			const double x = sqrt(6. / (nrIn + nrOut));
+			std::normal_distribution<> dist(0, x);
+			return dist(rde);
+		}
 	};
 
 }

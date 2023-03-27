@@ -372,6 +372,9 @@ bool IrisNeuralNetworkTest()
 	//Initializers::WeightsInitializerUniform initializer(-0.01, 0.01);
 	//neuralNetwork.Initialize(initializer);
 
+	Initializers::WeightsInitializerGlorotNormal initializer;
+	neuralNetwork.Initialize(initializer);
+
 
 	// train the model
 

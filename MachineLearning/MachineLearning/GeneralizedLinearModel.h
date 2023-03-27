@@ -86,7 +86,7 @@ namespace GLM {
 		{
 			for (int j = 0; j < BaseType::W.cols(); ++j)
 				for (int i = 0; i < BaseType::W.rows(); ++i)
-					BaseType::W(i, j) = initializer.get();
+					BaseType::W(i, j) = initializer.get(BaseType::getNrInputs(), BaseType::getNrOutputs());
 		}
 
 

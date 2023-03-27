@@ -107,11 +107,17 @@ namespace Utils {
 			labelsStream.close();
 		}
 
-		bool ReadImage(std::vector<uint8_t>& img)
+		bool ReadImage(std::vector<double>& img)
 		{
 			if (!imagesStream.good()) return false;
-			img.resize(28 * 28);
-			imagesStream.read((char*)img.data(), img.size());
+			
+			std::vector<uint8_t> imgbuf(28 * 28);
+			imagesStream.read((char*)imgbuf.data(), imgbuf.size());
+			
+			img.resize(imgbuf.size());
+			for (size_t i = 0; i < imgbuf.size(); ++i)
+				img[i] = (double)imgbuf[i] / 255.;
+
 			return true;
 		}
 
@@ -122,10 +128,9 @@ namespace Utils {
 			return true;
 		}
 
-
-		std::pair<std::vector<uint8_t>, uint8_t> ReadImageAndLabel()
+		std::pair<std::vector<double>, uint8_t> ReadImageAndLabel()
 		{
-			std::vector<uint8_t> img;
+			std::vector<double> img;
 			uint8_t label = 0xFF; // invalid, read values will be 0-9
 
 			if (ReadImage(img))
@@ -134,9 +139,9 @@ namespace Utils {
 			return std::make_pair(img, label);
 		}
 
-		std::vector<std::pair<std::vector<uint8_t>, uint8_t>> ReadAllImagesAndLabels()
+		std::vector<std::pair<std::vector<double>, uint8_t>> ReadAllImagesAndLabels()
 		{
-			std::vector<std::pair<std::vector<uint8_t>, uint8_t>> res;
+			std::vector<std::pair<std::vector<double>, uint8_t>> res;
 
 			while (imagesStream.good() && labelsStream.good())
 			{
