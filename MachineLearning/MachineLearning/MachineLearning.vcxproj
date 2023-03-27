@@ -163,6 +163,7 @@
     <ClInclude Include="GeneralizedLinearModel.h" />
     <ClInclude Include="Gnuplot.h" />
     <ClInclude Include="GradientSolvers.h" />
+    <ClInclude Include="MINSTDatabase.h" />
     <ClInclude Include="NeuralLayer.h" />
     <ClInclude Include="LogisticRegression.h" />
     <ClInclude Include="NeuralNetwork.h" />
