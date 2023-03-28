@@ -569,6 +569,7 @@ bool NeuralNetworkTestsMNIST()
 	testInputs = testInputs.colwise() - pixelsNormalizer.getAverageInput();
 
 	// create the model
+	// also tested { nrInputs, 1000, 300, 80, nrOutputs }
 	NeuralNetworks::MultilayerPerceptron<SGD::SoftmaxRegressionAdamSolver> neuralNetwork({ nrInputs, 1000, 100, nrOutputs});
 
 	const double alpha = 0.0005;
