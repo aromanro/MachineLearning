@@ -4,17 +4,23 @@
 #include <iostream>
 #include <sstream>
 #include <vector>
+#include <winsock.h>
 
 #include "DataFileBase.h"
 
 namespace Utils {
 
-	class MINSTDatabase
+	class MNISTDatabase
 	{
 	public:
-		MINSTDatabase() {}
+		MNISTDatabase() 
+		{
+			setRelativePath("../../Datasets/");
+			setImagesFileName("emnist-digits-train-images-idx3-ubyte");
+			setLabelsFileName("emnist-digits-train-labels-idx1-ubyte");
+		}
 
-		virtual ~MINSTDatabase() 
+		virtual ~MNISTDatabase() 
 		{
 			Close();
 		}
@@ -52,6 +58,7 @@ namespace Utils {
 			// check magic
 			uint32_t magic = 0;
 			imagesStream.read((char*)&magic, sizeof(uint32_t));
+			magic = ntohl(magic);
 			if (magic != 0x803) 
 			{
 				imagesStream.close();
@@ -60,11 +67,15 @@ namespace Utils {
 
 			uint32_t cntImgs = 0;
 			imagesStream.read((char*)&cntImgs, sizeof(uint32_t));
+			cntImgs = ntohl(cntImgs);
 
 			uint32_t rows = 0;	
 			imagesStream.read((char*)&rows, sizeof(uint32_t));
+			rows = ntohl(rows);
+
 			uint32_t cols = 0;
 			imagesStream.read((char*)&cols, sizeof(uint32_t));
+			cols = ntohl(cols);
 
 			if (rows != cols || rows != 28)
 			{
@@ -80,7 +91,8 @@ namespace Utils {
 			}
 			// check magic
 			magic = 0;
-			labelsStream.read((char*) magic, sizeof(uint32_t));
+			labelsStream.read((char*) &magic, sizeof(uint32_t));
+			magic = ntohl(magic);
 			if (magic != 0x801) 
 			{
 				Close();
@@ -90,6 +102,7 @@ namespace Utils {
 
 			uint32_t cntLabels = 0;
 			labelsStream.read((char*)&cntLabels, sizeof(uint32_t));
+			cntLabels = ntohl(cntLabels);
 
 			if (cntLabels != cntImgs)
 			{

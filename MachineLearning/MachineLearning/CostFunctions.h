@@ -1,6 +1,6 @@
 #pragma once
 
-#include <Eigen/eigen>
+#include <Eigen/Eigen>
 //#include <unsupported/Eigen/MatrixFunctions>
 
 namespace LossFunctions

@@ -19,7 +19,7 @@ namespace GLM {
 		{
 		}
 
-		virtual ~GeneralizedLinearModelBase() {}
+		virtual ~GeneralizedLinearModelBase() = default;
 
 		virtual OutputType Predict(const InputType& input)
 		{
@@ -58,6 +58,12 @@ namespace GLM {
 			return outputs;
 		}
 
+		Solver& getSolver()
+		{
+			return solver;
+
+		}
+
 	protected:
 		int inputs;
 		int outputs;
@@ -65,7 +71,6 @@ namespace GLM {
 		WeightsType W;
 		OutputType b;
 
-	public:
 		Solver solver;
 	};
 

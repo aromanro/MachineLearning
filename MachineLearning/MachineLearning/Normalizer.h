@@ -1,6 +1,6 @@
 #pragma once
 
-#include <Eigen/eigen>
+#include <Eigen/Eigen>
 
 namespace Norm
 {
@@ -24,25 +24,25 @@ namespace Norm
 			sum2Output = OutputType::Zero(szo);
 		}
 
-		const InputType getAverageInput() const
+		InputType getAverageInput() const
 		{
 			return sumInput / samplesCount;
 		}
 
-		const OutputType getAverageOutput() const
+		OutputType getAverageOutput() const
 		{
 			return sumOutput / samplesCount;
 		}
 
 
-		const InputType getVarianceInput() const
+		InputType getVarianceInput() const
 		{
 			InputType avg = getAverageInput();
 
 			return sum2Input / samplesCount - avg.cwiseProduct(avg);
 		}
 
-		const OutputType getVarianceOutput() const
+		OutputType getVarianceOutput() const
 		{
 			OutputType avg = getAverageOutput();
 
@@ -65,7 +65,7 @@ namespace Norm
 			samplesCount += static_cast<int>(batchInput.cols());
 		}
 
-	protected:
+	private:
 		int samplesCount;
 
 		InputType sumInput;
@@ -95,25 +95,25 @@ namespace Norm
 			sum2Output = 0;
 		}
 
-		const double getAverageInput() const
+		double getAverageInput() const
 		{
 			return sumInput / samplesCount;
 		}
 
-		const double getAverageOutput() const
+		double getAverageOutput() const
 		{
 			return sumOutput / samplesCount;
 		}
 
 
-		const double getVarianceInput() const
+		double getVarianceInput() const
 		{
 			double avg = getAverageInput();
 
 			return sum2Input / samplesCount - avg * avg;
 		}
 
-		const double getVarianceOutput() const
+		double getVarianceOutput() const
 		{
 			double avg = getAverageOutput();
 
@@ -136,7 +136,7 @@ namespace Norm
 			samplesCount += static_cast<int>(batchInput.cols());
 		}
 
-	protected:
+	private:
 		int samplesCount;
 
 		double sumInput;
@@ -166,25 +166,25 @@ namespace Norm
 			sum2Output = 0;
 		}
 
-		const Eigen::VectorXd getAverageInput() const
+		Eigen::VectorXd getAverageInput() const
 		{
 			return sumInput / samplesCount;
 		}
 
-		const double getAverageOutput() const
+		double getAverageOutput() const
 		{
 			return sumOutput / samplesCount;
 		}
 
 
-		const Eigen::VectorXd getVarianceInput() const
+		Eigen::VectorXd getVarianceInput() const
 		{
 			Eigen::VectorXd avg = getAverageInput();
 
 			return sum2Input / samplesCount - avg.cwiseProduct(avg);
 		}
 
-		const double getVarianceOutput() const
+		double getVarianceOutput() const
 		{
 			double avg = getAverageOutput();
 
@@ -207,7 +207,7 @@ namespace Norm
 			samplesCount += static_cast<int>(batchInput.cols());
 		}
 
-	protected:
+	private:
 		int samplesCount;
 
 		Eigen::VectorXd sumInput;

@@ -104,7 +104,7 @@
     <ClInclude Include="Softmax.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="MINSTDatabase.h">
+    <ClInclude Include="MNISTDatabase.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

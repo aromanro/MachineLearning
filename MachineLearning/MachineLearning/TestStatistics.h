@@ -19,44 +19,44 @@ namespace Utils {
 			}
 		}
 
-		int getTruePositives() const
+		long long int getTruePositives() const
 		{
 			return truePositives;
 		}
 
-		int getTrueNegatives() const
+		long long int getTrueNegatives() const
 		{
 			return trueNegatives;
 		}
 
-		int getFalsePositives() const
+		long long int getFalsePositives() const
 		{
 			return falsePositives;
 		}
 
-		int getFalseNegatives() const
+		long long int getFalseNegatives() const
 		{
 			return falseNegatives;
 		}
 
 		double getAccuracy() const
 		{
-			return static_cast<double>(truePositives + trueNegatives) / (truePositives + trueNegatives + falsePositives + falseNegatives);
+			return static_cast<double>(truePositives + trueNegatives) / static_cast<double>(truePositives + trueNegatives + falsePositives + falseNegatives);
 		}
 
 		double getSpecificity() const
 		{
-			return static_cast<double>(trueNegatives) / (trueNegatives + falsePositives);
+			return static_cast<double>(trueNegatives) / static_cast<double>(trueNegatives + falsePositives);
 		}
 
 		double getPrecision() const
 		{
-			return static_cast<double>(truePositives) / (truePositives + falsePositives);
+			return static_cast<double>(truePositives) / static_cast<double>(truePositives + falsePositives);
 		}
 
 		double getRecall() const
 		{
-			return static_cast<double>(truePositives) / (truePositives + falseNegatives);
+			return static_cast<double>(truePositives) / static_cast<double>(truePositives + falseNegatives);
 		}
 
 		double getF1Score() const
@@ -85,15 +85,16 @@ namespace Utils {
 			std::cout << name << " specificity: " << getSpecificity() << std::endl;
 			std::cout << name << " precision: " << getPrecision() << std::endl;
 			std::cout << name << " recall: " << getRecall() << std::endl;
+			std::cout << name << " F1 score: " << getF1Score() << std::endl;
 
 			std::cout << std::endl;
 		}
 
 	protected:
-		int truePositives = 0;
-		int trueNegatives = 0;
-		int falsePositives = 0;
-		int falseNegatives = 0;
+		long long int truePositives = 0;
+		long long int trueNegatives = 0;
+		long long int falsePositives = 0;
+		long long int falseNegatives = 0;
 	};
 
 }

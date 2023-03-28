@@ -3,6 +3,7 @@
 #include "NeuralNetwork.h"
 #include "CSVDataFile.h"
 #include "TestStatistics.h"
+#include "MNISTDatabase.h"
 #include "Softmax.h"
 
 
@@ -51,13 +52,13 @@ bool XORNeuralNetworksTests()
 
 		GLM::LogisticRegression<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, SGD::LogisticRegressionAdamSolver> modelLastLayer(numHiddenNeurons, 1);
 
-		modelLastLayer.solver.alpha = alpha;
-		//modelLastLayer.solver.beta = beta1; // for RMSPropSolver set alpha to 0.001, otherwise it can stick into a local minimum, for momentum alpha = 0.1 seems to work
-		modelLastLayer.solver.beta1 = beta1;
-		modelLastLayer.solver.beta2 = beta2;
-		modelLastLayer.solver.lim = lim;
+		modelLastLayer.getSolver().alpha = alpha;
+		//modelLastLayer.getSolver().beta = beta1; // for RMSPropSolver set alpha to 0.001, otherwise it can stick into a local minimum, for momentum alpha = 0.1 seems to work
+		modelLastLayer.getSolver().beta1 = beta1;
+		modelLastLayer.getSolver().beta2 = beta2;
+		modelLastLayer.getSolver().lim = lim;
 
-		modelLastLayer.solver.firstLayer = false;
+		modelLastLayer.getSolver().firstLayer = false;
 
 		// kind of works with tanh as well, it just seems to have a bigger chance to end up in a local minimum
 		// works with others, too, but they might need some other parameters (for example, smaller aplha)
@@ -65,13 +66,13 @@ bool XORNeuralNetworksTests()
 		typedef SGD::AdamSolver<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, Eigen::MatrixXd, Eigen::MatrixXd, ActivationFunctions::LeakyRELUFunction<>> HiddenLayerRegressionAdamSolver;
 		GLM::GeneralizedLinearModel<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, HiddenLayerRegressionAdamSolver> hiddenLayerModel(2, numHiddenNeurons);
 
-		hiddenLayerModel.solver.alpha = alpha;
-		//hiddenLayerModel.solver.beta = beta1; // for RMSPropSolver set alpha to 0.001, otherwise it can stick into a local minimum, for momentum alpha = 0.1 seems to work
-		hiddenLayerModel.solver.beta1 = beta1;
-		hiddenLayerModel.solver.beta2 = beta2;
-		hiddenLayerModel.solver.lim = lim;
+		hiddenLayerModel.getSolver().alpha = alpha;
+		//hiddenLayerModel.getSolver().beta = beta1; // for RMSPropSolver set alpha to 0.001, otherwise it can stick into a local minimum, for momentum alpha = 0.1 seems to work
+		hiddenLayerModel.getSolver().beta1 = beta1;
+		hiddenLayerModel.getSolver().beta2 = beta2;
+		hiddenLayerModel.getSolver().lim = lim;
 
-		hiddenLayerModel.solver.lastLayer = false;
+		hiddenLayerModel.getSolver().lastLayer = false;
 
 		hiddenLayerModel.Initialize(weightsInitializer);
 
@@ -471,7 +472,169 @@ bool IrisNeuralNetworkTest()
 	return true;
 }
 
+
+bool NeuralNetworkTestsMNIST()
+{
+	std::cout << "MNIST Neural Network Tests, it will take a long time..." << std::endl;
+
+	const int nrInputs = 28 * 28;
+	const int nrOutputs = 10;
+
+	// load the data
+	Utils::MNISTDatabase minstTrainDataFiles;
+	if (!minstTrainDataFiles.Open()) {
+		std::cout << "Couldn't load train data" << std::endl;
+		return false;
+	}
+
+	std::vector<std::pair<std::vector<double>, uint8_t>> trainingRecords = minstTrainDataFiles.ReadAllImagesAndLabels();
+	minstTrainDataFiles.Close();
+
+	Utils::MNISTDatabase minstTestDataFiles;
+	minstTrainDataFiles.setImagesFileName("emnist-digits-test-images-idx3-ubyte");
+	minstTrainDataFiles.setLabelsFileName("emnist-digits-test-labels-idx1-ubyte");
+	if (!minstTestDataFiles.Open()) {
+		std::cout << "Couldn't load test data" << std::endl;
+		return false;
+	}
+
+	std::vector<std::pair<std::vector<double>, uint8_t>> testRecords = minstTestDataFiles.ReadAllImagesAndLabels();
+	minstTestDataFiles.Close();
+
+
+	std::random_device rd;
+	std::mt19937 g(rd());
+	std::shuffle(trainingRecords.begin(), trainingRecords.end(), g);
+
+	// normalize the data
+	Norm::Normalizer<> pixelsNormalizer(nrInputs, nrOutputs);
+
+	Eigen::MatrixXd trainInputs(nrInputs, trainingRecords.size());
+	Eigen::MatrixXd trainOutputs(nrOutputs, trainingRecords.size());
+
+	int rec = 0;
+	for (const auto& record : trainingRecords)
+	{
+		for (int i = 0; i < nrInputs; ++i)
+			trainInputs(i, rec) = record.first[i];
+
+		for (int i = 0; i < nrOutputs; ++i)
+			trainOutputs(i, rec) = (i == record.second) ? 1 : 0;
+
+		++rec;
+	}
+
+	pixelsNormalizer.AddBatch(trainInputs, trainOutputs);
+
+
+	Eigen::MatrixXd testInputs(nrInputs, testRecords.size());
+	Eigen::MatrixXd testOutputs(10, testRecords.size());
+
+	rec = 0;
+	for (const auto& record : testRecords)
+	{
+		for (int i = 0; i < nrInputs; ++i)
+			testInputs(i, rec) = record.first[i];
+
+		for (int i = 0; i < 10; ++i)
+			testOutputs(i, rec) = (i == record.second) ? 1 : 0;
+
+		++rec;
+	}
+
+	// only inputs and only shifting the average
+
+	trainInputs = trainInputs.colwise() - pixelsNormalizer.getAverageInput();
+	testInputs = testInputs.colwise() - pixelsNormalizer.getAverageInput();
+
+	// create the model
+	NeuralNetworks::MultilayerPerceptron<SGD::SoftmaxRegressionAdamSolver> neuralNetwork({ nrInputs, 1000, 100, nrOutputs});
+
+	const double alpha = 0.0005;
+	const double beta1 = 0.9;
+	const double beta2 = 0.95;
+	const double lim = 10;
+
+	neuralNetwork.setParams({ alpha, lim, beta1, beta2 });
+
+	Initializers::WeightsInitializerXavierUniform initializer;
+	//Initializers::WeightsInitializerGlorotUniform initializer;
+	neuralNetwork.Initialize(initializer);
+
+	// train the model
+
+	const int batchSize = 64;
+
+	Eigen::MatrixXd in(nrInputs, batchSize);
+	Eigen::MatrixXd out(nrOutputs, batchSize);
+
+	std::default_random_engine rde(42);
+	std::uniform_int_distribution<> distIntBig(0, static_cast<int>(trainInputs.cols() - 1));
+
+	long long int bcnt = 0;
+	for (int epoch = 0; epoch < 6; ++epoch)
+	{
+		std::cout << "Epoch: " << epoch << std::endl;
+
+		for (int batch = 0; batch < trainInputs.cols() / batchSize; ++batch)
+		{
+			for (int b = 0; b < batchSize; ++b)
+			{
+				const int ind = distIntBig(rde);
+
+				in.col(b) = trainInputs.col(ind);
+				out.col(b) = trainOutputs.col(ind);
+
+			}
+
+			neuralNetwork.ForwardBackwardStep(in, out);
+			++bcnt;
+			if (bcnt % 100 == 0)
+			{
+				double loss = neuralNetwork.getLoss() / batchSize;
+				std::cout << "Loss: " << loss << std::endl;
+			}
+		}
+	}
+
+	std::vector<Utils::TestStatistics> stats(10);
+
+	// first, on training set:
+
+	std::cout << std::endl << "Training set:" << std::endl;
+
+	for (int i = 0; i < trainInputs.cols(); ++i)
+	{
+		Eigen::VectorXd res = neuralNetwork.Predict(trainInputs.col(i));
+		for (int j = 0; j < 10; ++j)
+			stats[j].AddPrediction(res(j) > 0.5, trainOutputs(j, i) > 0.5);
+	}
+
+	for (int j = 0; j < 10; ++j)
+		stats[j].PrintStatistics(std::to_string(j));
+
+	// now, on test set:
+
+	std::cout << std::endl << "Test set:" << std::endl;
+
+	for (int j = 0; j < 10; ++j)
+		stats[j].Clear();
+
+	for (int i = 0; i < testInputs.cols(); ++i)
+	{
+		Eigen::VectorXd res = neuralNetwork.Predict(testInputs.col(i));
+		for (int j = 0; j < 10; ++j)
+			stats[j].AddPrediction(res(j) > 0.5, testOutputs(j, i) > 0.5);
+	}
+
+	for (int j = 0; j < 10; ++j)
+		stats[j].PrintStatistics(std::to_string(j));
+
+	return true;
+}
+
+
 bool NeuralNetworksTests()
 {
-	return XORNeuralNetworksTests() && IrisNeuralNetworkTest();
+	return XORNeuralNetworksTests() && IrisNeuralNetworkTest() && NeuralNetworkTestsMNIST();
 }

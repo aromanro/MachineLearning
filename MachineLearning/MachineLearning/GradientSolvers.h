@@ -1,6 +1,6 @@
 #pragma once
 
-#include <Eigen/eigen>
+#include <Eigen/Eigen>
 //#include <unsupported/Eigen/MatrixFunctions>
 
 #include "ActivationFunctions.h"
@@ -101,7 +101,7 @@ namespace SGD
 			{
 				const OutputType lossDerivative = BaseType::lastLayer ? BaseType::lossFunction.derivative(pred.col(c), target.col(c)) : target.col(c);
 
-				if (BaseType::activationFunction.isDerivativeMatrix())
+				if (BaseType::activationFunction.isDerivativeJacobianMatrix())
 					lossLinkGrad.col(c) = norm * BaseType::activationFunction.derivative(linpred.col(c)).transpose() * lossDerivative;
 				else
 					lossLinkGrad.col(c) = norm * BaseType::activationFunction.derivative(linpred.col(c)).cwiseProduct(lossDerivative);

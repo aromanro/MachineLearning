@@ -4,7 +4,7 @@
 bool SimpleLinearRegressionTests()
 {
 	std::default_random_engine rde(42);
-	std::normal_distribution<double> dist(0., 10.);
+	std::normal_distribution<> dist(0., 10.);
 
 	int nrPoints = 100;
 

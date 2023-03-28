@@ -1,6 +1,6 @@
 #pragma once
 
-#include <Eigen/eigen>
+#include <Eigen/Eigen>
 
 #include "GeneralizedLinearModel.h"
 #include "SimpleLinearRegressionSolvers.h"

@@ -1,10 +1,12 @@
 #include "Tests.h"
 #include "CSVDataFile.h"
 #include "TestStatistics.h"
+#include "MNISTDatabase.h"
+#include "Normalizer.h"
 
 #include "Softmax.h"
 
-bool SoftmaxTests()
+bool SoftmaxTestsIris()
 {
 	std::cout << std::endl << "Softmax for the Iris dataset, Setosa is lineary separable from the other two, but the others two cannot be linearly separated, so expect good results for Setosa but not for the other two" << std::endl << std::endl;
 
@@ -36,7 +38,7 @@ bool SoftmaxTests()
 
 		for (auto it = records.begin() + nrTraining; it != records.end(); ++it)
 		{
-			const auto rec = *it;
+			const auto& rec = *it;
 			if (std::get<4>(rec) == "Iris-setosa") ++setosa;
 			if (std::get<4>(rec) == "Iris-versicolor") ++versicolor;
 			if (std::get<4>(rec) == "Iris-virginica") ++virginica;
@@ -105,10 +107,10 @@ bool SoftmaxTests()
 	// create the model
 	GLM::SoftmaxRegression<> softmaxModel(4, nrOutputs);
 
-	softmaxModel.solver.alpha = 0.01;
-	softmaxModel.solver.beta1 = 0.7;
-	softmaxModel.solver.beta2 = 0.8;
-	softmaxModel.solver.lim = 1;
+	softmaxModel.getSolver().alpha = 0.01;
+	softmaxModel.getSolver().beta1 = 0.7;
+	softmaxModel.getSolver().beta2 = 0.8;
+	softmaxModel.getSolver().lim = 1;
 
 	Initializers::WeightsInitializerZero initializer;
 	softmaxModel.Initialize(initializer);
@@ -209,4 +211,160 @@ bool SoftmaxTests()
 	std::cout << std::endl;
 
 	return true;
+}
+
+
+bool SoftmaxTestsMNIST()
+{
+	std::cout << "MNIST Softmax Regression Tests" << std::endl;
+
+	const int nrInputs = 28 * 28;
+	const int nrOutputs = 10;
+
+	// load the data
+	Utils::MNISTDatabase minstTrainDataFiles;
+	if (!minstTrainDataFiles.Open()) {
+		std::cout << "Couldn't load train data" << std::endl;
+		return false;
+	}
+
+	std::vector<std::pair<std::vector<double>, uint8_t>> trainingRecords = minstTrainDataFiles.ReadAllImagesAndLabels();
+	minstTrainDataFiles.Close();
+
+	Utils::MNISTDatabase minstTestDataFiles;
+	minstTrainDataFiles.setImagesFileName("emnist-digits-test-images-idx3-ubyte");
+	minstTrainDataFiles.setLabelsFileName("emnist-digits-test-labels-idx1-ubyte");
+	if (!minstTestDataFiles.Open()) {
+		std::cout << "Couldn't load test data" << std::endl;
+		return false;
+	}
+
+	std::vector<std::pair<std::vector<double>, uint8_t>> testRecords = minstTestDataFiles.ReadAllImagesAndLabels();
+	minstTestDataFiles.Close();
+
+
+	std::random_device rd;
+	std::mt19937 g(rd());
+	std::shuffle(trainingRecords.begin(), trainingRecords.end(), g);
+
+	// normalize the data
+	Norm::Normalizer<> pixelsNormalizer(nrInputs, nrOutputs);
+
+	Eigen::MatrixXd trainInputs(nrInputs, trainingRecords.size());
+	Eigen::MatrixXd trainOutputs(nrOutputs, trainingRecords.size());
+
+	int rec = 0;
+	for (const auto& record : trainingRecords)
+	{
+		for (int i = 0; i < nrInputs; ++i)
+			trainInputs(i, rec) = record.first[i];
+
+		for (int i = 0; i < nrOutputs; ++i)
+			trainOutputs(i, rec) = (i == record.second) ? 1 : 0;
+
+		++rec;
+	}
+
+	pixelsNormalizer.AddBatch(trainInputs, trainOutputs);
+
+
+	Eigen::MatrixXd testInputs(nrInputs, testRecords.size());
+	Eigen::MatrixXd testOutputs(10, testRecords.size());
+
+	rec = 0;
+	for (const auto& record : testRecords)
+	{
+		for (int i = 0; i < nrInputs; ++i)
+			testInputs(i, rec) = record.first[i];
+
+		for (int i = 0; i < 10; ++i)
+			testOutputs(i, rec) = (i == record.second) ? 1 : 0;
+
+		++rec;
+	}
+
+	// only inputs and only shifting the average
+
+	trainInputs = trainInputs.colwise() - pixelsNormalizer.getAverageInput();
+	testInputs = testInputs.colwise() - pixelsNormalizer.getAverageInput();
+
+	// create the model
+	GLM::SoftmaxRegression<> softmaxModel(nrInputs, 10);
+
+	softmaxModel.getSolver().alpha = 0.0005;
+	softmaxModel.getSolver().beta1 = 0.7;
+	softmaxModel.getSolver().beta2 = 0.9;
+	softmaxModel.getSolver().lim = 1;
+
+	Initializers::WeightsInitializerZero initializer;
+	softmaxModel.Initialize(initializer);
+
+	// train the model
+
+	const int batchSize = 128;
+
+	Eigen::MatrixXd in(nrInputs, batchSize);
+	Eigen::MatrixXd out(nrOutputs, batchSize);
+
+	std::default_random_engine rde(42);
+	std::uniform_int_distribution<> distIntBig(0, static_cast<int>(trainInputs.cols() - 1));
+	for (int epoch = 0; epoch < 20; ++epoch)
+	{
+		for (int batch = 0; batch < trainInputs.cols() / batchSize; ++batch)
+		{
+			for (int b = 0; b < batchSize; ++b)
+			{
+				const int ind = distIntBig(rde);
+
+				in.col(b) = trainInputs.col(ind);
+				out.col(b) = trainOutputs.col(ind);
+
+			}
+
+			softmaxModel.AddBatch(in, out);
+		}
+
+		double loss = softmaxModel.getLoss() / batchSize;
+		std::cout << "Loss: " << loss << std::endl;
+	}
+
+	std::vector<Utils::TestStatistics> stats(10);
+
+	// first, on training set:
+
+	std::cout << std::endl << "Training set:" << std::endl;
+
+	for (int i = 0; i < trainInputs.cols(); ++i)
+	{
+		Eigen::VectorXd res = softmaxModel.Predict(trainInputs.col(i));
+		for (int j = 0; j < 10; ++j)
+			stats[j].AddPrediction(res(j) > 0.5, trainOutputs(j, i) > 0.5);
+	}
+
+	for (int j = 0; j < 10; ++j)
+		stats[j].PrintStatistics(std::to_string(j));
+
+	// now, on test set:
+
+	std::cout << std::endl << "Test set:" << std::endl;
+
+	for (int j = 0; j < 10; ++j)
+		stats[j].Clear();
+
+	for (int i = 0; i < testInputs.cols(); ++i)
+	{
+		Eigen::VectorXd res = softmaxModel.Predict(testInputs.col(i));
+		for (int j = 0; j < 10; ++j)
+			stats[j].AddPrediction(res(j) > 0.5, testOutputs(j, i) > 0.5);
+	}
+
+	for (int j = 0; j < 10; ++j)
+		stats[j].PrintStatistics(std::to_string(j));
+
+	return true;
+}
+
+bool SoftmaxTests()
+{
+	return SoftmaxTestsIris() && SoftmaxTestsMNIST();
 }

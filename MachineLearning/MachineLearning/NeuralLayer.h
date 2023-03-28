@@ -18,22 +18,22 @@ namespace NeuralNetworks
 
 		void setLastLayer(bool last = true)
 		{
-			layer.solver.lastLayer = last;
+			layer.getSolver().lastLayer = last;
 		}
 
 		bool getLastLayer() const
 		{
-			return layer.solver.lastLayer;
+			return layer.getSolver().lastLayer;
 		}
 
 		void setFirstLayer(bool first = true)
 		{
-			layer.solver.firstLayer = first;
+			layer.getSolver().firstLayer = first;
 		}
 
 		bool getFirstLayer() const
 		{
-			return layer.solver.firstLayer;
+			return layer.getSolver().firstLayer;
 		}
 
 		void setParams(const std::vector<double>& params)

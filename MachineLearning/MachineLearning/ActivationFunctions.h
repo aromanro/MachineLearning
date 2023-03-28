@@ -3,7 +3,7 @@
 #include <cmath>
 
 
-#include <Eigen/eigen>
+#include <Eigen/Eigen>
 //#include <unsupported/Eigen/MatrixFunctions>
 
 namespace ActivationFunctions
@@ -26,7 +26,7 @@ namespace ActivationFunctions
 			return InputOutputType::Ones(input.size());
 		}
 
-		static bool isDerivativeMatrix()
+		static bool isDerivativeJacobianMatrix()
 		{
 			return false;
 		}
@@ -44,12 +44,12 @@ namespace ActivationFunctions
 			return input;
 		}
 
-		const double derivative(const double& input) const
+		double derivative(const double& input) const
 		{
 			return 1;
 		}
 
-		static bool isDerivativeMatrix()
+		static bool isDerivativeJacobianMatrix()
 		{
 			return false;
 		}
@@ -94,7 +94,7 @@ namespace ActivationFunctions
 			return fx.cwiseProduct(InputOutputType::Ones(fx.rows(), fx.cols()) - fx);
 		}
 
-		static bool isDerivativeMatrix()
+		static bool isDerivativeJacobianMatrix()
 		{
 			return false;
 		}
@@ -130,7 +130,7 @@ namespace ActivationFunctions
 			return fx * (1. - fx);
 		}
 
-		static bool isDerivativeMatrix()
+		static bool isDerivativeJacobianMatrix()
 		{
 			return false;
 		}
@@ -163,7 +163,7 @@ namespace ActivationFunctions
 			return InputOutputType::Ones(fx.rows(), fx.cols()) - fx.cwiseProduct(fx);
 		}
 
-		static bool isDerivativeMatrix()
+		static bool isDerivativeJacobianMatrix()
 		{
 			return false;
 		}
@@ -188,7 +188,7 @@ namespace ActivationFunctions
 			return 1. - fx * fx;
 		}
 
-		static bool isDerivativeMatrix()
+		static bool isDerivativeJacobianMatrix()
 		{
 			return false;
 		}
@@ -218,7 +218,7 @@ namespace ActivationFunctions
 			return fx.cwiseInverse();
 		}
 
-		static bool isDerivativeMatrix()
+		static bool isDerivativeJacobianMatrix()
 		{
 			return false;
 		}
@@ -243,7 +243,7 @@ namespace ActivationFunctions
 			return 1. / fx;
 		}
 
-		static bool isDerivativeMatrix()
+		static bool isDerivativeJacobianMatrix()
 		{
 			return false;
 		}
@@ -279,7 +279,7 @@ namespace ActivationFunctions
 			return out;
 		}
 
-		static bool isDerivativeMatrix()
+		static bool isDerivativeJacobianMatrix()
 		{
 			return false;
 		}
@@ -302,7 +302,7 @@ namespace ActivationFunctions
 			return (input < 0) ? 0 : 1;
 		}
 
-		bool isDerivativeMatrix() const
+		bool isDerivativeJacobianMatrix() const
 		{
 			return false;
 		}
@@ -341,7 +341,7 @@ namespace ActivationFunctions
 			return out;
 		}
 
-		static bool isDerivativeMatrix()
+		static bool isDerivativeJacobianMatrix()
 		{
 			return false;
 		}
@@ -372,7 +372,7 @@ namespace ActivationFunctions
 			return (input < 0) ? alpha : 1.;
 		}
 
-		static bool isDerivativeMatrix()
+		static bool isDerivativeJacobianMatrix()
 		{
 			return false;
 		}
@@ -418,7 +418,7 @@ namespace ActivationFunctions
 			return output;
 		}
 
-		static bool isDerivativeMatrix()
+		static bool isDerivativeJacobianMatrix()
 		{
 			return true;
 		}

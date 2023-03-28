@@ -3,7 +3,7 @@
 bool Test1()
 {
 	std::default_random_engine rde(42);
-	std::normal_distribution<double> dist(0., 10.);
+	std::normal_distribution<> dist(0., 10.);
 
 	int nrPoints = 100;
 
@@ -35,10 +35,10 @@ bool Test1()
 		// a simple linear regression, but with gradient descent
 		//GeneralLinearModel<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, SGD::GradientDescentSolver<>, Eigen::MatrixXd> generalLinearModel;
 		GLM::GeneralizedLinearModel<double, double, double, SGD::AdamSolver<double, double, double, Eigen::RowVectorXd, Eigen::RowVectorXd, ActivationFunctions::IdentityFunction<double>, LossFunctions::L2Loss<double>>, Eigen::RowVectorXd, Eigen::RowVectorXd> generalLinearModel;
-		generalLinearModel.solver.alpha = 0.03;
-		generalLinearModel.solver.beta1 = 0.7;
-		generalLinearModel.solver.beta2 = 0.9;
-		generalLinearModel.solver.lim = 20;
+		generalLinearModel.getSolver().alpha = 0.03;
+		generalLinearModel.getSolver().beta1 = 0.7;
+		generalLinearModel.getSolver().beta2 = 0.9;
+		generalLinearModel.getSolver().lim = 20;
 
 		generalLinearModel.Initialize(initializer);
 
@@ -84,7 +84,7 @@ bool Test1()
 bool Test2()
 {
 	std::default_random_engine rde(42);
-	std::normal_distribution<double> dist(0., 10.);
+	std::normal_distribution<> dist(0., 10.);
 
 	int nrPoints = 100;
 
@@ -106,10 +106,10 @@ bool Test2()
 		}
 
 		GLM::GeneralizedLinearModel<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, SGD::AdamSolver<>> generalLinearModel(3, 3);
-		generalLinearModel.solver.alpha = 0.02;
-		generalLinearModel.solver.beta1 = 0.7;
-		generalLinearModel.solver.beta2 = 0.9;
-		generalLinearModel.solver.lim = 200;
+		generalLinearModel.getSolver().alpha = 0.02;
+		generalLinearModel.getSolver().beta1 = 0.7;
+		generalLinearModel.getSolver().beta2 = 0.9;
+		generalLinearModel.getSolver().lim = 200;
 
 		generalLinearModel.Initialize(initializer);
 
@@ -158,7 +158,7 @@ bool Test2()
 bool Test3()
 {
 	std::default_random_engine rde(42);
-	std::normal_distribution<double> dist(0., 10.);
+	std::normal_distribution<> dist(0., 10.);
 
 	int nrPoints = 100;
 
@@ -196,10 +196,10 @@ bool Test3()
 
 		generalLinearModel.Initialize(initializer);
 
-		generalLinearModel.solver.alpha = 0.1;
-		generalLinearModel.solver.beta1 = 0.8;
-		generalLinearModel.solver.beta2 = 0.9;
-		generalLinearModel.solver.lim = 2000;
+		generalLinearModel.getSolver().alpha = 0.1;
+		generalLinearModel.getSolver().beta1 = 0.8;
+		generalLinearModel.getSolver().beta2 = 0.9;
+		generalLinearModel.getSolver().lim = 2000;
 
 		Eigen::MatrixXd x, y;
 		const int batchSize = 32;
@@ -256,7 +256,7 @@ bool Test3()
 bool Test4()
 {
 	std::default_random_engine rde(42);
-	std::normal_distribution<double> dist(0., 10.);
+	std::normal_distribution<> dist(0., 10.);
 
 	int nrPoints = 100;
 
@@ -299,15 +299,15 @@ bool Test4()
 		typedef SGD::AdamSolver<> theSolver;
 		GLM::GeneralizedLinearModel<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, theSolver> generalLinearModel(3, 1);
 
-		//generalLinearModel.solver.alpha = 0.01;
-		//generalLinearModel.solver.lim = 100;
+		//generalLinearModel.getSolver().alpha = 0.01;
+		//generalLinearModel.getSolver().lim = 100;
 
-		//generalLinearModel.solver.beta = 0.8;
+		//generalLinearModel.getSolver().beta = 0.8;
 
-		generalLinearModel.solver.alpha = 0.01;
-		generalLinearModel.solver.beta1 = 0.9;
-		generalLinearModel.solver.beta2 = 0.9;
-		generalLinearModel.solver.lim = 2000;
+		generalLinearModel.getSolver().alpha = 0.01;
+		generalLinearModel.getSolver().beta1 = 0.9;
+		generalLinearModel.getSolver().beta2 = 0.9;
+		generalLinearModel.getSolver().lim = 2000;
 
 		generalLinearModel.Initialize(initializer);
 
