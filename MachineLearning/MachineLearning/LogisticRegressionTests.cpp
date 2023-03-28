@@ -501,10 +501,20 @@ bool IrisLogisticRegressionTest()
 		if (nrOutputs > 1) versicolorStats.AddPrediction(res(1) > 0.5, out(1, 0) > 0.5);
 		if (nrOutputs > 2) virginicaStats.AddPrediction(res(2) > 0.5, out(2, 0) > 0.5);
 	}
+	
+	Utils::TestStatistics totalStats;
 
 	setosaStats.PrintStatistics("Setosa");
-	if (nrOutputs > 1) versicolorStats.PrintStatistics("Versicolor");
-	if (nrOutputs > 2) virginicaStats.PrintStatistics("Virginica");
+	if (nrOutputs > 1) {
+		versicolorStats.PrintStatistics("Versicolor");
+		if (nrOutputs > 2) virginicaStats.PrintStatistics("Virginica");
+
+		totalStats.Add(setosaStats);
+		totalStats.Add(versicolorStats);
+		if (nrOutputs > 2) totalStats.Add(virginicaStats);
+
+		totalStats.PrintStatistics("Overall");
+	}
 	std::cout << std::endl;
 
 	setosaStats.Clear();
@@ -531,8 +541,19 @@ bool IrisLogisticRegressionTest()
 	}
 
 	setosaStats.PrintStatistics("Setosa");
-	if (nrOutputs > 1) versicolorStats.PrintStatistics("Versicolor");
-	if (nrOutputs > 2) virginicaStats.PrintStatistics("Virginica");
+	if (nrOutputs > 1)
+	{
+		versicolorStats.PrintStatistics("Versicolor");
+		if (nrOutputs > 2) virginicaStats.PrintStatistics("Virginica");
+
+		totalStats.Clear();
+		totalStats.Add(setosaStats);
+		totalStats.Add(versicolorStats);
+		if (nrOutputs > 2) totalStats.Add(virginicaStats);
+
+		totalStats.PrintStatistics("Overall");
+	}
+
 	std::cout << std::endl;
 
 	return true;
@@ -668,6 +689,12 @@ bool MNISTLogisticRegressionTests()
 	for (int j = 0; j < 10; ++j)
 		stats[j].PrintStatistics(std::to_string(j));
 
+	Utils::TestStatistics totalStats;
+	for (int j = 0; j < 10; ++j)
+		totalStats.Add(stats[j]);
+
+	totalStats.PrintStatistics("Overall");
+
 	// now, on test set:
 
 	std::cout << std::endl << "Test set:" << std::endl;
@@ -684,6 +711,12 @@ bool MNISTLogisticRegressionTests()
 
 	for (int j = 0; j < 10; ++j)
 		stats[j].PrintStatistics(std::to_string(j));
+
+	totalStats.Clear();
+	for (int j = 0; j < 10; ++j)
+		totalStats.Add(stats[j]);
+
+	totalStats.PrintStatistics("Overall");
 
 	return true;
 }
