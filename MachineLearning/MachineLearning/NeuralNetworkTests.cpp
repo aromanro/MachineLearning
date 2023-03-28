@@ -569,8 +569,11 @@ bool NeuralNetworkTestsMNIST()
 	testInputs = testInputs.colwise() - pixelsNormalizer.getAverageInput();
 
 	// create the model
-	// also tested { nrInputs, 1000, 300, 80, nrOutputs }
-	NeuralNetworks::MultilayerPerceptron<SGD::SoftmaxRegressionAdamSolver> neuralNetwork({ nrInputs, 1000, 100, nrOutputs});
+	// two hidden layers works quite well: { nrInputs, 1000, 100, nrOutputs } - use XavierUniform weights initializer for it - over 98%
+	// also tested { nrInputs, 1000, 600, 100, nrOutputs } - use Glorot uniform weights initializer for it, this one I suspect that it needs different parameters and maybe more iterations
+	// a single hidden layer, should be fast enough: { nrInputs, 32, nrOutputs } - over 97%
+	// for simple ones the xavier initializer works well, for the deeper ones the glorot one is better
+	NeuralNetworks::MultilayerPerceptron<SGD::SoftmaxRegressionAdamSolver> neuralNetwork({ nrInputs, 1000, 100, nrOutputs });
 
 	const double alpha = 0.0005;
 	const double beta1 = 0.9;
