@@ -99,7 +99,7 @@ namespace ActivationFunctions
 			return false;
 		}
 
-	protected:
+	private:
 		InputOutputType beta0;
 		InputOutputType beta;
 	};
@@ -107,11 +107,6 @@ namespace ActivationFunctions
 	template<> class SigmoidFunction<double, double>
 	{
 	public:
-		SigmoidFunction(int size = 1)
-			: beta0(0), beta(1)
-		{
-		}
-
 		void setParams(double b0, double b)
 		{
 			beta0 = b0;
@@ -135,9 +130,9 @@ namespace ActivationFunctions
 			return false;
 		}
 
-	protected:
-		double beta0;
-		double beta;
+	private:
+		double beta0 = 0;
+		double beta = 1;
 	};
 
 
@@ -145,10 +140,6 @@ namespace ActivationFunctions
 	template<typename InputOutputType = Eigen::VectorXd> class TanhFunction
 	{
 	public:
-		TanhFunction(int size = 1)
-		{
-		}
-
 		InputOutputType operator()(const InputOutputType& input) const
 		{
 			const SigmoidFunction<InputOutputType, InputOutputType> sigmoid(static_cast<int>(input.size()));

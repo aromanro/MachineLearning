@@ -5,11 +5,11 @@
 namespace SGD
 {
 
-	typedef SGD::GradientDescentSolver<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, Eigen::MatrixXd, Eigen::MatrixXd, ActivationFunctions::SoftmaxFunction<Eigen::VectorXd>, LossFunctions::CrossEntropyLoss<Eigen::VectorXd>> SoftmaxRegressionGradientDescentSolver;
-	typedef SGD::MomentumSolver<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, Eigen::MatrixXd, Eigen::MatrixXd, ActivationFunctions::SoftmaxFunction<Eigen::VectorXd>, LossFunctions::CrossEntropyLoss<Eigen::VectorXd>> SoftmaxRegressionMomentumSolver;
-	typedef SGD::AdaGradSolver<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, Eigen::MatrixXd, Eigen::MatrixXd, ActivationFunctions::SoftmaxFunction<Eigen::VectorXd>, LossFunctions::CrossEntropyLoss<Eigen::VectorXd>> SoftmaxRegressionAdaGradSolver;
-	typedef SGD::RMSPropSolver<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, Eigen::MatrixXd, Eigen::MatrixXd, ActivationFunctions::SoftmaxFunction<Eigen::VectorXd>, LossFunctions::CrossEntropyLoss<Eigen::VectorXd>> SoftmaxRegressionRMSPropSolver;
-	typedef SGD::AdamSolver<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, Eigen::MatrixXd, Eigen::MatrixXd, ActivationFunctions::SoftmaxFunction<Eigen::VectorXd>, LossFunctions::CrossEntropyLoss<Eigen::VectorXd>> SoftmaxRegressionAdamSolver;
+	using SoftmaxRegressionGradientDescentSolver = SGD::GradientDescentSolver<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, Eigen::MatrixXd, Eigen::MatrixXd, ActivationFunctions::SoftmaxFunction<Eigen::VectorXd>, LossFunctions::CrossEntropyLoss<Eigen::VectorXd>>;
+	using SoftmaxRegressionMomentumSolver = SGD::MomentumSolver<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, Eigen::MatrixXd, Eigen::MatrixXd, ActivationFunctions::SoftmaxFunction<Eigen::VectorXd>, LossFunctions::CrossEntropyLoss<Eigen::VectorXd>>;
+	using SoftmaxRegressionAdaGradSolver = SGD::AdaGradSolver<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, Eigen::MatrixXd, Eigen::MatrixXd, ActivationFunctions::SoftmaxFunction<Eigen::VectorXd>, LossFunctions::CrossEntropyLoss<Eigen::VectorXd>>;
+	using SoftmaxRegressionRMSPropSolver = SGD::RMSPropSolver<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, Eigen::MatrixXd, Eigen::MatrixXd, ActivationFunctions::SoftmaxFunction<Eigen::VectorXd>, LossFunctions::CrossEntropyLoss<Eigen::VectorXd>>;
+	using SoftmaxRegressionAdamSolver = SGD::AdamSolver<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, Eigen::MatrixXd, Eigen::MatrixXd, ActivationFunctions::SoftmaxFunction<Eigen::VectorXd>, LossFunctions::CrossEntropyLoss<Eigen::VectorXd>>;
 
 }
 
@@ -20,7 +20,7 @@ namespace GLM
 		: public GeneralizedLinearModel<InputType, OutputType, WeightsType, Solver, BatchInputType, BatchOutputType>
 	{
 	public:
-		typedef GeneralizedLinearModel<InputType, OutputType, WeightsType, Solver, BatchInputType, BatchOutputType> BaseType;
+		using BaseType = GeneralizedLinearModel<InputType, OutputType, WeightsType, Solver, BatchInputType, BatchOutputType>;
 
 		SoftmaxRegression(int szi = 1, int szo = 1)
 			: BaseType(szi, szo)

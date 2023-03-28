@@ -15,11 +15,11 @@ namespace LossFunctions
 namespace SGD
 {
 
-	typedef SGD::GradientDescentSolver<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, Eigen::MatrixXd, Eigen::MatrixXd, ActivationFunctions::SigmoidFunction<Eigen::VectorXd, Eigen::MatrixXd>, LossFunctions::LogLoss<Eigen::VectorXd>> LogisticRegressionGradientDescentSolver;
-	typedef SGD::MomentumSolver<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, Eigen::MatrixXd, Eigen::MatrixXd, ActivationFunctions::SigmoidFunction<Eigen::VectorXd, Eigen::MatrixXd>, LossFunctions::LogLoss<Eigen::VectorXd>> LogisticRegressionMomentumSolver;
-	typedef SGD::AdaGradSolver<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, Eigen::MatrixXd, Eigen::MatrixXd, ActivationFunctions::SigmoidFunction<Eigen::VectorXd, Eigen::MatrixXd>, LossFunctions::LogLoss<Eigen::VectorXd>> LogisticRegressionAdaGradSolver;
-	typedef SGD::RMSPropSolver<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, Eigen::MatrixXd, Eigen::MatrixXd, ActivationFunctions::SigmoidFunction<Eigen::VectorXd, Eigen::MatrixXd>, LossFunctions::LogLoss<Eigen::VectorXd>> LogisticRegressionRMSPropSolver;
-	typedef SGD::AdamSolver<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, Eigen::MatrixXd, Eigen::MatrixXd, ActivationFunctions::SigmoidFunction<Eigen::VectorXd, Eigen::MatrixXd>, LossFunctions::LogLoss<Eigen::VectorXd>> LogisticRegressionAdamSolver;
+	using LogisticRegressionGradientDescentSolver = SGD::GradientDescentSolver<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, Eigen::MatrixXd, Eigen::MatrixXd, ActivationFunctions::SigmoidFunction<Eigen::VectorXd, Eigen::MatrixXd>, LossFunctions::LogLoss<Eigen::VectorXd>>;
+	using LogisticRegressionMomentumSolver = SGD::MomentumSolver<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, Eigen::MatrixXd, Eigen::MatrixXd, ActivationFunctions::SigmoidFunction<Eigen::VectorXd, Eigen::MatrixXd>, LossFunctions::LogLoss<Eigen::VectorXd>>;
+	using LogisticRegressionAdaGradSolver = SGD::AdaGradSolver<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, Eigen::MatrixXd, Eigen::MatrixXd, ActivationFunctions::SigmoidFunction<Eigen::VectorXd, Eigen::MatrixXd>, LossFunctions::LogLoss<Eigen::VectorXd>>;
+	using LogisticRegressionRMSPropSolver = SGD::RMSPropSolver<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, Eigen::MatrixXd, Eigen::MatrixXd, ActivationFunctions::SigmoidFunction<Eigen::VectorXd, Eigen::MatrixXd>, LossFunctions::LogLoss<Eigen::VectorXd>>;
+	using LogisticRegressionAdamSolver = SGD::AdamSolver<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, Eigen::MatrixXd, Eigen::MatrixXd, ActivationFunctions::SigmoidFunction<Eigen::VectorXd, Eigen::MatrixXd>, LossFunctions::LogLoss<Eigen::VectorXd>>;
 
 }
 
@@ -30,7 +30,7 @@ namespace GLM
 		: public GeneralizedLinearModel<InputType, OutputType, WeightsType, Solver, BatchInputType, BatchOutputType>
 	{
 	public:
-		typedef GeneralizedLinearModel<InputType, OutputType, WeightsType, Solver, BatchInputType, BatchOutputType> BaseType;
+		using BaseType = GeneralizedLinearModel<InputType, OutputType, WeightsType, Solver, BatchInputType, BatchOutputType>;
 
 		LogisticRegression(int szi = 1, int szo = 1)
 			: BaseType(szi, szo)

@@ -40,8 +40,9 @@ namespace SLRS
 			pred = output;
 		}
 
-		void setLinearPrediction(const BatchOutputType& output)
+		void setLinearPrediction(const BatchOutputType&)
 		{
+			// this is here just for conformacy with the other solvers
 		}
 
 		Eigen::MatrixXd getWeightsAndBias(WeightsType& w, OutputType& b) const
@@ -65,7 +66,7 @@ namespace SLRS
 			return Eigen::MatrixXd(); // an empty matrix, no need of it, it won't be used
 		}
 
-		const long long int getSize() const
+		long long int getSize() const
 		{
 			return size;
 		}
@@ -80,7 +81,7 @@ namespace SLRS
 			return cost;
 		}
 
-	protected:
+	private:
 		void AddSample(const InputType& input, const OutputType& output)
 		{
 			xaccum += input;
@@ -144,8 +145,9 @@ namespace SLRS
 			pred = output;
 		}
 
-		void setLinearPrediction(const Eigen::MatrixXd& output)
+		void setLinearPrediction(const Eigen::MatrixXd&)
 		{
+			// this is here just for conformacy with the other solvers
 		}
 
 		Eigen::MatrixXd getWeightsAndBias(Eigen::MatrixXd& w, Eigen::VectorXd& b) const
@@ -159,7 +161,7 @@ namespace SLRS
 			return Eigen::MatrixXd();
 		}
 
-		const long long int getSize() const
+		long long int getSize() const
 		{
 			return size;
 		}
@@ -174,7 +176,7 @@ namespace SLRS
 			return cost;
 		}
 
-	protected:
+	private:
 		void AddSample(const double& input, const Eigen::VectorXd& output)
 		{
 			xaccum += input;
@@ -231,8 +233,9 @@ namespace SLRS
 			pred = output;
 		}
 
-		void setLinearPrediction(const Eigen::RowVectorXd& output)
+		void setLinearPrediction(const Eigen::RowVectorXd&)
 		{
+			// this is here just for conformacy with the other solvers
 		}
 
 		Eigen::RowVectorXd getWeightsAndBias(double& w, double& b) const
@@ -248,7 +251,7 @@ namespace SLRS
 			return Eigen::RowVectorXd();
 		}
 
-		const long long int getSize() const
+		long long int getSize() const
 		{
 			return 1;
 		}
@@ -263,7 +266,7 @@ namespace SLRS
 			return cost;
 		}
 
-	protected:
+	private:
 		void AddSample(const double& input, const double& output)
 		{
 			xaccum += input;

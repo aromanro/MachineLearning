@@ -8,8 +8,8 @@ namespace Utils {
 	class DataFileBase
 	{
 	public:
-		DataFileBase() {}
-		virtual ~DataFileBase() {}
+		DataFileBase() = default;
+		virtual ~DataFileBase() = default;
 
 		std::string getFilePath() const
 		{
@@ -37,8 +37,17 @@ namespace Utils {
 			dataFileName = d;
 		}
 
+		const std::string& getRelativePath() const
+		{
+			return relPath;
+		}
 
-	protected:
+		const std::string& getDataFileName() const
+		{
+			return dataFileName;
+		}
+
+	private:
 		std::string relPath = "../../data/";
 		std::string dataFileName = "data.txt";
 	};

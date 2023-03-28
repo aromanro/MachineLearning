@@ -41,7 +41,7 @@ namespace Utils {
 
 	class IrisDataset : public CSVDataFile {
 	public:
-		typedef std::tuple<double, double, double, double, std::string> Record;
+		using Record = std::tuple<double, double, double, double, std::string>;
 
 		Record getRecord()
 		{

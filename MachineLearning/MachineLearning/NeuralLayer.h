@@ -91,7 +91,7 @@ namespace NeuralNetworks
 			return layer.BackpropagateBatch(grad);
 		}
 
-	protected:
+	private:
 		NeuralSublayer<Solver> layer;
 	};
 

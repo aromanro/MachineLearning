@@ -11,7 +11,7 @@ namespace Utils
 	class DataFileWriter
 	{
 	public:
-		DataFileWriter(const std::string& name);
+		explicit DataFileWriter(const std::string& name);
 
 		template<typename T1, typename T2> bool AddDataset(const std::vector<T1>& x, const std::vector<T2>& y)
 		{
@@ -35,7 +35,7 @@ namespace Utils
 			file << cmd << std::endl;
 		}
 
-	protected:
+	private:
 		std::ofstream file;
 	};
 

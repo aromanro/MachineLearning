@@ -18,7 +18,7 @@ namespace NeuralNetworks
 	class NeuralSublayer : public GLM::GeneralizedLinearModel<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, Solver>
 	{
 	public:
-		typedef GLM::GeneralizedLinearModel<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, Solver> BaseType;
+		using BaseType = GLM::GeneralizedLinearModel<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, Solver>;
 
 		NeuralSublayer(int szi = 1, int szo = 1) : BaseType(szi, szo)
 		{

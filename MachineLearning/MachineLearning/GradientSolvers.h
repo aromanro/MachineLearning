@@ -50,7 +50,7 @@ namespace SGD
 	class GradientDescentSolverBase : public GradientDescentSolverCommonImpl<ActivationFunction, LossFunction>
 	{
 	public:
-		typedef GradientDescentSolverCommonImpl<ActivationFunction, LossFunction> BaseType;
+		using BaseType = GradientDescentSolverCommonImpl<ActivationFunction, LossFunction>;
 
 		void AddBatch(const BatchInputType& batchInput, const BatchOutputType& batchOutput)
 		{
@@ -128,7 +128,7 @@ namespace SGD
 		: public GradientDescentSolverCommonImpl<ActivationFunction, LossFunction>
 	{
 	public:
-		typedef GradientDescentSolverCommonImpl<ActivationFunction, LossFunction> BaseType;
+		using BaseType = GradientDescentSolverCommonImpl<ActivationFunction, LossFunction>;
 
 		void AddBatch(const Eigen::RowVectorXd& batchInput, const Eigen::RowVectorXd& batchOutput)
 		{
@@ -201,7 +201,7 @@ namespace SGD
 	class GradientDescentSolver : public GradientDescentSolverBase<InputType, OutputType, WeightsType, BatchInputType, BatchOutputType, ActivationFunction, LossFunction>
 	{
 	public:
-		typedef  GradientDescentSolverBase<InputType, OutputType, WeightsType, BatchInputType, BatchOutputType, ActivationFunction, LossFunction> BaseType;
+		using BaseType = GradientDescentSolverBase<InputType, OutputType, WeightsType, BatchInputType, BatchOutputType, ActivationFunction, LossFunction>;
 
 		void Initialize(int szi = 1, int szo = 1)
 		{
@@ -239,7 +239,7 @@ namespace SGD
 	class GradientDescentSolver<double, double, double, Eigen::RowVectorXd, Eigen::RowVectorXd, ActivationFunction, LossFunction> : public GradientDescentSolverBase<double, double, double, Eigen::RowVectorXd, Eigen::RowVectorXd, ActivationFunction, LossFunction>
 	{
 	public:
-		typedef GradientDescentSolverBase<double, double, double, Eigen::RowVectorXd, Eigen::RowVectorXd, ActivationFunction, LossFunction> BaseType;
+		using BaseType = GradientDescentSolverBase<double, double, double, Eigen::RowVectorXd, Eigen::RowVectorXd, ActivationFunction, LossFunction>;
 
 		void Initialize(int szi = 1, int szo = 1)
 		{
@@ -285,7 +285,7 @@ namespace SGD
 	class MomentumSolver : public GradientDescentSolverBase<InputType, OutputType, WeightsType, BatchInputType, BatchOutputType, ActivationFunction, LossFunction>
 	{
 	public:
-		typedef  GradientDescentSolverBase<InputType, OutputType, WeightsType, BatchInputType, BatchOutputType, ActivationFunction, LossFunction> BaseType;
+		using BaseType = GradientDescentSolverBase<InputType, OutputType, WeightsType, BatchInputType, BatchOutputType, ActivationFunction, LossFunction>;
 
 		void Initialize(int szi = 1, int szo = 1)
 		{
@@ -331,7 +331,7 @@ namespace SGD
 	class MomentumSolver<double, double, double, Eigen::RowVectorXd, Eigen::RowVectorXd, ActivationFunction, LossFunction> : public GradientDescentSolverBase<double, double, double, Eigen::RowVectorXd, Eigen::RowVectorXd, ActivationFunction, LossFunction>
 	{
 	public:
-		typedef GradientDescentSolverBase<double, double, double, Eigen::RowVectorXd, Eigen::RowVectorXd, ActivationFunction, LossFunction> BaseType;
+		using BaseType = GradientDescentSolverBase<double, double, double, Eigen::RowVectorXd, Eigen::RowVectorXd, ActivationFunction, LossFunction>;
 
 		void Initialize(int szi = 1, int szo = 1)
 		{
@@ -394,7 +394,7 @@ namespace SGD
 	class AdaGradSolver : public GradientDescentSolverBase<InputType, OutputType, WeightsType, BatchInputType, BatchOutputType, ActivationFunction, LossFunction>
 	{
 	public:
-		typedef  GradientDescentSolverBase<InputType, OutputType, WeightsType, BatchInputType, BatchOutputType, ActivationFunction, LossFunction> BaseType;
+		using BaseType = GradientDescentSolverBase<InputType, OutputType, WeightsType, BatchInputType, BatchOutputType, ActivationFunction, LossFunction>;
 
 		void Initialize(int szi = 1, int szo = 1)
 		{
@@ -429,7 +429,7 @@ namespace SGD
 	class AdaGradSolver<double, double, double, Eigen::RowVectorXd, Eigen::RowVectorXd, ActivationFunction, LossFunction> : public GradientDescentSolverBase<double, double, double, Eigen::RowVectorXd, Eigen::RowVectorXd, ActivationFunction, LossFunction>
 	{
 	public:
-		typedef GradientDescentSolverBase<double, double, double, Eigen::RowVectorXd, Eigen::RowVectorXd, ActivationFunction, LossFunction> BaseType;
+		using BaseType = GradientDescentSolverBase<double, double, double, Eigen::RowVectorXd, Eigen::RowVectorXd, ActivationFunction, LossFunction>;
 
 		Eigen::RowVectorXd getWeightsAndBias(double& w, double& b)
 		{
@@ -479,7 +479,7 @@ namespace SGD
 	class RMSPropSolver : public GradientDescentSolverBase<InputType, OutputType, WeightsType, BatchInputType, BatchOutputType, ActivationFunction, LossFunction>
 	{
 	public:
-		typedef  GradientDescentSolverBase<InputType, OutputType, WeightsType, BatchInputType, BatchOutputType, ActivationFunction, LossFunction> BaseType;
+		using BaseType = GradientDescentSolverBase<InputType, OutputType, WeightsType, BatchInputType, BatchOutputType, ActivationFunction, LossFunction>;
 
 		void Initialize(int szi = 1, int szo = 1)
 		{
@@ -527,7 +527,7 @@ namespace SGD
 	class RMSPropSolver<double, double, double, Eigen::RowVectorXd, Eigen::RowVectorXd, ActivationFunction, LossFunction> : public GradientDescentSolverBase<double, double, double, Eigen::RowVectorXd, Eigen::RowVectorXd, ActivationFunction, LossFunction>
 	{
 	public:
-		typedef GradientDescentSolverBase<double, double, double, Eigen::RowVectorXd, Eigen::RowVectorXd, ActivationFunction, LossFunction> BaseType;
+		using BaseType = GradientDescentSolverBase<double, double, double, Eigen::RowVectorXd, Eigen::RowVectorXd, ActivationFunction, LossFunction>;
 
 		void Initialize(int szi = 1, int szo = 1)
 		{
@@ -588,7 +588,7 @@ namespace SGD
 	class AdamSolver : public GradientDescentSolverBase<InputType, OutputType, WeightsType, BatchInputType, BatchOutputType, ActivationFunction, LossFunction>
 	{
 	public:
-		typedef  GradientDescentSolverBase<InputType, OutputType, WeightsType, BatchInputType, BatchOutputType, ActivationFunction, LossFunction> BaseType;
+		using BaseType = GradientDescentSolverBase<InputType, OutputType, WeightsType, BatchInputType, BatchOutputType, ActivationFunction, LossFunction>;
 
 		void Initialize(int szi = 1, int szo = 1)
 		{
@@ -662,7 +662,7 @@ namespace SGD
 	class AdamSolver<double, double, double, Eigen::RowVectorXd, Eigen::RowVectorXd, ActivationFunction, LossFunction> : public GradientDescentSolverBase<double, double, double, Eigen::RowVectorXd, Eigen::RowVectorXd, ActivationFunction, LossFunction>
 	{
 	public:
-		typedef GradientDescentSolverBase<double, double, double, Eigen::RowVectorXd, Eigen::RowVectorXd, ActivationFunction, LossFunction> BaseType;
+		using BaseType = GradientDescentSolverBase<double, double, double, Eigen::RowVectorXd, Eigen::RowVectorXd, ActivationFunction, LossFunction>;
 
 		void Initialize(int szi = 1, int szo = 1)
 		{

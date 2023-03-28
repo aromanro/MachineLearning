@@ -19,11 +19,6 @@ namespace Utils {
 			setImagesFileName("emnist-digits-train-images-idx3-ubyte");
 			setLabelsFileName("emnist-digits-train-labels-idx1-ubyte");
 		}
-
-		virtual ~MNISTDatabase() 
-		{
-			Close();
-		}
 		
 		void setRelativePath(const std::string& p)
 		{
@@ -166,7 +161,7 @@ namespace Utils {
 			return res;
 		}
 
-	protected:
+	private:
 		DataFileBase imagesFile;
 		DataFileBase labelsFile;
 

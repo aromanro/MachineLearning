@@ -80,7 +80,7 @@ namespace GLM {
 	class GeneralizedLinearModel : public GeneralizedLinearModelBase<GeneralizedLinearModel<InputType, OutputType, WeightsType, Solver, BatchInputType, BatchOutputType>, InputType, OutputType, WeightsType, Solver, BatchInputType, BatchOutputType>
 	{
 	public:
-		typedef GeneralizedLinearModelBase<GeneralizedLinearModel<InputType, OutputType, WeightsType, Solver, BatchInputType, BatchOutputType>, InputType, OutputType, WeightsType, Solver, BatchInputType, BatchOutputType> BaseType;
+		using BaseType = GeneralizedLinearModelBase<GeneralizedLinearModel<InputType, OutputType, WeightsType, Solver, BatchInputType, BatchOutputType>, InputType, OutputType, WeightsType, Solver, BatchInputType, BatchOutputType>;
 
 		GeneralizedLinearModel(int szi = 1, int szo = 1) : BaseType(szi, szo)
 		{
@@ -156,7 +156,7 @@ namespace GLM {
 	class GeneralizedLinearModel<double, double, double, Solver, Eigen::RowVectorXd> : public GeneralizedLinearModelBase<GeneralizedLinearModel<double, double, double, Solver, Eigen::RowVectorXd>, double, double, double, Solver, Eigen::RowVectorXd>
 	{
 	public:
-		typedef GeneralizedLinearModelBase<GeneralizedLinearModel<double, double, double, Solver, Eigen::RowVectorXd>, double, double, double, Solver, Eigen::RowVectorXd> BaseType;
+		using BaseType = GeneralizedLinearModelBase<GeneralizedLinearModel<double, double, double, Solver, Eigen::RowVectorXd>, double, double, double, Solver, Eigen::RowVectorXd>;
 
 		GeneralizedLinearModel(int szi = 1, int szo = 1) : BaseType(szi, szo)
 		{

@@ -9,15 +9,15 @@ namespace Utils
 
 	void Gnuplot::Execute()
 	{
-		std::string cmdPath = relPath;
+		std::string cmdPath = getRelativePath();
 
 		{
 			std::filesystem::path p = std::filesystem::current_path();
 			if (cmdPath[0] != '/' && cmdPath[0] != '\\')
 				p += '/';
 
-			p += relPath;
-			p += dataFileName;
+			p += cmdPath;
+			p += getDataFileName();
 
 			if (cmdPath[cmdPath.length() - 1] != '/' && cmdPath[cmdPath.length() - 1] != '\\')
 				cmdPath += "/";

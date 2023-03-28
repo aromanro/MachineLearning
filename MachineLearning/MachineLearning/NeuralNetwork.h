@@ -15,7 +15,7 @@ namespace NeuralNetworks
 	// and that one can be different for the last layer
 
 	// for the hidden layer, by default use an adam solver with a leaky RELU activation (the cost does not matter, it's computed for the output of the last layer only)
-	typedef SGD::AdamSolver<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, Eigen::MatrixXd, Eigen::MatrixXd, ActivationFunctions::LeakyRELUFunction<>> HiddenLayerDefault;
+	using HiddenLayerDefault = SGD::AdamSolver<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, Eigen::MatrixXd, Eigen::MatrixXd, ActivationFunctions::LeakyRELUFunction<>>;
 
 	// for the last layer, by default a single neuron with sigmoid function, to be used for classification
 	// this should be changed more often, that's why it's the first template argument
@@ -26,7 +26,7 @@ namespace NeuralNetworks
 	public:
 		// neurons contains the number of neurons in each layer including the input layer 
 		// which is not explicitly represented in the implementation, but the number is used for the number of inputs
-		MultilayerPerceptron(const std::vector<int>& neurons)
+		explicit MultilayerPerceptron(const std::vector<int>& neurons)
 		{
 			if (neurons.empty()) return;
 			else if (neurons.size() == 1)
@@ -131,7 +131,7 @@ namespace NeuralNetworks
 				hiddenLayers[0].AddBatch(hiddenLayers[0].getInput(), grad);
 		}
 
-	protected:
+	private:
 		NeuralLayer<LastSolver> lastLayer;
 		std::vector<NeuralLayer<Solver>> hiddenLayers;
 

@@ -12,9 +12,9 @@ namespace NeuralNetworks
 	class Neuron : public NeuralSublayer<Solver>
 	{
 	public:
-		typedef NeuralSublayer<Solver> BaseType;
+		using BaseType = NeuralSublayer<Solver>;
 
-		Neuron(int szi = 1)
+		explicit Neuron(int szi = 1)
 			: BaseType(szi, 1)
 		{
 		}
