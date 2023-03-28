@@ -556,8 +556,8 @@ bool MNISTLogisticRegressionTests()
 	minstTrainDataFiles.Close();
 
 	Utils::MNISTDatabase minstTestDataFiles;
-	minstTrainDataFiles.setImagesFileName("emnist-digits-test-images-idx3-ubyte");
-	minstTrainDataFiles.setLabelsFileName("emnist-digits-test-labels-idx1-ubyte");
+	minstTestDataFiles.setImagesFileName("emnist-digits-test-images-idx3-ubyte");
+	minstTestDataFiles.setLabelsFileName("emnist-digits-test-labels-idx1-ubyte");
 	if (!minstTestDataFiles.Open()) {
 		std::cout << "Couldn't load test data" << std::endl;
 		return false;
