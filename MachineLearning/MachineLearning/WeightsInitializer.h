@@ -48,9 +48,7 @@ namespace Initializers
 		{
 			double v = dist(rde);
 
-			const unsigned long long int r = neg % 2;
-
-			if (r)
+			if (neg % 2)
 				v *= -1;
 
 			++neg;
