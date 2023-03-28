@@ -436,9 +436,20 @@ bool IrisNeuralNetworkTest()
 		if (nrOutputs > 2) virginicaStats.AddPrediction(res(2) > 0.5, out(2, 0) > 0.5);
 	}
 
+	Utils::TestStatistics totalStats;
+
 	setosaStats.PrintStatistics("Setosa");
-	if (nrOutputs > 1) versicolorStats.PrintStatistics("Versicolor");
-	if (nrOutputs > 2) virginicaStats.PrintStatistics("Virginica");
+	if (nrOutputs > 1) {
+		versicolorStats.PrintStatistics("Versicolor");
+		if (nrOutputs > 2) virginicaStats.PrintStatistics("Virginica");
+
+		totalStats.Add(setosaStats);
+		totalStats.Add(versicolorStats);
+		if (nrOutputs > 2) totalStats.Add(virginicaStats);
+
+		totalStats.PrintStatistics("Overall");
+	}
+
 	std::cout << std::endl;
 
 	setosaStats.Clear();
@@ -465,8 +476,18 @@ bool IrisNeuralNetworkTest()
 	}
 
 	setosaStats.PrintStatistics("Setosa");
-	if (nrOutputs > 1) versicolorStats.PrintStatistics("Versicolor");
-	if (nrOutputs > 2) virginicaStats.PrintStatistics("Virginica");
+	if (nrOutputs > 1)
+	{
+		versicolorStats.PrintStatistics("Versicolor");
+		if (nrOutputs > 2) virginicaStats.PrintStatistics("Virginica");
+
+		totalStats.Clear();
+		totalStats.Add(setosaStats);
+		totalStats.Add(versicolorStats);
+		if (nrOutputs > 2) totalStats.Add(virginicaStats);
+
+		totalStats.PrintStatistics("Overall");
+	}
 	std::cout << std::endl;
 
 	return true;
