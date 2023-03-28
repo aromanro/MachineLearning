@@ -8,7 +8,7 @@ namespace Initializers
 	class WeightsInitializerInterface
 	{
 	public:
-		virtual ~WeightsInitializerInterface() {}
+		virtual ~WeightsInitializerInterface() = default;
 
 		virtual double get(int nrIn = 1, int nrOut = 1) = 0;
 	};
@@ -31,9 +31,7 @@ namespace Initializers
 	class WeightsInitializerZero : public WeightsInitializerImpl
 	{
 	public:
-		WeightsInitializerZero()
-		{
-		}
+		WeightsInitializerZero() = default;
 
 		double get(int nrIn = 1, int nrOut = 1) override
 		{
@@ -44,10 +42,7 @@ namespace Initializers
 	class WeightsInitializerForXorNetwork : public WeightsInitializerImpl
 	{
 	public:
-		WeightsInitializerForXorNetwork()
-			: dist(0.6, 0.9), neg(0)
-		{
-		}
+		WeightsInitializerForXorNetwork() = default;
 
 		double get(int nrIn = 1, int nrOut = 1) override
 		{
@@ -63,9 +58,9 @@ namespace Initializers
 			return v;
 		}
 
-	protected:
-		std::uniform_real_distribution<> dist;
-		unsigned long long int neg;
+	private:
+		std::uniform_real_distribution<> dist{0.6, 0.9};
+		unsigned long long int neg = 0;
 	};
 
 	class WeightsInitializerUniform : public WeightsInitializerImpl
@@ -81,16 +76,14 @@ namespace Initializers
 			return dist(rde);
 		}
 
-	protected:
+	private:
 		std::uniform_real_distribution<> dist;
 	};
 
 	class WeightsInitializerXavierUniform : public WeightsInitializerImpl
 	{
 	public:
-		WeightsInitializerXavierUniform()
-		{
-		}
+		WeightsInitializerXavierUniform() = default;
 		
 		double get(int nrIn = 1, int nrOut = 1) override
 		{
@@ -103,9 +96,7 @@ namespace Initializers
 	class WeightsInitializerHeUniform : public WeightsInitializerImpl
 	{
 	public:
-		WeightsInitializerHeUniform()
-		{
-		}
+		WeightsInitializerHeUniform() = default;
 
 		double get(int nrIn = 1, int nrOut = 1) override
 		{
@@ -118,9 +109,7 @@ namespace Initializers
 	class WeightsInitializerGlorotUniform : public WeightsInitializerImpl
 	{
 	public:
-		WeightsInitializerGlorotUniform()
-		{
-		}
+		WeightsInitializerGlorotUniform() = default;
 
 		double get(int nrIn = 1, int nrOut = 1) override
 		{
@@ -133,9 +122,7 @@ namespace Initializers
 	class WeightsInitializerXavierNormal : public WeightsInitializerImpl
 	{
 	public:
-		WeightsInitializerXavierNormal()
-		{
-		}
+		WeightsInitializerXavierNormal() = default;
 
 		double get(int nrIn = 1, int nrOut = 1) override
 		{
@@ -148,9 +135,8 @@ namespace Initializers
 	class WeightsInitializerHeNormal : public WeightsInitializerImpl
 	{
 	public:
-		WeightsInitializerHeNormal()
-		{
-		}
+		WeightsInitializerHeNormal() = default;
+
 
 		double get(int nrIn = 1, int nrOut = 1) override
 		{
@@ -163,9 +149,8 @@ namespace Initializers
 	class WeightsInitializerGlorotNormal : public WeightsInitializerImpl
 	{
 	public:
-		WeightsInitializerGlorotNormal()
-		{
-		}
+		WeightsInitializerGlorotNormal() = default;
+
 
 		double get(int nrIn = 1, int nrOut = 1) override
 		{

@@ -77,26 +77,6 @@ namespace Utils {
 			falseNegatives = 0;
 		}
 
-		void AddTruePositives(long long int tp)
-		{
-			truePositives += tp;
-		}
-
-		void AddTrueNegatives(long long int tn)
-		{
-			trueNegatives += tn;
-		}
-
-		void AddFalsePositives(long long int fp)
-		{
-			falsePositives += fp;
-		}
-
-		void AddFalseNegatives(long long int fn)
-		{
-			falseNegatives += fn;
-		}
-
 		void Add(const TestStatistics& other)
 		{
 			truePositives += other.truePositives;
@@ -118,7 +98,7 @@ namespace Utils {
 			std::cout << std::endl;
 		}
 
-	protected:
+	private:
 		long long int truePositives = 0;
 		long long int trueNegatives = 0;
 		long long int falsePositives = 0;

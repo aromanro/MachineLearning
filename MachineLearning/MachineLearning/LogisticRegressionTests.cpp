@@ -513,7 +513,7 @@ bool IrisLogisticRegressionTest()
 		totalStats.Add(versicolorStats);
 		if (nrOutputs > 2) totalStats.Add(virginicaStats);
 
-		totalStats.PrintStatistics("Overall");
+		//totalStats.PrintStatistics("Overall"); // misleading
 	}
 	std::cout << std::endl;
 
@@ -551,7 +551,7 @@ bool IrisLogisticRegressionTest()
 		totalStats.Add(versicolorStats);
 		if (nrOutputs > 2) totalStats.Add(virginicaStats);
 
-		totalStats.PrintStatistics("Overall");
+		//totalStats.PrintStatistics("Overall"); // misleading
 	}
 
 	std::cout << std::endl;
@@ -614,7 +614,7 @@ bool MNISTLogisticRegressionTests()
 
 
 	Eigen::MatrixXd testInputs(nrInputs, testRecords.size());
-	Eigen::MatrixXd testOutputs(10, testRecords.size());
+	Eigen::MatrixXd testOutputs(nrOutputs, testRecords.size());
 
 	rec = 0;
 	for (const auto& record : testRecords)
@@ -622,7 +622,7 @@ bool MNISTLogisticRegressionTests()
 		for (int i = 0; i < nrInputs; ++i)
 			testInputs(i, rec) = record.first[i];
 
-		for (int i = 0; i < 10; ++i)
+		for (int i = 0; i < nrOutputs; ++i)
 			testOutputs(i, rec) = (i == record.second) ? 1 : 0;
 
 		++rec;
@@ -673,7 +673,7 @@ bool MNISTLogisticRegressionTests()
 		std::cout << "Loss: " << loss << std::endl;
 	}
 
-	std::vector<Utils::TestStatistics> stats(10);
+	std::vector<Utils::TestStatistics> stats(nrOutputs);
 
 	// first, on training set:
 
@@ -682,41 +682,42 @@ bool MNISTLogisticRegressionTests()
 	for (int i = 0; i < trainInputs.cols(); ++i)
 	{
 		Eigen::VectorXd res = logisticModel.Predict(trainInputs.col(i));
-		for (int j = 0; j < 10; ++j)
+		for (int j = 0; j < nrOutputs; ++j)
 			stats[j].AddPrediction(res(j) > 0.5, trainOutputs(j, i) > 0.5);
 	}
 
-	for (int j = 0; j < 10; ++j)
+	for (int j = 0; j < nrOutputs; ++j)
 		stats[j].PrintStatistics(std::to_string(j));
 
 	Utils::TestStatistics totalStats;
-	for (int j = 0; j < 10; ++j)
+	for (int j = 0; j < nrOutputs; ++j)
 		totalStats.Add(stats[j]);
 
-	totalStats.PrintStatistics("Overall");
+	// totalStats.PrintStatistics("Overall"); // misleading
+
 
 	// now, on test set:
 
 	std::cout << std::endl << "Test set:" << std::endl;
 
-	for (int j = 0; j < 10; ++j)
+	for (int j = 0; j < nrOutputs; ++j)
 		stats[j].Clear();
 
 	for (int i = 0; i < testInputs.cols(); ++i)
 	{
 		Eigen::VectorXd res = logisticModel.Predict(testInputs.col(i));
-		for (int j = 0; j < 10; ++j)
+		for (int j = 0; j < nrOutputs; ++j)
 			stats[j].AddPrediction(res(j) > 0.5, testOutputs(j, i) > 0.5);
 	}
 
-	for (int j = 0; j < 10; ++j)
+	for (int j = 0; j < nrOutputs; ++j)
 		stats[j].PrintStatistics(std::to_string(j));
 
 	totalStats.Clear();
-	for (int j = 0; j < 10; ++j)
+	for (int j = 0; j < nrOutputs; ++j)
 		totalStats.Add(stats[j]);
 
-	totalStats.PrintStatistics("Overall");
+	// totalStats.PrintStatistics("Overall"); //misleading
 
 	return true;
 }
