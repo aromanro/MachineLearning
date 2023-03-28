@@ -606,12 +606,23 @@ bool NeuralNetworkTestsMNIST()
 	for (int i = 0; i < trainInputs.cols(); ++i)
 	{
 		Eigen::VectorXd res = neuralNetwork.Predict(trainInputs.col(i));
+
+		double limp = 0;
 		for (int j = 0; j < 10; ++j)
-			stats[j].AddPrediction(res(j) > 0.5, trainOutputs(j, i) > 0.5);
+			limp = max(limp, res(j));
+
+		for (int j = 0; j < 10; ++j)
+			stats[j].AddPrediction(res(j) >= limp, trainOutputs(j, i) > 0.5);
 	}
 
 	for (int j = 0; j < 10; ++j)
 		stats[j].PrintStatistics(std::to_string(j));
+
+	Utils::TestStatistics totalStats;
+	for (int j = 0; j < 10; ++j)
+		totalStats.Add(stats[j]);
+
+	totalStats.PrintStatistics("Overall");
 
 	// now, on test set:
 
@@ -623,12 +634,46 @@ bool NeuralNetworkTestsMNIST()
 	for (int i = 0; i < testInputs.cols(); ++i)
 	{
 		Eigen::VectorXd res = neuralNetwork.Predict(testInputs.col(i));
+
+		double limp = 0;
 		for (int j = 0; j < 10; ++j)
-			stats[j].AddPrediction(res(j) > 0.5, testOutputs(j, i) > 0.5);
+			limp = max(limp, res(j));
+
+		for (int j = 0; j < 10; ++j)
+			stats[j].AddPrediction(res(j) >= limp, testOutputs(j, i) > 0.5);
+
+		if (i % 1000 == 0)
+		{
+			int nr = -1;
+			for (int n = 0; n < 10; ++n)
+				if (testOutputs(n, i) > 0.5)
+				{
+					if (nr != -1)
+						std::cout << "Info from label ambiguous, should not happen: " << nr << " and " << n << std::endl;
+					nr = n;
+				}
+
+			int predn = -1;
+			for (int n = 0; n < 10; ++n)
+				if (res(n) >= limp)
+				{
+					if (predn != -1)
+						std::cout << "Ambiguous prediction: " << predn << " and " << n << std::endl;
+					predn = n;
+				}
+				
+			std::cout << "Number: " << nr << " Prediction: " << predn << ((nr == predn) ? " Correct!" : " Wrong!") << std::endl;
+		}
 	}
 
 	for (int j = 0; j < 10; ++j)
 		stats[j].PrintStatistics(std::to_string(j));
+
+	totalStats.Clear();
+	for (int j = 0; j < 10; ++j)
+		totalStats.Add(stats[j]);
+
+	totalStats.PrintStatistics("Overall");
 
 	return true;
 }
