@@ -11,7 +11,7 @@
 namespace SGD
 {
 
-	const double eps = 1E-10;
+	const double eps = 1E-8;
 
 	template<class ActivationFunction = ActivationFunctions::IdentityFunction<Eigen::VectorXd>, class LossFunction = LossFunctions::L2Loss<Eigen::VectorXd>>
 	class GradientDescentSolverCommonImpl
@@ -28,6 +28,11 @@ namespace SGD
 			lim = p[1];
 
 			return 2;
+		}
+
+		void setLearnRate(double a)
+		{
+			alpha = a;
 		}
 
 		bool lastLayer = true;

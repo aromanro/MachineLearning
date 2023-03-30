@@ -41,6 +41,11 @@ namespace NeuralNetworks
 			layer.setParams(params);
 		}
 
+		void setLearnRate(double a)
+		{
+			layer.setLearnRate(a);
+		}
+
 		void Initialize(Initializers::WeightsInitializerInterface& initializer)
 		{
 			layer.Initialize(initializer);

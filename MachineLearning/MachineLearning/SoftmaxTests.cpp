@@ -365,7 +365,7 @@ bool SoftmaxTestsMNIST()
 
 		double lim = 0;
 		for (int j = 0; j < nrOutputs; ++j)
-			lim = max(lim, res(j));
+			lim = std::max(lim, res(j));
 
 		int nr = -1;
 		for (int j = 0; j < nrOutputs; ++j)
@@ -418,7 +418,7 @@ bool SoftmaxTestsMNIST()
 
 		double lim = 0;
 		for (int j = 0; j < nrOutputs; ++j)
-			lim = max(lim, res(j));
+			lim = std::max(lim, res(j));
 
 		int nr = -1;
 		for (int j = 0; j < nrOutputs; ++j)

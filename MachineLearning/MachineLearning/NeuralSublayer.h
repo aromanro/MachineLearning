@@ -48,6 +48,11 @@ namespace NeuralNetworks
 		{
 			BaseType::solver.setParams(params);
 		}
+
+		void setLearnRate(double a)
+		{
+			BaseType::solver.setLearnRate(a);
+		}
 	};
 
 }

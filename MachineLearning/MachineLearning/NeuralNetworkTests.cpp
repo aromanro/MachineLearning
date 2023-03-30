@@ -573,17 +573,18 @@ bool NeuralNetworkTestsMNIST()
 	// also tested { nrInputs, 1000, 600, 100, nrOutputs } - use Glorot uniform weights initializer for it, this one I suspect that it needs different parameters and maybe more iterations
 	// a single hidden layer, should be fast enough: { nrInputs, 32, nrOutputs } - over 97%
 	// for simple ones the xavier initializer works well, for the deeper ones the glorot one is better
-	NeuralNetworks::MultilayerPerceptron<SGD::SoftmaxRegressionAdamSolver> neuralNetwork({ nrInputs, 1000, 100, nrOutputs });
+	NeuralNetworks::MultilayerPerceptron<SGD::SoftmaxRegressionAdamSolver> neuralNetwork({nrInputs, 1000, 100, nrOutputs});
 
-	const double alpha = 0.0005;
+	double alpha = 0.0005; // non const, so it can be adjusted
 	const double beta1 = 0.9;
 	const double beta2 = 0.95;
-	const double lim = 10;
+	const double lim = 1;
 
 	neuralNetwork.setParams({ alpha, lim, beta1, beta2 });
 
 	Initializers::WeightsInitializerXavierUniform initializer;
 	//Initializers::WeightsInitializerGlorotUniform initializer;
+	//Initializers::WeightsInitializerHeNormal initializer;
 	neuralNetwork.Initialize(initializer);
 
 	// train the model
@@ -595,6 +596,12 @@ bool NeuralNetworkTestsMNIST()
 
 	std::default_random_engine rde(42);
 	std::uniform_int_distribution<> distIntBig(0, static_cast<int>(trainInputs.cols() - 1));
+
+//#define ADD_NOISE 1
+#ifdef ADD_NOISE
+	std::uniform_real_distribution<> distDrop(0., 1.);
+	const double dropProb = 0.2; // also a hyperparameter
+#endif
 
 	long long int bcnt = 0;
 	for (int epoch = 0; epoch < 6; ++epoch)
@@ -608,18 +615,38 @@ bool NeuralNetworkTestsMNIST()
 				const int ind = distIntBig(rde);
 
 				in.col(b) = trainInputs.col(ind);
+
+#ifdef ADD_NOISE
+
+				for (int i = 0; i < nrInputs; ++i)
+				{
+					if (distDrop(rde) < dropProb)
+						in(i, b) = 0;
+				}
+
+#endif
+
 				out.col(b) = trainOutputs.col(ind);
 
 			}
 
 			neuralNetwork.ForwardBackwardStep(in, out);
-			++bcnt;
+			
 			if (bcnt % 100 == 0)
 			{
 				double loss = neuralNetwork.getLoss() / batchSize;
-				std::cout << "Loss: " << loss << std::endl;
+				std::cout << "Loss: " << loss << " Alpha: " << alpha << std::endl;
 			}
+			++bcnt;
+
+			//alpha *= 0.9997;
+			//neuralNetwork.setLearnRate(alpha);
 		}
+
+		// makes the learning rate smaller each epoch
+
+		alpha *= 0.5;
+		neuralNetwork.setLearnRate(alpha);
 	}
 
 	std::vector<Utils::TestStatistics> stats(nrOutputs);
@@ -636,7 +663,7 @@ bool NeuralNetworkTestsMNIST()
 
 		double limp = 0;
 		for (int j = 0; j < nrOutputs; ++j)
-			limp = max(limp, res(j));
+			limp = std::max(limp, res(j));
 
 		int nr = -1;
 		for (int j = 0; j < nrOutputs; ++j)
@@ -689,7 +716,7 @@ bool NeuralNetworkTestsMNIST()
 
 		double limp = 0;
 		for (int j = 0; j < nrOutputs; ++j)
-			limp = max(limp, res(j));
+			limp = std::max(limp, res(j));
 
 		int nr = -1;
 		for (int j = 0; j < nrOutputs; ++j)

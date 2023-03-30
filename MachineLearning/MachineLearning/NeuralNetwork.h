@@ -61,6 +61,13 @@ namespace NeuralNetworks
 			setParamsHiddenLayers(params);
 		}
 
+		void setLearnRate(double a)
+		{
+			lastLayer.setLearnRate(a);
+			for (int i = 0; i < hiddenLayers.size(); ++i)
+				hiddenLayers[i].setLearnRate(a);
+		}
+
 		void setParamsLastLayer(const std::vector<double>& params)
 		{
 			lastLayer.setParams(params);

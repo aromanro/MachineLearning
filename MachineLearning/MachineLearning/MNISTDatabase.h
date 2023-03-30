@@ -4,7 +4,6 @@
 #include <iostream>
 #include <sstream>
 #include <vector>
-#include <winsock.h>
 
 #include "DataFileBase.h"
 
@@ -53,7 +52,7 @@ namespace Utils {
 			// check magic
 			uint32_t magic = 0;
 			imagesStream.read((char*)&magic, sizeof(uint32_t));
-			magic = ntohl(magic);
+			magic = ntohlAlt(magic);
 			if (magic != 0x803) 
 			{
 				imagesStream.close();
@@ -62,15 +61,15 @@ namespace Utils {
 
 			uint32_t cntImgs = 0;
 			imagesStream.read((char*)&cntImgs, sizeof(uint32_t));
-			cntImgs = ntohl(cntImgs);
+			cntImgs = ntohlAlt(cntImgs);
 
 			uint32_t rows = 0;	
 			imagesStream.read((char*)&rows, sizeof(uint32_t));
-			rows = ntohl(rows);
+			rows = ntohlAlt(rows);
 
 			uint32_t cols = 0;
 			imagesStream.read((char*)&cols, sizeof(uint32_t));
-			cols = ntohl(cols);
+			cols = ntohlAlt(cols);
 
 			if (rows != cols || rows != 28)
 			{
@@ -87,7 +86,7 @@ namespace Utils {
 			// check magic
 			magic = 0;
 			labelsStream.read((char*) &magic, sizeof(uint32_t));
-			magic = ntohl(magic);
+			magic = ntohlAlt(magic);
 			if (magic != 0x801) 
 			{
 				Close();
@@ -97,7 +96,7 @@ namespace Utils {
 
 			uint32_t cntLabels = 0;
 			labelsStream.read((char*)&cntLabels, sizeof(uint32_t));
-			cntLabels = ntohl(cntLabels);
+			cntLabels = ntohlAlt(cntLabels);
 
 			if (cntLabels != cntImgs)
 			{
@@ -162,6 +161,14 @@ namespace Utils {
 		}
 
 	private:
+		static uint32_t ntohlAlt(uint32_t val)
+		{
+			uint8_t buf[4];
+			memcpy(buf, &val, 4);
+
+			return ((uint32_t)buf[0] << 24) | ((uint32_t)buf[1] << 16) | ((uint32_t)buf[2] << 8) | (uint32_t)buf[3];
+		}
+
 		DataFileBase imagesFile;
 		DataFileBase labelsFile;
 
