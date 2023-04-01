@@ -70,12 +70,12 @@ namespace SGD
 			pred = output;
 		}
 
-		BatchOutputType getPrediction() const
+		const BatchOutputType& getPrediction() const
 		{
 			return pred;
 		}
 
-		BatchInputType getInput() const
+		const BatchInputType& getInput() const
 		{
 			return input;
 		}
@@ -83,6 +83,12 @@ namespace SGD
 		void setLinearPrediction(const BatchOutputType& output) // before calling the link function
 		{
 			linpred = output;
+		}
+
+
+		const BatchOutputType& getLinearPrediction() const
+		{
+			return linpred;
 		}
 
 		double getLoss() const
@@ -93,6 +99,11 @@ namespace SGD
 				cost += BaseType::lossFunction(pred.col(c), target.col(c)).sum();
 
 			return cost;
+		}
+
+		const BatchOutputType& getTarget() const
+		{
+			return target;
 		}
 
 	protected:
@@ -120,6 +131,8 @@ namespace SGD
 			return lossLinkGrad;
 		}
 
+
+	private:
 		BatchOutputType pred;
 		BatchOutputType linpred;
 
@@ -148,7 +161,7 @@ namespace SGD
 			pred = output;
 		}
 
-		Eigen::RowVectorXd getPrediction() const
+		const Eigen::RowVectorXd& getPrediction() const
 		{
 			return pred;
 		}
@@ -157,6 +170,22 @@ namespace SGD
 		{
 			linpred = output;
 		}
+
+		const Eigen::RowVectorXd& getLinearPrediction() const
+		{
+			return linpred;
+		}
+
+		const Eigen::RowVectorXd& getTarget() const
+		{
+			return target;
+		}
+
+		const Eigen::RowVectorXd& getInput() const
+		{
+			return input;
+		}
+
 
 		double getLoss() const
 		{
@@ -188,6 +217,7 @@ namespace SGD
 			return lossLinkGrad;
 		}
 
+	private:
 		Eigen::RowVectorXd pred;
 		Eigen::RowVectorXd linpred;
 
@@ -210,6 +240,7 @@ namespace SGD
 
 		void Initialize(int szi = 1, int szo = 1)
 		{
+			// no need for initialization based on size, it's very simple
 		}
 
 		BatchOutputType getWeightsAndBias(WeightsType& w, OutputType& b)
@@ -248,6 +279,7 @@ namespace SGD
 
 		void Initialize(int szi = 1, int szo = 1)
 		{
+			// no need for initialization based on size, it's very simple
 		}
 
 		double getWeightsAndBias(double& w, double& b)
@@ -327,7 +359,7 @@ namespace SGD
 
 		double beta = 0.5;
 
-	protected:
+	private:
 		WeightsType mW;
 		OutputType mb;
 	};
@@ -382,7 +414,7 @@ namespace SGD
 
 		double beta = 0.5;
 
-	protected:
+	private:
 		double mW;
 		double mb;
 	};
@@ -425,7 +457,7 @@ namespace SGD
 			return lossLinkGrad;
 		}
 
-	protected:
+	private:
 		WeightsType sW;
 		OutputType sb;
 	};
@@ -435,6 +467,12 @@ namespace SGD
 	{
 	public:
 		using BaseType = GradientDescentSolverBase<double, double, double, Eigen::RowVectorXd, Eigen::RowVectorXd, ActivationFunction, LossFunction>;
+
+		void Initialize(int szi = 1, int szo = 1)
+		{
+			sW = 0;
+			sb = 0;
+		}
 
 		Eigen::RowVectorXd getWeightsAndBias(double& w, double& b)
 		{
@@ -461,13 +499,7 @@ namespace SGD
 			return cost;
 		}
 
-	protected:
-		void Initialize(int szi = 1, int szo = 1)
-		{
-			sW = 0;
-			sb = 0;
-		}
-
+	private:
 		double sW;
 		double sb;
 	};
@@ -523,7 +555,7 @@ namespace SGD
 
 		double beta = 0.5;
 
-	protected:
+	private:
 		WeightsType sW;
 		OutputType sb;
 	};
@@ -547,7 +579,7 @@ namespace SGD
 			sb = beta * sb + (1. - beta) * lossLinkGrad.cwiseProduct(lossLinkGrad).sum();
 			b -= BaseType::alpha * lossLinkGrad.sum() / sqrt(sb + eps);
 
-			const double wAdj = (lossLinkGrad * BaseType::input.transpose())(0);
+			const double wAdj = (lossLinkGrad * BaseType::getInput.transpose())(0);
 			sW = beta * sW + (1. - beta) * wAdj * wAdj;
 
 			w -= BaseType::alpha * wAdj / sqrt(sW + eps);
@@ -560,7 +592,7 @@ namespace SGD
 			double cost = 0;
 
 			for (int c = 0; c < BaseType::target.cols(); ++c)
-				cost += BaseType::lossFunction(BaseType::pred(c), BaseType::target(c));
+				cost += BaseType::lossFunction(BaseType::getPrediction(c), BaseType::getTarget(c));
 
 			return cost;
 		}
@@ -578,7 +610,7 @@ namespace SGD
 
 		double beta = 0.5;
 
-	protected:
+	private:
 		double sW;
 		double sb;
 	};
@@ -607,20 +639,22 @@ namespace SGD
 		BatchOutputType getWeightsAndBias(WeightsType& w, OutputType& b)
 		{
 			++step;
-			const BatchOutputType lossLinkGrad = BaseType::getGrad();
 
 			const double div1 = 1. / (1. - pow(beta1, step));
 			const double div2 = 1. / (1. - pow(beta2, step));
 
+			const BatchOutputType lossLinkGrad = BaseType::getGrad();
+
 			mb = beta1 * mb - (1. - beta1) * lossLinkGrad.rowwise().sum();
-			mb *= div1;
 			sb = beta2 * sb + (1. - beta2) * lossLinkGrad.cwiseProduct(lossLinkGrad).rowwise().sum();
+						
+			mb *= div1;
 			sb *= div2;
 
 			const OutputType sba = sb + OutputType::Constant(sb.size(), eps);
 			b += BaseType::alpha * mb.cwiseProduct(sba.cwiseSqrt().cwiseInverse());
 
-			const WeightsType wAdj = lossLinkGrad * BaseType::input.transpose();
+			const WeightsType wAdj = lossLinkGrad * BaseType::getInput().transpose();
 
 			mW = beta1 * mW - (1. - beta1) * wAdj;
 			mW *= div1;
@@ -653,7 +687,7 @@ namespace SGD
 		double beta1 = 0.9;
 		double beta2 = 0.995;
 
-	protected:
+	private:
 		int step = 0;
 
 		WeightsType sW;
@@ -693,7 +727,7 @@ namespace SGD
 
 			b += BaseType::alpha * mb / sqrt(sb + eps);
 
-			const double wAdj = (lossLinkGrad * BaseType::input.transpose())(0);
+			const double wAdj = (lossLinkGrad * BaseType::getInput().transpose())(0);
 
 			mW = beta1 * mW - (1. - beta1) * wAdj;
 			mW *= div1;
@@ -723,7 +757,7 @@ namespace SGD
 		double beta1 = 0.9;
 		double beta2 = 0.995;
 
-	protected:
+	private:
 		int step = 0;
 
 		double sW = 0;

@@ -86,6 +86,11 @@ namespace NeuralNetworks
 			return layer.getPrediction();
 		}
 
+		void setPrediction(const Eigen::MatrixXd& p)
+		{
+			layer.setPrediction(p);
+		}
+
 		Eigen::MatrixXd getInput() const
 		{
 			return layer.getInput();

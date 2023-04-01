@@ -573,17 +573,18 @@ bool NeuralNetworkTestsMNIST()
 	// also tested { nrInputs, 1000, 600, 100, nrOutputs } - use Glorot uniform weights initializer for it, this one I suspect that it needs different parameters and maybe more iterations
 	// a single hidden layer, should be fast enough: { nrInputs, 32, nrOutputs } - over 97%
 	// for simple ones the xavier initializer works well, for the deeper ones the glorot one is better
-	NeuralNetworks::MultilayerPerceptron<SGD::SoftmaxRegressionAdamSolver> neuralNetwork({nrInputs, 1000, 100, nrOutputs});
+	NeuralNetworks::MultilayerPerceptron<SGD::SoftmaxRegressionAdamSolver> neuralNetwork({nrInputs, 1000, 100, nrOutputs}/*{ nrInputs, 800, 600, 100, nrOutputs }*/);
 
-	double alpha = 0.0005; // non const, so it can be adjusted
+	double alpha = 0.002; // non const, so it can be adjusted
+	double decay = 0.9;
 	const double beta1 = 0.9;
 	const double beta2 = 0.95;
-	const double lim = 1;
+	const double lim = 10;
 
 	neuralNetwork.setParams({ alpha, lim, beta1, beta2 });
 
-	Initializers::WeightsInitializerXavierUniform initializer;
-	//Initializers::WeightsInitializerGlorotUniform initializer;
+	//Initializers::WeightsInitializerXavierUniform initializer;
+	Initializers::WeightsInitializerGlorotUniform initializer;
 	//Initializers::WeightsInitializerHeNormal initializer;
 	neuralNetwork.Initialize(initializer);
 
@@ -597,18 +598,28 @@ bool NeuralNetworkTestsMNIST()
 	std::default_random_engine rde(42);
 	std::uniform_int_distribution<> distIntBig(0, static_cast<int>(trainInputs.cols() - 1));
 
+// use dropout for input level instead!
 //#define ADD_NOISE 1
 #ifdef ADD_NOISE
-	std::uniform_real_distribution<> distDrop(0., 1.);
 	const double dropProb = 0.2; // also a hyperparameter
+	std::bernoulli_distribution dist(dropProb);
 #endif
 
+	std::cout << "Training samples: " << trainInputs.cols() << std::endl;
+	const long long int nrBatches	= trainInputs.cols() / batchSize;
+	std::cout << "Traing batches / epoch: " << nrBatches << std::endl;
+
+	// for some reason I couldn't set again the parameters that got ~98.75% accuracy with a small number of epochs (should have saved them), but with 30 epochs and a decaying alpha it still works
+	// although without looking at the learning charts, it looks like overfitting, since on the training set it's ~99.85%
+
+	// I must try with dropout to see what happens
+
 	long long int bcnt = 0;
-	for (int epoch = 0; epoch < 6; ++epoch)
+	for (int epoch = 0; epoch < 30; ++epoch)
 	{
 		std::cout << "Epoch: " << epoch << std::endl;
 
-		for (int batch = 0; batch < trainInputs.cols() / batchSize; ++batch)
+		for (int batch = 0; batch < nrBatches; ++batch)
 		{
 			for (int b = 0; b < batchSize; ++b)
 			{
@@ -617,13 +628,11 @@ bool NeuralNetworkTestsMNIST()
 				in.col(b) = trainInputs.col(ind);
 
 #ifdef ADD_NOISE
-
 				for (int i = 0; i < nrInputs; ++i)
 				{
-					if (distDrop(rde) < dropProb)
+					if (distDrop(rde))
 						in(i, b) = 0;
 				}
-
 #endif
 
 				out.col(b) = trainOutputs.col(ind);
@@ -645,7 +654,7 @@ bool NeuralNetworkTestsMNIST()
 
 		// makes the learning rate smaller each epoch
 
-		alpha *= 0.5;
+		alpha *= decay;
 		neuralNetwork.setLearnRate(alpha);
 	}
 

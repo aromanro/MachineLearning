@@ -26,7 +26,7 @@ namespace NeuralNetworks
 	public:
 		// neurons contains the number of neurons in each layer including the input layer 
 		// which is not explicitly represented in the implementation, but the number is used for the number of inputs
-		explicit MultilayerPerceptron(const std::vector<int>& neurons)
+		explicit MultilayerPerceptron(const std::vector<int>& neurons, const std::vector<double>& drop = {})
 		{
 			if (neurons.empty()) return;
 			else if (neurons.size() == 1)
@@ -52,6 +52,13 @@ namespace NeuralNetworks
 			lastLayer = NeuralLayer<LastSolver>(inputs, neurons.back());
 			lastLayer.setLastLayer();
 			lastLayer.setFirstLayer(false);
+
+			std::random_device rd;
+			rde.seed(rd());
+
+			dropout.resize(hiddenLayers.size() + 1, 0.);
+			for (int i = 0; i < std::min(drop.size(), dropout.size()); ++i)
+				dropout[i] = drop[i];
 		}
 
 		// this assumes that the params for the last and hidden layers are the same, so use the same solver (but the activation and cost functions can be different)
@@ -117,11 +124,34 @@ namespace NeuralNetworks
 
 			// forward
 			Eigen::MatrixXd inp = input;
+
+			// dropout for input
+			if (!dropout.empty() && dropout[0] > 0.)
+			{
+				const Eigen::RowVectorXd zeroRow = Eigen::RowVectorXd::Zero(inp.cols());
+				for (int i = 0; i < inp.rows(); ++i)
+					if (distDrop(rde) < dropout[0]) inp.row(i) = zeroRow;
+
+				inp /= (1. - dropout[0]);
+			}
+
 			for (int i = 0; i < hiddenLayers.size(); ++i)
 			{
 				t.resize(hiddenLayers[i].getNrOutputs(), batchSize);
 				hiddenLayers[i].AddBatchNoParamsAdjustment(inp, t);
 				inp = hiddenLayers[i].getPrediction();
+
+				if (dropout.size() > i + 1 && dropout[i + 1] > 0.)
+				{
+					const Eigen::RowVectorXd zeroRow = Eigen::RowVectorXd::Zero(inp.cols());
+					for (int j = 0; j < inp.rows(); ++j)
+						if (distDrop(rde) < dropout[i + 1]) inp.row(j) = zeroRow;
+
+					inp /= (1. - dropout[i + 1]);
+
+					// change the prediction, too, for backpropagation 
+					hiddenLayers[i].setPrediction(inp);
+				}
 			}
 
 			// forward and backward for the last layer and backpropagate the gradient to the last hidden layer
@@ -141,6 +171,11 @@ namespace NeuralNetworks
 	private:
 		NeuralLayer<LastSolver> lastLayer;
 		std::vector<NeuralLayer<Solver>> hiddenLayers;
+
+		std::vector<double> dropout;
+
+		std::mt19937 rde;
+		std::uniform_real_distribution<> distDrop{0., 1.};
 
 		Eigen::MatrixXd t; // bogus, used only for its size during forward-backward step
 	};

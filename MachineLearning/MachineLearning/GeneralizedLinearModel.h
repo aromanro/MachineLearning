@@ -38,6 +38,11 @@ namespace GLM {
 			return solver.getPrediction();
 		}
 
+		void setPrediction(const BatchOutputType& p)
+		{
+			solver.setPrediction(p);
+		}
+
 		BatchInputType getInput() const
 		{
 			return solver.getInput();
