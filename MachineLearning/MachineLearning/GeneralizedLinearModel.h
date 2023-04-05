@@ -33,7 +33,7 @@ namespace GLM {
 			return solver.getWeightsAndBias(W, b);
 		}
 
-		BatchOutputType getPrediction() const
+		const BatchOutputType& getPrediction() const
 		{
 			return solver.getPrediction();
 		}
@@ -43,7 +43,7 @@ namespace GLM {
 			solver.setPrediction(p);
 		}
 
-		BatchInputType getInput() const
+		const BatchInputType& getInput() const
 		{
 			return solver.getInput();
 		}

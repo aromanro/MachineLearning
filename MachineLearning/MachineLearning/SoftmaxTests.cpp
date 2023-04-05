@@ -160,6 +160,7 @@ bool SoftmaxTestsIris()
 
 	std::cout << std::endl << "Training set:" << std::endl;
 
+	long long int correct = 0;
 	for (const auto& record : trainingSet)
 	{
 		in(0, 0) = std::get<0>(record);
@@ -175,6 +176,14 @@ bool SoftmaxTestsIris()
 		setosaStats.AddPrediction(res(0) > 0.5, out(0, 0) > 0.5);
 		if (nrOutputs > 1) versicolorStats.AddPrediction(res(1) > 0.5, out(1, 0) > 0.5);
 		if (nrOutputs > 2) virginicaStats.AddPrediction(res(2) > 0.5, out(2, 0) > 0.5);
+
+		double limp = 0.5;
+		for (int j = 0; j < nrOutputs; ++j)
+			limp = std::max(limp, res(j));
+
+		if (res(0) == limp && out(0, 0) > 0.5) ++correct;
+		else if (nrOutputs > 1 && res(1) == limp && out(1, 0) > 0.5) ++correct;
+		else if (nrOutputs > 2 && res(2) == limp && out(2, 0) > 0.5) ++correct;
 	}
 
 	Utils::TestStatistics totalStats;
@@ -191,13 +200,15 @@ bool SoftmaxTestsIris()
 		//totalStats.PrintStatistics("Overall"); //misleading
 	}
 
-	std::cout << std::endl;
+	std::cout << std::endl << "Accuracy (% correct): " << 100.0 * static_cast<double>(correct) / static_cast<double>(trainingSet.size()) << "%" << std::endl;
 
 	setosaStats.Clear();
 	versicolorStats.Clear();
 	virginicaStats.Clear();
 
 	std::cout << std::endl << "Test set:" << std::endl;
+
+	correct = 0;
 
 	for (const auto& record : testSet)
 	{
@@ -215,6 +226,14 @@ bool SoftmaxTestsIris()
 		setosaStats.AddPrediction(res(0) > 0.5, out(0, 0) > 0.5);
 		if (nrOutputs > 1) versicolorStats.AddPrediction(res(1) > 0.5, out(1, 0) > 0.5);
 		if (nrOutputs > 2) virginicaStats.AddPrediction(res(2) > 0.5, out(2, 0) > 0.5);
+
+		double limp = 0.5;
+		for (int j = 0; j < nrOutputs; ++j)
+			limp = std::max(limp, res(j));
+
+		if (res(0) == limp && out(0, 0) > 0.5) ++correct;
+		else if (nrOutputs > 1 && res(1) == limp && out(1, 0) > 0.5) ++correct;
+		else if (nrOutputs > 2 && res(2) == limp && out(2, 0) > 0.5) ++correct;
 	}
 
 	setosaStats.PrintStatistics("Setosa");
@@ -231,7 +250,7 @@ bool SoftmaxTestsIris()
 		//totalStats.PrintStatistics("Overall"); //misleading
 	}
 
-	std::cout << std::endl;
+	std::cout << std::endl << "Accuracy (% correct): " << 100.0 * static_cast<double>(correct) / static_cast<double>(testSet.size()) << "%" << std::endl;
 
 	return true;
 }

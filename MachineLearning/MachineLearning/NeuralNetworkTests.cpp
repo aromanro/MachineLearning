@@ -419,6 +419,7 @@ bool IrisNeuralNetworkTest()
 
 	std::cout << std::endl << "Training set:" << std::endl;
 
+	long long int correct = 0;
 	for (const auto& record : trainingSet)
 	{
 		in(0, 0) = std::get<0>(record);
@@ -431,9 +432,19 @@ bool IrisNeuralNetworkTest()
 		if (nrOutputs > 2) out(2, 0) = (std::get<4>(record) == "Iris-virginica") ? 1 : 0;
 
 		Eigen::VectorXd res = neuralNetwork.Predict(in.col(0));
+
+
 		setosaStats.AddPrediction(res(0) > 0.5, out(0, 0) > 0.5);
 		if (nrOutputs > 1) versicolorStats.AddPrediction(res(1) > 0.5, out(1, 0) > 0.5);
 		if (nrOutputs > 2) virginicaStats.AddPrediction(res(2) > 0.5, out(2, 0) > 0.5);
+
+		double limp = 0.5;
+		for (int j = 0; j < nrOutputs; ++j)
+			limp = std::max(limp, res(j));
+
+		if (res(0) == limp && out(0, 0) > 0.5) ++correct;
+		else if (nrOutputs > 1 && res(1) == limp && out(1, 0) > 0.5) ++correct;
+		else if (nrOutputs > 2 && res(2) == limp && out(2, 0) > 0.5) ++correct;
 	}
 
 	Utils::TestStatistics totalStats;
@@ -450,13 +461,16 @@ bool IrisNeuralNetworkTest()
 		//totalStats.PrintStatistics("Overall"); //misleading
 	}
 
-	std::cout << std::endl;
+
+	std::cout << std::endl << "Accuracy (% correct): " << 100.0 * static_cast<double>(correct) / static_cast<double>(trainingSet.size()) << "%" << std::endl;
 
 	setosaStats.Clear();
 	versicolorStats.Clear();
 	virginicaStats.Clear();
 
 	std::cout << std::endl << "Test set:" << std::endl;
+
+	correct = 0;
 
 	for (const auto& record : testSet)
 	{
@@ -473,6 +487,14 @@ bool IrisNeuralNetworkTest()
 		setosaStats.AddPrediction(res(0) > 0.5, out(0, 0) > 0.5);
 		if (nrOutputs > 1) versicolorStats.AddPrediction(res(1) > 0.5, out(1, 0) > 0.5);
 		if (nrOutputs > 2) virginicaStats.AddPrediction(res(2) > 0.5, out(2, 0) > 0.5);
+
+		double limp = 0.5;
+		for (int j = 0; j < nrOutputs; ++j)
+			limp = std::max(limp, res(j));
+
+		if (res(0) == limp && out(0, 0) > 0.5) ++correct;
+		else if (nrOutputs > 1 && res(1) == limp && out(1, 0) > 0.5) ++correct;
+		else if (nrOutputs > 2 && res(2) == limp && out(2, 0) > 0.5) ++correct;
 	}
 
 	setosaStats.PrintStatistics("Setosa");
@@ -488,7 +510,8 @@ bool IrisNeuralNetworkTest()
 
 		//totalStats.PrintStatistics("Overall"); //misleading
 	}
-	std::cout << std::endl;
+
+	std::cout << std::endl << "Accuracy (% correct): " << 100.0 * static_cast<double>(correct) / static_cast<double>(testSet.size()) << "%" << std::endl;
 
 	return true;
 }
@@ -573,10 +596,10 @@ bool NeuralNetworkTestsMNIST()
 	// also tested { nrInputs, 1000, 600, 100, nrOutputs } - use Glorot uniform weights initializer for it, this one I suspect that it needs different parameters and maybe more iterations
 	// a single hidden layer, should be fast enough: { nrInputs, 32, nrOutputs } - over 97%
 	// for simple ones the xavier initializer works well, for the deeper ones the glorot one is better
-	NeuralNetworks::MultilayerPerceptron<SGD::SoftmaxRegressionAdamSolver> neuralNetwork({nrInputs, 1000, 100, nrOutputs}/*{ nrInputs, 800, 600, 100, nrOutputs }*/);
+	NeuralNetworks::MultilayerPerceptron<SGD::SoftmaxRegressionAdamSolver> neuralNetwork(/*{nrInputs, 1000, 100, nrOutputs}*/ {nrInputs, 1000, 800, 400, 100, nrOutputs}, {0.2, 0.2, 0.2, 0.2, 0} );
 
-	double alpha = 0.002; // non const, so it can be adjusted
-	double decay = 0.9;
+	double alpha = 0.001; // non const, so it can be adjusted
+	double decay = 0.95;
 	const double beta1 = 0.9;
 	const double beta2 = 0.95;
 	const double lim = 10;
@@ -590,7 +613,7 @@ bool NeuralNetworkTestsMNIST()
 
 	// train the model
 
-	const int batchSize = 64;
+	const int batchSize = 32;
 
 	Eigen::MatrixXd in(nrInputs, batchSize);
 	Eigen::MatrixXd out(nrOutputs, batchSize);
@@ -609,6 +632,8 @@ bool NeuralNetworkTestsMNIST()
 	const long long int nrBatches	= trainInputs.cols() / batchSize;
 	std::cout << "Traing batches / epoch: " << nrBatches << std::endl;
 
+	std::chrono::high_resolution_clock::time_point t1 = std::chrono::high_resolution_clock::now();
+
 	// for some reason I couldn't set again the parameters that got ~98.75% accuracy with a small number of epochs (should have saved them), but with 30 epochs and a decaying alpha it still works
 	// although without looking at the learning charts, it looks like overfitting, since on the training set it's ~99.85%
 
@@ -617,8 +642,9 @@ bool NeuralNetworkTestsMNIST()
 	long long int bcnt = 0;
 	for (int epoch = 0; epoch < 30; ++epoch)
 	{
-		std::cout << "Epoch: " << epoch << std::endl;
+		std::cout << "Epoch: " << epoch << " Alpha: " << alpha << std::endl;
 
+		double totalLoss = 0;
 		for (int batch = 0; batch < nrBatches; ++batch)
 		{
 			for (int b = 0; b < batchSize; ++b)
@@ -640,23 +666,27 @@ bool NeuralNetworkTestsMNIST()
 			}
 
 			neuralNetwork.ForwardBackwardStep(in, out);
+
+			double loss = neuralNetwork.getLoss() / batchSize;
+			totalLoss += loss;
 			
 			if (bcnt % 100 == 0)
-			{
-				double loss = neuralNetwork.getLoss() / batchSize;
-				std::cout << "Loss: " << loss << " Alpha: " << alpha << std::endl;
-			}
+				std::cout << "Loss: " << loss << std::endl;
+			
 			++bcnt;
-
-			//alpha *= 0.9997;
-			//neuralNetwork.setLearnRate(alpha);
 		}
 
-		// makes the learning rate smaller each epoch
+		std::cout << "Average loss: " << totalLoss / static_cast<double>(nrBatches) << std::endl;
 
+		// makes the learning rate smaller each epoch
 		alpha *= decay;
 		neuralNetwork.setLearnRate(alpha);
 	}
+
+	std::chrono::high_resolution_clock::time_point t2 = std::chrono::high_resolution_clock::now();
+	auto dif = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();
+
+	std::cout << "Training took: " << dif / 1000. << " seconds!" << std::endl;
 
 	std::vector<Utils::TestStatistics> stats(nrOutputs);
 

@@ -317,7 +317,6 @@ bool Test4()
 		x.resize(3, batchSize);
 		y.resize(1, batchSize);
 
-		std::chrono::high_resolution_clock::time_point t1 = std::chrono::high_resolution_clock::now();
 
 		for (int i = 0; i <= 100000; ++i)
 		{
@@ -340,11 +339,6 @@ bool Test4()
 				std::cout << "Loss: " << loss << std::endl;
 			}
 		}
-
-		std::chrono::high_resolution_clock::time_point t2 = std::chrono::high_resolution_clock::now();
-		auto dif = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();
-
-		std::cout << "Computation took: " << dif / 1000. << " seconds!" << std::endl;
 
 		Eigen::VectorXd in(3);
 		in(0) = 32. / 100;
