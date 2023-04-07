@@ -25,7 +25,7 @@ bool SimpleLinearRegressionTests()
 
 		simpleLinearRegression.AddBatch(x, y);
 
-		double loss = simpleLinearRegression.getLoss() / nrPoints;
+		const double loss = simpleLinearRegression.getLoss() / nrPoints;
 		std::cout << "Loss: " << loss << std::endl;
 
 		double res = simpleLinearRegression.Predict(7.);
@@ -52,7 +52,7 @@ bool SimpleLinearRegressionTests()
 
 		multivariateSimpleLinearRegression.AddBatch(x, y);
 
-		double loss = multivariateSimpleLinearRegression.getLoss() / nrPoints;
+		const double loss = multivariateSimpleLinearRegression.getLoss() / nrPoints;
 		std::cout << "Loss: " << loss << std::endl;
 
 		Eigen::VectorXd res = multivariateSimpleLinearRegression.Predict(12.);
@@ -85,7 +85,7 @@ bool SimpleLinearRegressionTests()
 		multivariateSimpleLinearRegression.AddBatch(x, y);
 
 
-		double loss = multivariateSimpleLinearRegression.getLoss() / nrPoints;
+		const double loss = multivariateSimpleLinearRegression.getLoss() / nrPoints;
 		std::cout << "Loss: " << loss << std::endl;
 
 		Eigen::VectorXd in(3);

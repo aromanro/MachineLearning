@@ -143,7 +143,7 @@ bool SoftmaxTestsIris()
 		softmaxModel.AddBatch(in, out);
 		if (i % 100 == 0)
 		{
-			double loss = softmaxModel.getLoss() / batchSize;
+			const double loss = softmaxModel.getLoss() / batchSize;
 			std::cout << "Loss: " << loss << std::endl;
 		}
 	}
@@ -200,7 +200,7 @@ bool SoftmaxTestsIris()
 		//totalStats.PrintStatistics("Overall"); //misleading
 	}
 
-	std::cout << std::endl << "Accuracy (% correct): " << 100.0 * static_cast<double>(correct) / static_cast<double>(trainingSet.size()) << "%" << std::endl;
+	std::cout << "Accuracy (% correct): " << 100.0 * static_cast<double>(correct) / static_cast<double>(trainingSet.size()) << "%" << std::endl << std::endl;
 
 	setosaStats.Clear();
 	versicolorStats.Clear();
@@ -250,7 +250,7 @@ bool SoftmaxTestsIris()
 		//totalStats.PrintStatistics("Overall"); //misleading
 	}
 
-	std::cout << std::endl << "Accuracy (% correct): " << 100.0 * static_cast<double>(correct) / static_cast<double>(testSet.size()) << "%" << std::endl;
+	std::cout << "Accuracy (% correct): " << 100.0 * static_cast<double>(correct) / static_cast<double>(testSet.size()) << "%" << std::endl << std::endl;
 
 	return true;
 }
@@ -366,7 +366,7 @@ bool SoftmaxTestsMNIST()
 			softmaxModel.AddBatch(in, out);
 		}
 
-		double loss = softmaxModel.getLoss() / batchSize;
+		const double loss = softmaxModel.getLoss() / batchSize;
 		std::cout << "Loss: " << loss << std::endl;
 	}
 

@@ -67,7 +67,7 @@ bool SimpleLogisticRegressionTest()
 		{
 			for (int b = 0; b < batchSize; ++b)
 			{
-				int ind = distInt(rde);
+				const int ind = distInt(rde);
 
 				x(0, b) = xvals[ind];
 				x(1, b) = yvals[ind];
@@ -79,7 +79,7 @@ bool SimpleLogisticRegressionTest()
 
 			if (i % 10000 == 0)
 			{
-				double loss = logisticModel.getLoss() / batchSize;
+				const double loss = logisticModel.getLoss() / batchSize;
 				std::cout << "Loss: " << loss << std::endl;
 			}
 		}
@@ -252,7 +252,7 @@ bool MoreComplexLogisticRegressionTest()
 		{
 			for (int b = 0; b < batchSize; ++b)
 			{
-				int ind = distIntBig(rde);
+				const int ind = distIntBig(rde);
 
 				x(0, b) = xvals[ind];
 				x(1, b) = yvals[ind];
@@ -264,7 +264,7 @@ bool MoreComplexLogisticRegressionTest()
 
 			if (i % 10000 == 0)
 			{
-				double loss = logisticModel.getLoss() / batchSize;
+				const double loss = logisticModel.getLoss() / batchSize;
 				std::cout << "Loss: " << loss << std::endl;
 			}
 		}
@@ -468,7 +468,7 @@ bool IrisLogisticRegressionTest()
 		logisticModel.AddBatch(in, out);
 		if (i % 100 == 0)
 		{
-			double loss = logisticModel.getLoss() / batchSize;
+			const double loss = logisticModel.getLoss() / batchSize;
 			std::cout << "Loss: " << loss << std::endl;
 		}
 	}
@@ -669,7 +669,7 @@ bool MNISTLogisticRegressionTests()
 			logisticModel.AddBatch(in, out);
 		}
 
-		double loss = logisticModel.getLoss() / batchSize;
+		const double loss = logisticModel.getLoss() / batchSize;
 		std::cout << "Loss: " << loss << std::endl;
 	}
 

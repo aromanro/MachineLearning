@@ -109,7 +109,7 @@ bool XORNeuralNetworksTests()
 
 			if (i % 10000 == 0)
 			{
-				double loss = modelLastLayer.getLoss() / batchSize;
+				const double loss = modelLastLayer.getLoss() / batchSize;
 				std::cout << "Loss: " << loss << std::endl;
 
 				if (loss < 1E-2)
@@ -207,7 +207,7 @@ bool XORNeuralNetworksTests()
 			
 			if (i % 10000 == 0)
 			{
-				double loss = neuralNetwork.getLoss() / batchSize;
+				const double loss = neuralNetwork.getLoss() / batchSize;
 				std::cout << "Loss: " << loss << std::endl;
 
 				if (loss < 1E-2)
@@ -402,7 +402,7 @@ bool IrisNeuralNetworkTest()
 		neuralNetwork.ForwardBackwardStep(in, out);
 		if (i % 300 == 0)
 		{
-			double loss = neuralNetwork.getLoss() / batchSize;
+			const double loss = neuralNetwork.getLoss() / batchSize;
 			std::cout << "Loss: " << loss << std::endl;
 		}
 	}
@@ -462,7 +462,7 @@ bool IrisNeuralNetworkTest()
 	}
 
 
-	std::cout << std::endl << "Accuracy (% correct): " << 100.0 * static_cast<double>(correct) / static_cast<double>(trainingSet.size()) << "%" << std::endl;
+	std::cout << "Accuracy (% correct): " << 100.0 * static_cast<double>(correct) / static_cast<double>(trainingSet.size()) << "%" << std::endl << std::endl;
 
 	setosaStats.Clear();
 	versicolorStats.Clear();
@@ -511,7 +511,7 @@ bool IrisNeuralNetworkTest()
 		//totalStats.PrintStatistics("Overall"); //misleading
 	}
 
-	std::cout << std::endl << "Accuracy (% correct): " << 100.0 * static_cast<double>(correct) / static_cast<double>(testSet.size()) << "%" << std::endl;
+	std::cout << "Accuracy (% correct): " << 100.0 * static_cast<double>(correct) / static_cast<double>(testSet.size()) << "%" << std::endl << std::endl;
 
 	return true;
 }
@@ -596,9 +596,9 @@ bool NeuralNetworkTestsMNIST()
 	// also tested { nrInputs, 1000, 600, 100, nrOutputs } - use Glorot uniform weights initializer for it, this one I suspect that it needs different parameters and maybe more iterations
 	// a single hidden layer, should be fast enough: { nrInputs, 32, nrOutputs } - over 97%
 	// for simple ones the xavier initializer works well, for the deeper ones the glorot one is better
-	NeuralNetworks::MultilayerPerceptron<SGD::SoftmaxRegressionAdamSolver> neuralNetwork(/*{nrInputs, 1000, 100, nrOutputs}*/ {nrInputs, 1000, 800, 400, 100, nrOutputs}, {0.2, 0.2, 0.2, 0.2, 0} );
+	NeuralNetworks::MultilayerPerceptron<SGD::SoftmaxRegressionAdamSolver> neuralNetwork(/*{nrInputs, 1000, 100, nrOutputs}*/ {nrInputs, 1000, 800, 400, 100, nrOutputs}, {0.2, 0.2, 0.1, 0, 0} ); // don't use dropout right before the softmax layer
 
-	double alpha = 0.001; // non const, so it can be adjusted
+	double alpha = 0.002; // non const, so it can be adjusted
 	double decay = 0.95;
 	const double beta1 = 0.9;
 	const double beta2 = 0.95;
@@ -640,7 +640,7 @@ bool NeuralNetworkTestsMNIST()
 	// I must try with dropout to see what happens
 
 	long long int bcnt = 0;
-	for (int epoch = 0; epoch < 30; ++epoch)
+	for (int epoch = 0; epoch < 50; ++epoch)
 	{
 		std::cout << "Epoch: " << epoch << " Alpha: " << alpha << std::endl;
 
@@ -667,7 +667,7 @@ bool NeuralNetworkTestsMNIST()
 
 			neuralNetwork.ForwardBackwardStep(in, out);
 
-			double loss = neuralNetwork.getLoss() / batchSize;
+			const double loss = neuralNetwork.getLoss() / batchSize;
 			totalLoss += loss;
 			
 			if (bcnt % 100 == 0)

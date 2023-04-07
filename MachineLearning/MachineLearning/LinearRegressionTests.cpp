@@ -52,7 +52,7 @@ bool Test1()
 		{
 			for (int b = 0; b < batchSize; ++b)
 			{
-				int ind = distInt(rde);
+				const int ind = distInt(rde);
 				x(b) = xvals[ind];
 				y(b) = yvals[ind];
 			}
@@ -61,7 +61,7 @@ bool Test1()
 
 			if (i % 500 == 0)
 			{
-				double loss = generalLinearModel.getLoss() / batchSize;
+				const double loss = generalLinearModel.getLoss() / batchSize;
 				std::cout << "Loss: " << loss << std::endl;
 			}
 		}
@@ -140,7 +140,7 @@ bool Test2()
 
 			if (i % 500 == 0)
 			{
-				double loss = generalLinearModel.getLoss() / batchSize;
+				const double loss = generalLinearModel.getLoss() / batchSize;
 				std::cout << "Loss: " << loss << std::endl;
 			}
 		}
@@ -211,7 +211,7 @@ bool Test3()
 		{
 			for (int b = 0; b < batchSize; ++b)
 			{
-				int ind = distInt(rde);
+				const int ind = distInt(rde);
 
 				x(0, b) = xvals[ind];
 				x(1, b) = xvals[ind] * xvals[ind];
@@ -223,7 +223,7 @@ bool Test3()
 
 			if (i % 100 == 0)
 			{
-				double loss = generalLinearModel.getLoss() / batchSize;
+				const double loss = generalLinearModel.getLoss() / batchSize;
 				std::cout << "Loss: " << loss << std::endl;
 			}
 		}
@@ -322,7 +322,7 @@ bool Test4()
 		{
 			for (int b = 0; b < batchSize; ++b)
 			{
-				int ind = distInt(rde);
+				const int ind = distInt(rde);
 
 				x(0, b) = xvals[ind];
 				x(1, b) = xvals[ind] * xvals[ind];
@@ -335,7 +335,7 @@ bool Test4()
 
 			if (i % 10000 == 0)
 			{
-				double loss = generalLinearModel.getLoss() / batchSize;
+				const double loss = generalLinearModel.getLoss() / batchSize;
 				std::cout << "Loss: " << loss << std::endl;
 			}
 		}
