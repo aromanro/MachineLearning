@@ -598,8 +598,8 @@ bool NeuralNetworkTestsMNIST()
 	// for simple ones the xavier initializer works well, for the deeper ones the glorot one is better
 	NeuralNetworks::MultilayerPerceptron<SGD::SoftmaxRegressionAdamSolver> neuralNetwork(/*{nrInputs, 1000, 100, nrOutputs}*/ {nrInputs, 1000, 800, 400, 100, nrOutputs}, {0.2, 0.2, 0.1, 0, 0} ); // don't use dropout right before the softmax layer
 
-	double alpha = 0.002; // non const, so it can be adjusted
-	double decay = 0.95;
+	double alpha = 0.001; // non const, so it can be adjusted
+	double decay = 0.93;
 	const double beta1 = 0.9;
 	const double beta2 = 0.95;
 	const double lim = 10;
@@ -662,7 +662,6 @@ bool NeuralNetworkTestsMNIST()
 #endif
 
 				out.col(b) = trainOutputs.col(ind);
-
 			}
 
 			neuralNetwork.ForwardBackwardStep(in, out);

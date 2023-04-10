@@ -66,7 +66,6 @@ namespace GLM {
 		Solver& getSolver()
 		{
 			return solver;
-
 		}
 
 	protected:

@@ -360,7 +360,6 @@ bool SoftmaxTestsMNIST()
 
 				in.col(b) = trainInputs.col(ind);
 				out.col(b) = trainOutputs.col(ind);
-
 			}
 
 			softmaxModel.AddBatch(in, out);
