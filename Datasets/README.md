@@ -5,9 +5,9 @@ Download and unpack here the following datasets:
 1. Iris dataset
 
 Source: https://archive.ics.uci.edu/ml/datasets/iris
-Only the iris.data is needed.
+Only the iris.data file is needed.
 
-2. EMINST dataset
+2. EMNIST dataset
 
 Source: https://www.nist.gov/itl/products-and-services/emnist-dataset
 Download the binary format as the original MINST dataset.
