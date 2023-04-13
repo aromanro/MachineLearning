@@ -550,6 +550,13 @@ bool NeuralNetworkTestsMNIST()
 	std::mt19937 g(rd());
 	std::shuffle(trainingRecords.begin(), trainingRecords.end(), g);
 
+	// split the training data into training and validation sets
+
+	const int nrTrainingRecords = static_cast<int>(trainingRecords.size() * 0.95);
+
+	std::vector<std::pair<std::vector<double>, uint8_t>> validationRecords(trainingRecords.begin() + nrTrainingRecords, trainingRecords.end());
+	trainingRecords.resize(nrTrainingRecords);
+
 	// normalize the data
 	Norm::Normalizer<> pixelsNormalizer(nrInputs, nrOutputs);
 
@@ -571,8 +578,23 @@ bool NeuralNetworkTestsMNIST()
 	pixelsNormalizer.AddBatch(trainInputs, trainOutputs);
 
 
+	Eigen::MatrixXd validationInputs(nrInputs, validationRecords.size());
+	Eigen::MatrixXd validationOutputs(nrOutputs, validationRecords.size());
+
+	rec = 0;
+	for (const auto& record : validationRecords)
+	{
+		for (int i = 0; i < nrInputs; ++i)
+			validationInputs(i, rec) = record.first[i];
+		for (int i = 0; i < nrOutputs; ++i)
+			validationOutputs(i, rec) = (i == record.second) ? 1 : 0;
+		++rec;
+	}
+
+
 	Eigen::MatrixXd testInputs(nrInputs, testRecords.size());
 	Eigen::MatrixXd testOutputs(nrOutputs, testRecords.size());
+
 
 	rec = 0;
 	for (const auto& record : testRecords)
@@ -589,6 +611,7 @@ bool NeuralNetworkTestsMNIST()
 	// only inputs and only shifting the average
 
 	trainInputs = trainInputs.colwise() - pixelsNormalizer.getAverageInput();
+	validationInputs = validationInputs.colwise() - pixelsNormalizer.getAverageInput();
 	testInputs = testInputs.colwise() - pixelsNormalizer.getAverageInput();
 
 	// create the model
@@ -596,7 +619,7 @@ bool NeuralNetworkTestsMNIST()
 	// also tested { nrInputs, 1000, 600, 100, nrOutputs } - use Glorot uniform weights initializer for it, this one I suspect that it needs different parameters and maybe more iterations
 	// a single hidden layer, should be fast enough: { nrInputs, 32, nrOutputs } - over 97%
 	// for simple ones the xavier initializer works well, for the deeper ones the glorot one is better
-	NeuralNetworks::MultilayerPerceptron<SGD::SoftmaxRegressionAdamSolver> neuralNetwork(/*{nrInputs, 1000, 100, nrOutputs}*/ {nrInputs, 1000, 800, 400, 100, nrOutputs}, {0.2, 0.2, 0.1, 0, 0} ); // don't use dropout right before the softmax layer
+	NeuralNetworks::MultilayerPerceptron<SGD::SoftmaxRegressionAdamSolver> neuralNetwork(/*{nrInputs, 1000, 100, nrOutputs}*/ {nrInputs, 1000, 800, 400, 100, nrOutputs}, {0.15, 0.15, 0.1, 0, 0} ); // don't use dropout right before the softmax layer
 
 	double alpha = 0.001; // non const, so it can be adjusted
 	double decay = 0.93;
