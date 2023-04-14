@@ -726,7 +726,7 @@ bool NeuralNetworkTestsMNIST()
 
 			int nr = -1;
 			for (int j = 0; j < nrOutputs; ++j)
-				if (trainOutputs(j, i) > 0.5)
+				if (validationOutputs(j, i) > 0.5)
 				{
 					if (nr != -1)
 						std::cout << "Info from label ambiguous, should not happen: " << nr << " and " << j << std::endl;
@@ -759,7 +759,7 @@ bool NeuralNetworkTestsMNIST()
 
 			nr = -1;
 			for (int j = 0; j < nrOutputs; ++j)
-				if (trainOutputs(j, i) > 0.5)
+				if (trainStatsOutputs(j, i) > 0.5)
 				{
 					if (nr != -1)
 						std::cout << "Info from label ambiguous, should not happen: " << nr << " and " << j << std::endl;
@@ -785,8 +785,8 @@ bool NeuralNetworkTestsMNIST()
 		std::cout << "Training loss: " << trainingLoss / static_cast<double>(validationRecords.size()) << std::endl;
 		std::cout << "Validation loss: " << validationLoss / static_cast<double>(validationRecords.size()) << std::endl;
 
-		std::cout << "Training accuracy: " << 100 * static_cast<double>(trainCorrect) / static_cast<double>(validationRecords.size()) << "%" << std::endl;
-		std::cout << "Validation accuracy: " << 100 * static_cast<double>(validCorrect) / static_cast<double>(validationRecords.size()) << "%" << std::endl;
+		std::cout << "Training accuracy: " << 100. * static_cast<double>(trainCorrect) / static_cast<double>(validationRecords.size()) << "%" << std::endl;
+		std::cout << "Validation accuracy: " << 100. * static_cast<double>(validCorrect) / static_cast<double>(validationRecords.size()) << "%" << std::endl;
 
 		// makes the learning rate smaller each epoch
 		alpha *= decay;
