@@ -61,6 +61,11 @@ namespace NeuralNetworks
 			return layer.getLoss();
 		}
 
+		double getLoss(const Eigen::MatrixXd& prediction, const Eigen::MatrixXd& target) const
+		{
+			return layer.getLoss(prediction, target);
+		}
+
 		int getNrOutputs() const
 		{
 			return layer.getNrOutputs();

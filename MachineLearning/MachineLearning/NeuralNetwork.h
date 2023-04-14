@@ -118,6 +118,11 @@ namespace NeuralNetworks
 			return lastLayer.getLoss();
 		}
 
+		double getLoss(const Eigen::MatrixXd& prediction, const Eigen::MatrixXd& target) const
+		{
+			return lastLayer.getLoss(prediction, target);
+		}
+
 		void ForwardBackwardStep(const Eigen::MatrixXd& input, const Eigen::MatrixXd& target)
 		{
 			const int batchSize = static_cast<int>(input.cols());

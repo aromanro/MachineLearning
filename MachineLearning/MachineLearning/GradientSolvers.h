@@ -93,13 +93,19 @@ namespace SGD
 
 		double getLoss() const
 		{
+			return getLoss(pred, target);
+		}
+
+		double getLoss(const BatchOutputType& p, const BatchOutputType& t) const
+		{
 			double cost = 0;
 
-			for (int c = 0; c < target.cols(); ++c)
-				cost += BaseType::lossFunction(pred.col(c), target.col(c)).sum();
+			for (int c = 0; c < t.cols(); ++c)
+				cost += BaseType::lossFunction(p.col(c), t.col(c)).sum();
 
 			return cost;
 		}
+
 
 		const BatchOutputType& getTarget() const
 		{
@@ -186,13 +192,17 @@ namespace SGD
 			return input;
 		}
 
-
 		double getLoss() const
+		{
+			return getLoss(pred, target);
+		}
+
+		double getLoss(const Eigen::RowVectorXd& p, const Eigen::RowVectorXd& t) const
 		{
 			double cost = 0;
 
-			for (int c = 0; c < target.cols(); ++c)
-				cost += BaseType::lossFunction(pred(c), target(c));
+			for (int c = 0; c < t.cols(); ++c)
+				cost += BaseType::lossFunction(p(c), t(c));
 
 			return cost;
 		}
@@ -391,15 +401,6 @@ namespace SGD
 			return lossLinkGrad;
 		}
 
-		double getLoss() const
-		{
-			double cost = 0;
-
-			for (int c = 0; c < BaseType::target.cols(); ++c)
-				cost += BaseType::lossFunction(BaseType::pred(c), BaseType::target(c));
-
-			return cost;
-		}
 
 		int setParams(const std::vector<double>& p)
 		{
@@ -489,16 +490,6 @@ namespace SGD
 			return lossLinkGrad;
 		}
 
-		double getLoss() const
-		{
-			double cost = 0;
-
-			for (int c = 0; c < BaseType::target.cols(); ++c)
-				cost += BaseType::lossFunction(BaseType::pred(c), BaseType::target(c));
-
-			return cost;
-		}
-
 	private:
 		double sW;
 		double sb;
@@ -585,16 +576,6 @@ namespace SGD
 			w -= BaseType::alpha * wAdj / sqrt(sW + eps);
 
 			return lossLinkGrad;
-		}
-
-		double getLoss() const
-		{
-			double cost = 0;
-
-			for (int c = 0; c < BaseType::target.cols(); ++c)
-				cost += BaseType::lossFunction(BaseType::getPrediction(c), BaseType::getTarget(c));
-
-			return cost;
 		}
 
 		int setParams(const std::vector<double>& p)

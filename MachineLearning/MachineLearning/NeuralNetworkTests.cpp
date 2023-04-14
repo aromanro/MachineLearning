@@ -580,6 +580,11 @@ bool NeuralNetworkTestsMNIST()
 
 	Eigen::MatrixXd validationInputs(nrInputs, validationRecords.size());
 	Eigen::MatrixXd validationOutputs(nrOutputs, validationRecords.size());
+	Eigen::MatrixXd validationRes(nrOutputs, validationRecords.size());
+
+
+	Eigen::MatrixXd trainStatsOutputs(nrOutputs, validationRecords.size());
+	Eigen::MatrixXd trainStatsRes(nrOutputs, validationRecords.size());
 
 	rec = 0;
 	for (const auto& record : validationRecords)
@@ -588,6 +593,7 @@ bool NeuralNetworkTestsMNIST()
 			validationInputs(i, rec) = record.first[i];
 		for (int i = 0; i < nrOutputs; ++i)
 			validationOutputs(i, rec) = (i == record.second) ? 1 : 0;
+
 		++rec;
 	}
 
@@ -619,7 +625,7 @@ bool NeuralNetworkTestsMNIST()
 	// also tested { nrInputs, 1000, 600, 100, nrOutputs } - use Glorot uniform weights initializer for it, this one I suspect that it needs different parameters and maybe more iterations
 	// a single hidden layer, should be fast enough: { nrInputs, 32, nrOutputs } - over 97%
 	// for simple ones the xavier initializer works well, for the deeper ones the glorot one is better
-	NeuralNetworks::MultilayerPerceptron<SGD::SoftmaxRegressionAdamSolver> neuralNetwork(/*{nrInputs, 1000, 100, nrOutputs}*/ {nrInputs, 1000, 800, 400, 100, nrOutputs}, {0.15, 0.15, 0.1, 0, 0} ); // don't use dropout right before the softmax layer
+	NeuralNetworks::MultilayerPerceptron<SGD::SoftmaxRegressionAdamSolver> neuralNetwork(/*{nrInputs, 1000, 100, nrOutputs}*/ {nrInputs, 1000, 800, 400, 100, nrOutputs}, {0.2, 0.15, 0.1, 0, 0} ); // don't use dropout right before the softmax layer
 
 	double alpha = 0.001; // non const, so it can be adjusted
 	double decay = 0.93;
@@ -654,6 +660,9 @@ bool NeuralNetworkTestsMNIST()
 	std::cout << "Training samples: " << trainInputs.cols() << std::endl;
 	const long long int nrBatches	= trainInputs.cols() / batchSize;
 	std::cout << "Traing batches / epoch: " << nrBatches << std::endl;
+
+	std::cout << "Validation samples: " << validationInputs.cols() << std::endl;
+	std::cout << "Test samples: " << testInputs.cols() << std::endl;
 
 	std::chrono::high_resolution_clock::time_point t1 = std::chrono::high_resolution_clock::now();
 
@@ -699,6 +708,85 @@ bool NeuralNetworkTestsMNIST()
 		}
 
 		std::cout << "Average loss: " << totalLoss / static_cast<double>(nrBatches) << std::endl;
+
+
+		// stats / epoch
+
+		long long int validCorrect = 0;
+		long long int trainCorrect = 0;
+
+		for (int i = 0; i < validationRecords.size(); ++i)
+		{
+			Eigen::VectorXd res = neuralNetwork.Predict(validationInputs.col(i));
+			validationRes.col(i) = res;
+
+			double limp = 0;
+			for (int j = 0; j < nrOutputs; ++j)
+				limp = std::max(limp, res(j));
+
+			int nr = -1;
+			for (int j = 0; j < nrOutputs; ++j)
+				if (trainOutputs(j, i) > 0.5)
+				{
+					if (nr != -1)
+						std::cout << "Info from label ambiguous, should not happen: " << nr << " and " << j << std::endl;
+					nr = j;
+				}
+
+			int predn = -1;
+			for (int n = 0; n < nrOutputs; ++n)
+				if (res(n) >= limp)
+				{
+					if (predn != -1)
+						std::cout << "Ambiguous prediction: " << predn << " and " << n << std::endl;
+					predn = n;
+				}
+
+			if (predn == nr)
+				++validCorrect;
+
+
+			const int ind = distIntBig(rde);
+
+			res = neuralNetwork.Predict(trainInputs.col(ind));
+			trainStatsRes.col(i) = res;
+			trainStatsOutputs.col(i) = trainOutputs.col(ind);
+
+			limp = 0;
+
+			for (int j = 0; j < nrOutputs; ++j)
+				limp = std::max(limp, res(j));
+
+			nr = -1;
+			for (int j = 0; j < nrOutputs; ++j)
+				if (trainOutputs(j, i) > 0.5)
+				{
+					if (nr != -1)
+						std::cout << "Info from label ambiguous, should not happen: " << nr << " and " << j << std::endl;
+					nr = j;
+				}
+
+			predn = -1;
+			for (int n = 0; n < nrOutputs; ++n)
+				if (res(n) >= limp)
+				{
+					if (predn != -1)
+						std::cout << "Ambiguous prediction: " << predn << " and " << n << std::endl;
+					predn = n;
+				}
+
+			if (predn == nr)
+				++trainCorrect;
+		}
+
+		const double trainingLoss = neuralNetwork.getLoss(trainStatsRes, trainStatsOutputs);
+		const double validationLoss = neuralNetwork.getLoss(validationRes, validationOutputs);
+
+		std::cout << "Training loss: " << trainingLoss / static_cast<double>(validationRecords.size()) << std::endl;
+		std::cout << "Validation loss: " << validationLoss / static_cast<double>(validationRecords.size()) << std::endl;
+
+		std::cout << "Training accuracy: " << 100 * static_cast<double>(trainCorrect) / static_cast<double>(validationRecords.size()) << "%" << std::endl;
+		std::cout << "Validation accuracy: " << 100 * static_cast<double>(validCorrect) / static_cast<double>(validationRecords.size()) << "%" << std::endl;
 
 		// makes the learning rate smaller each epoch
 		alpha *= decay;

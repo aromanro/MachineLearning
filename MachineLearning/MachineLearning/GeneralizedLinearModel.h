@@ -53,6 +53,11 @@ namespace GLM {
 			return solver.getLoss();
 		}
 
+		double getLoss(const BatchOutputType& prediction, const BatchOutputType& target) const
+		{
+			return solver.getLoss(prediction, target);
+		}
+
 		int getNrInputs() const
 		{
 			return inputs;
