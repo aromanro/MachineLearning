@@ -671,6 +671,8 @@ bool NeuralNetworkTestsMNIST()
 	std::vector<double> trainLosses(nrEpochs);
 	std::vector<double> validationLosses(nrEpochs);
 
+	std::vector<double> indices(nrEpochs);
+
 	long long int bcnt = 0;
 	for (int epoch = 0; epoch < nrEpochs; ++epoch)
 	{
@@ -781,6 +783,7 @@ bool NeuralNetworkTestsMNIST()
 
 		trainLosses[epoch] = neuralNetwork.getLoss(trainStatsRes, trainStatsOutputs) / static_cast<double>(validationRecords.size());
 		validationLosses[epoch] = neuralNetwork.getLoss(validationRes, validationOutputs) / static_cast<double>(validationRecords.size());
+		indices[epoch] = epoch;
 
 		std::cout << "Training loss: " << trainLosses[epoch] << std::endl;
 		std::cout << "Validation loss: " << validationLosses[epoch] << std::endl;
@@ -800,7 +803,8 @@ bool NeuralNetworkTestsMNIST()
 
 	{
 		Utils::DataFileWriter theFile("../../data/EMNIST.txt");
-		theFile.AddDataset(trainLosses, validationLosses);
+		theFile.AddDataset(indices, trainLosses);
+		theFile.AddDataset(indices, validationLosses);
 	}
 
 	Utils::Gnuplot plot;
