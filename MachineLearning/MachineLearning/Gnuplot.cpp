@@ -30,9 +30,13 @@ namespace Utils
 			{
 				cmdf << "plot " << p << " index 0 u 1:2 w l lt 1 lw 2 lc rgb \"blue\" title \"Generating Boundary\", " << p << " index 1 u 1:2 w p pt 7 ps 1 lc rgb \"green\" title \"Data Points First Class\", " << p << " index 2 u 1:2 w p pt 7 ps 1 lc rgb \"red\" title \"Data Points Second Class\"" << std::endl;
 			}
-			else
+			else if (ctype == ChartType::linearRegression)
 			{
 				cmdf << "plot " << p << " index 0 u 1:2 w l lt 1 lw 2 lc rgb \"blue\" title \"Generating Function\", " << p << " index 1 u 1:2 w p pt 7 ps 1 lc rgb \"green\" title \"Data Points\", " << p << " index 2 u 1:2 w l lt 1 lw 2 lc rgb \"red\" title \"Regression\"" << std::endl;
+			}
+			else
+			{
+				cmdf << "plot " << p << " index 0 u 1:2 w l lt 1 lw 2 lc rgb \"blue\" title \"Test Loss\", " << p << " index 1 u 1:2 w l lt 1 lw 2 lc rgb \"red\" title \"Validation Loss\"" << std::endl;
 			}
 		}
 

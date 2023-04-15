@@ -13,7 +13,8 @@ namespace Utils
 		enum class ChartType : int
 		{
 			linearRegression,
-			logisticRegression
+			logisticRegression,
+			training		
 		};
 
 		void Execute();

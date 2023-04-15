@@ -666,13 +666,13 @@ bool NeuralNetworkTestsMNIST()
 
 	std::chrono::high_resolution_clock::time_point t1 = std::chrono::high_resolution_clock::now();
 
-	// for some reason I couldn't set again the parameters that got ~98.75% accuracy with a small number of epochs (should have saved them), but with 30 epochs and a decaying alpha it still works
-	// although without looking at the learning charts, it looks like overfitting, since on the training set it's ~99.85%
-
-	// I must try with dropout to see what happens
+	const int nrEpochs = 50;
+	
+	std::vector<double> trainLosses(nrEpochs);
+	std::vector<double> validationLosses(nrEpochs);
 
 	long long int bcnt = 0;
-	for (int epoch = 0; epoch < 50; ++epoch)
+	for (int epoch = 0; epoch < nrEpochs; ++epoch)
 	{
 		std::cout << "Epoch: " << epoch << " Alpha: " << alpha << std::endl;
 
@@ -779,11 +779,11 @@ bool NeuralNetworkTestsMNIST()
 				++trainCorrect;
 		}
 
-		const double trainingLoss = neuralNetwork.getLoss(trainStatsRes, trainStatsOutputs);
-		const double validationLoss = neuralNetwork.getLoss(validationRes, validationOutputs);
+		trainLosses[epoch] = neuralNetwork.getLoss(trainStatsRes, trainStatsOutputs) / static_cast<double>(validationRecords.size());
+		validationLosses[epoch] = neuralNetwork.getLoss(validationRes, validationOutputs) / static_cast<double>(validationRecords.size());
 
-		std::cout << "Training loss: " << trainingLoss / static_cast<double>(validationRecords.size()) << std::endl;
-		std::cout << "Validation loss: " << validationLoss / static_cast<double>(validationRecords.size()) << std::endl;
+		std::cout << "Training loss: " << trainLosses[epoch] << std::endl;
+		std::cout << "Validation loss: " << validationLosses[epoch] << std::endl;
 
 		std::cout << "Training accuracy: " << 100. * static_cast<double>(trainCorrect) / static_cast<double>(validationRecords.size()) << "%" << std::endl;
 		std::cout << "Validation accuracy: " << 100. * static_cast<double>(validCorrect) / static_cast<double>(validationRecords.size()) << "%" << std::endl;
@@ -797,6 +797,18 @@ bool NeuralNetworkTestsMNIST()
 	auto dif = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();
 
 	std::cout << "Training took: " << dif / 1000. << " seconds!" << std::endl;
+
+	{
+		Utils::DataFileWriter theFile("../../data/EMNIST.txt");
+		theFile.AddDataset(trainLosses, validationLosses);
+	}
+
+	Utils::Gnuplot plot;
+	plot.setType(Utils::Gnuplot::ChartType::training);
+	plot.setCmdFileName("EMNIST.plt");
+	plot.setDataFileName("EMNIST.txt");
+	plot.Execute();
+
 
 	std::vector<Utils::TestStatistics> stats(nrOutputs);
 
