@@ -30,6 +30,11 @@ namespace ActivationFunctions
 		{
 			return false;
 		}
+
+		static std::string getName()
+		{
+			return "Identity";
+		}
 	};
 
 	template<> class IdentityFunction<double>
@@ -52,6 +57,11 @@ namespace ActivationFunctions
 		static bool isDerivativeJacobianMatrix()
 		{
 			return false;
+		}
+
+		static std::string getName()
+		{
+			return "Identity";
 		}
 	};
 
@@ -99,6 +109,11 @@ namespace ActivationFunctions
 			return false;
 		}
 
+		static std::string getName()
+		{
+			return "Sigmoid";
+		}
+
 	private:
 		InputOutputType beta0;
 		InputOutputType beta;
@@ -130,6 +145,11 @@ namespace ActivationFunctions
 			return false;
 		}
 
+		static std::string getName()
+		{
+			return "Sigmoid";
+		}
+
 	private:
 		double beta0 = 0;
 		double beta = 1;
@@ -158,6 +178,11 @@ namespace ActivationFunctions
 		{
 			return false;
 		}
+
+		static std::string getName()
+		{
+			return "Tanh";
+		}
 	};
 
 	template<> class TanhFunction<double>
@@ -182,6 +207,11 @@ namespace ActivationFunctions
 		static bool isDerivativeJacobianMatrix()
 		{
 			return false;
+		}
+
+		static std::string getName()
+		{
+			return "Tanh";
 		}
 	};
 
@@ -213,6 +243,11 @@ namespace ActivationFunctions
 		{
 			return false;
 		}
+
+		static std::string getName()
+		{
+			return "Softplus";
+		}
 	};
 
 	template<> class SoftplusFunction<double>
@@ -237,6 +272,11 @@ namespace ActivationFunctions
 		static bool isDerivativeJacobianMatrix()
 		{
 			return false;
+		}
+
+		static std::string getName()
+		{
+			return "Softplus";
 		}
 	};
 
@@ -274,6 +314,11 @@ namespace ActivationFunctions
 		{
 			return false;
 		}
+
+		static std::string getName()
+		{
+			return "RELU";
+		}
 	};
 
 	template<> class RELUFunction<double>
@@ -296,6 +341,11 @@ namespace ActivationFunctions
 		bool isDerivativeJacobianMatrix() const
 		{
 			return false;
+		}
+
+		static std::string getName()
+		{
+			return "RELU";
 		}
 	};
 
@@ -337,6 +387,11 @@ namespace ActivationFunctions
 			return false;
 		}
 
+		static std::string getName()
+		{
+			return "LeakyRELU";
+		}
+
 	protected:
 		double alpha = 0.01;
 	};
@@ -366,6 +421,11 @@ namespace ActivationFunctions
 		static bool isDerivativeJacobianMatrix()
 		{
 			return false;
+		}
+
+		static std::string getName()
+		{
+			return "LeakyRELU";
 		}
 
 	protected:
@@ -412,6 +472,11 @@ namespace ActivationFunctions
 		static bool isDerivativeJacobianMatrix()
 		{
 			return true;
+		}
+
+		static std::string getName()
+		{
+			return "Softmax";
 		}
 	};
 

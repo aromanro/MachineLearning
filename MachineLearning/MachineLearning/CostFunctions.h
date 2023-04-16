@@ -20,6 +20,11 @@ namespace LossFunctions
 			const OutputType dif = output - target;
 			return 2. * dif;
 		}
+
+		static std::string getName()
+		{
+			return "L2";
+		}
 	};
 
 	template<> class L2Loss<double>
@@ -35,6 +40,11 @@ namespace LossFunctions
 		{
 			const double dif = output - target;
 			return 2. * dif;
+		}
+
+		static std::string getName()
+		{
+			return "L2";
 		}
 	};
 
@@ -58,6 +68,11 @@ namespace LossFunctions
 
 			return dif;
 		}
+
+		static std::string getName()
+		{
+			return "L1";
+		}
 	};
 
 
@@ -72,6 +87,11 @@ namespace LossFunctions
 		double derivative(const double& output, const double& target) const
 		{
 			return ((output - target) < 0) ? -1 : 1;
+		}
+
+		static std::string getName()
+		{
+			return "L1";
 		}
 	};
 
@@ -105,6 +125,11 @@ namespace LossFunctions
 
 			return (output - target).cwiseProduct(d);
 		}
+
+		static std::string getName()
+		{
+			return "BinaryCrossEntropy";
+		}
 	};
 
 
@@ -122,6 +147,11 @@ namespace LossFunctions
 			static const double eps = 1E-8;
 
 			return (output - target) / (output * (1. + eps - output));
+		}
+
+		static std::string getName()
+		{
+			return "BinaryCrossEntropy";
 		}
 	};
 
@@ -149,6 +179,11 @@ namespace LossFunctions
 				res(i) = -target(i) / (output(i) + eps);
 
 			return res;
+		}
+
+		static std::string getName()
+		{
+			return "CrossEntropy";
 		}
 	};
 
