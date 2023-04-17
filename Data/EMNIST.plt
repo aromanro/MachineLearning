@@ -1,0 +1,1 @@
+plot "C:\\Work\\Blog\\MachineLearning\\MachineLearning\\MachineLearning/../../data/EMNIST.txt" index 0 u 1:2 w l lt 1 lw 2 lc rgb "blue" title "Training Loss", "C:\\Work\\Blog\\MachineLearning\\MachineLearning\\MachineLearning/../../data/EMNIST.txt" index 1 u 1:2 w l lt 1 lw 2 lc rgb "red" title "Validation Loss"
