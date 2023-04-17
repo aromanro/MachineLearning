@@ -36,7 +36,7 @@ namespace Utils
 			}
 			else
 			{
-				cmdf << "plot " << p << " index 0 u 1:2 w l lt 1 lw 2 lc rgb \"blue\" title \"Test Loss\", " << p << " index 1 u 1:2 w l lt 1 lw 2 lc rgb \"red\" title \"Validation Loss\"" << std::endl;
+				cmdf << "plot " << p << " index 0 u 1:2 w l lt 1 lw 2 lc rgb \"blue\" title \"Training Loss\", " << p << " index 1 u 1:2 w l lt 1 lw 2 lc rgb \"red\" title \"Validation Loss\"" << std::endl;
 			}
 		}
 
