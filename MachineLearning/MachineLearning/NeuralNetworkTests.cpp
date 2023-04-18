@@ -789,7 +789,10 @@ bool NeuralNetworkTestsMNIST()
 		std::cout << "Validation loss: " << validationLosses[epoch] << std::endl;
 
 		std::cout << "Training accuracy: " << 100. * static_cast<double>(trainCorrect) / static_cast<double>(validationRecords.size()) << "%" << std::endl;
-		std::cout << "Validation accuracy: " << 100. * static_cast<double>(validCorrect) / static_cast<double>(validationRecords.size()) << "%" << std::endl;
+		std::cout << "Validation accuracy: " << 100. * static_cast<double>(validCorrect) / static_cast<double>(validationRecords.size()) << "%" << std::endl << std::endl;
+
+		const std::string fileName = "../../data/neural" + std::to_string(epoch) + ".net";
+		neuralNetwork.saveNetwork(fileName);
 
 		// makes the learning rate smaller each epoch
 		alpha *= decay;
@@ -851,9 +854,6 @@ bool NeuralNetworkTestsMNIST()
 					std::cout << "Ambiguous prediction: " << predn << " and " << n << std::endl;
 				predn = n;
 			}
-
-		const std::string fileName = "../../data/neural" + std::to_string(i) + ".net";
-		neuralNetwork.saveNetwork(fileName);
 
 		if (predn == nr)
 			++correct;
