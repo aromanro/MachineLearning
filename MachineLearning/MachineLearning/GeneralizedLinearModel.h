@@ -1,6 +1,9 @@
 #pragma once
 
 #include <random>
+#include <fstream>
+#include <iostream>
+#include <sstream>
 
 #include "ActivationFunctions.h"
 #include "CostFunctions.h"
@@ -71,6 +74,93 @@ namespace GLM {
 		Solver& getSolver()
 		{
 			return solver;
+		}
+
+		bool saveModel(std::ofstream& os) const
+		{
+			try
+			{
+				os << solver.activationFunction::name() << std::endl;
+				os << solver.costFunction::name() << std::endl;
+
+				os << inputs << " " << outputs << std::endl;
+
+				const static Eigen::IOFormat csv(Eigen::FullPrecision, Eigen::DontAlignCols, ", ", "\n");
+				os << W.format(csv) << std::endl;
+				os << b.format(csv) << std::endl;
+			}
+			catch (...)
+			{
+				return false;
+			}
+
+			return true;
+		}
+
+		bool loadModel(std::ifstream& is)
+		{
+			try
+			{
+				std::string activationFunctionName;
+				is >> activationFunctionName;
+				if (activationFunctionName != solver.activationFunction::name())
+					return false;
+
+				std::string costFunctionName;
+				is >> costFunctionName;
+				if (costFunctionName != solver.costFunction::name())
+					return false;
+
+				is >> inputs >> outputs;
+
+				W.resize(outputs, inputs);
+				b.resize(outputs);
+
+				std::string matRow;
+				int row = 0;
+				while (getline(is, matRow)) 
+				{
+					std::stringstream matRowStrstr(matRow);
+
+					std::string field;
+					int col = 0;
+					while (getline(matRowStrstr, field, ','))
+					{
+						W(row, col) = stod(field);
+						++col;
+					}
+					
+					++row;
+					if (row == outputs)
+						break;
+				}
+
+				// should have a single column, but...
+
+				row = 0;
+				while (getline(is, matRow))
+				{
+					std::stringstream matRowStrstr(matRow);
+
+					std::string field;
+					int col = 0;
+					while (getline(matRowStrstr, field, ','))
+					{
+						b(row, col) = stod(field);
+						++col;
+					}
+
+					++row;
+					if (row == outputs)
+						break;
+				}
+			}
+			catch (...)
+			{
+				return false;
+			}
+			
+			return true;
 		}
 
 	protected:

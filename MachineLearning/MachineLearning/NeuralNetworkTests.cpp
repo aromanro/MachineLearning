@@ -627,7 +627,7 @@ bool NeuralNetworkTestsMNIST()
 	// for simple ones the xavier initializer works well, for the deeper ones the glorot one is better
 	NeuralNetworks::MultilayerPerceptron<SGD::SoftmaxRegressionAdamSolver> neuralNetwork(/*{nrInputs, 1000, 100, nrOutputs}*/ {nrInputs, 1000, 800, 400, 100, nrOutputs}, {0.2, 0.15, 0.1, 0, 0} ); // don't use dropout right before the softmax layer
 
-	double alpha = 0.001; // non const, so it can be adjusted
+	double alpha = 0.0015; // non const, so it can be adjusted
 	double decay = 0.93;
 	const double beta1 = 0.9;
 	const double beta2 = 0.95;
@@ -666,7 +666,7 @@ bool NeuralNetworkTestsMNIST()
 
 	std::chrono::high_resolution_clock::time_point t1 = std::chrono::high_resolution_clock::now();
 
-	const int nrEpochs = 50;
+	const int nrEpochs = 60;
 	
 	std::vector<double> trainLosses(nrEpochs);
 	std::vector<double> validationLosses(nrEpochs);

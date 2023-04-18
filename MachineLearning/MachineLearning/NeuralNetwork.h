@@ -173,6 +173,51 @@ namespace NeuralNetworks
 				hiddenLayers[0].AddBatch(hiddenLayers[0].getInput(), grad);
 		}
 
+		bool saveNetwork(const std::string& name) const
+		{
+			std::ofstream os(name, std::ios::out | std::ios::trunc);
+
+			return saveNetwork(os);
+		}
+
+		bool saveNetwork(std::ofstream& os) const
+		{
+			if (!os.is_open()) return false;
+
+			os << hiddenLayers.size() << std::endl;
+
+			// save all layers
+			for (int i = 0; i < hiddenLayers.size(); ++i)
+				hiddenLayers[i].saveLayer(os);
+
+			lastLayer.saveLayer(os);
+
+			return true;
+		}
+
+		bool loadNetwork(const std::string& name)
+		{
+			std::ifstream is(name, std::ios::in);
+
+			return loadNetwork(is);
+		}
+
+		bool loadNetwork(std::ifstream& is)
+		{
+			if (!is.is_open()) return false;
+
+			int nrLayers;
+			is >> nrLayers;
+			
+			hiddenLayers.resize(nrLayers);
+
+			// load all layers
+			for (int i = 0; i < hiddenLayers.size(); ++i)
+				if (!hiddenLayers[i].loadLayer(is)) return false;
+
+			return lastLayer.loadLayer(is);
+		}
+
 	private:
 		NeuralLayer<LastSolver> lastLayer;
 		std::vector<NeuralLayer<Solver>> hiddenLayers;

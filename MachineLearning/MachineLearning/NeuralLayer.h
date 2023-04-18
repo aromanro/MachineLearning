@@ -106,6 +106,16 @@ namespace NeuralNetworks
 			return layer.BackpropagateBatch(grad);
 		}
 
+		bool saveLayer(std::ofstream& os) const
+		{
+			return layer.saveModel(os);
+		}
+
+		bool loadLayer(std::ifstream& is)
+		{
+			return layer.LoadModel(is);
+		}
+
 	private:
 		NeuralSublayer<Solver> layer;
 	};
