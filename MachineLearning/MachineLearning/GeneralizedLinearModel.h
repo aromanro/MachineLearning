@@ -80,8 +80,8 @@ namespace GLM {
 		{
 			try
 			{
-				os << solver.activationFunction::name() << std::endl;
-				os << solver.costFunction::name() << std::endl;
+				os << solver.activationFunction.getName() << std::endl;
+				os << solver.lossFunction.getName() << std::endl;
 
 				os << inputs << " " << outputs << std::endl;
 
@@ -103,12 +103,12 @@ namespace GLM {
 			{
 				std::string activationFunctionName;
 				is >> activationFunctionName;
-				if (activationFunctionName != solver.activationFunction::name())
+				if (activationFunctionName != solver.activationFunction.getName())
 					return false;
 
 				std::string costFunctionName;
 				is >> costFunctionName;
-				if (costFunctionName != solver.costFunction::name())
+				if (costFunctionName != solver.lossFunction.getName())
 					return false;
 
 				is >> inputs >> outputs;
