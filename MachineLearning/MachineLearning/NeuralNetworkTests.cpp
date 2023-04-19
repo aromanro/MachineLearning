@@ -627,18 +627,43 @@ bool NeuralNetworkTestsMNIST()
 	// for simple ones the xavier initializer works well, for the deeper ones the glorot one is better
 	NeuralNetworks::MultilayerPerceptron<SGD::SoftmaxRegressionAdamSolver> neuralNetwork(/*{nrInputs, 1000, 100, nrOutputs}*/ {nrInputs, 1000, 800, 400, 100, nrOutputs}, {0.2, 0.15, 0.1, 0, 0} ); // don't use dropout right before the softmax layer
 
-	double alpha = 0.002; // non const, so it can be adjusted
-	double decay = 0.93;
+#define LOAD_MODEL 1
+#ifdef LOAD_MODEL
+	// load some saved model
+
+	if (!neuralNetwork.loadNetwork("../../data/neural45.net"))
+	{
+		std::cout << "Couldn't load the model" << std::endl;
+		return false;
+	}
+
+#else
+	// initialize the model
+	double alpha = 0.0015; // non const, so it can be adjusted
+	double decay = 0.95;
 	const double beta1 = 0.9;
 	const double beta2 = 0.95;
 	const double lim = 10;
 
 	neuralNetwork.setParams({ alpha, lim, beta1, beta2 });
 
-	//Initializers::WeightsInitializerXavierUniform initializer;
-	Initializers::WeightsInitializerGlorotUniform initializer;
-	//Initializers::WeightsInitializerHeNormal initializer;
-	neuralNetwork.Initialize(initializer);
+	int startEpoch = 0; // set it to something different than 0 if you want to continue training
+
+
+	if (startEpoch == 0)
+	{
+		//Initializers::WeightsInitializerXavierUniform initializer;
+		Initializers::WeightsInitializerGlorotUniform initializer;
+		//Initializers::WeightsInitializerHeNormal initializer;
+		neuralNetwork.Initialize(initializer);
+	}
+	else
+		// load some saved model
+		if (!neuralNetwork.loadNetwork("../../data/neural" + std::to_string(startEpoch - 1) + ".net"))
+		{
+			std::cout << "Couldn't load the model" << std::endl;
+			return false;
+		}
 
 	// train the model
 
@@ -674,7 +699,7 @@ bool NeuralNetworkTestsMNIST()
 	std::vector<double> indices(nrEpochs);
 
 	long long int bcnt = 0;
-	for (int epoch = 0; epoch < nrEpochs; ++epoch)
+	for (int epoch = startEpoch; epoch < startEpoch + nrEpochs; ++epoch)
 	{
 		std::cout << "Epoch: " << epoch << " Alpha: " << alpha << std::endl;
 
@@ -815,6 +840,8 @@ bool NeuralNetworkTestsMNIST()
 	plot.setCmdFileName("EMNIST.plt");
 	plot.setDataFileName("EMNIST.txt");
 	plot.Execute();
+
+#endif
 
 
 	std::vector<Utils::TestStatistics> stats(nrOutputs);

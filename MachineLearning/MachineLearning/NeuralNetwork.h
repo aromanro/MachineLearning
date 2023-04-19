@@ -208,12 +208,17 @@ namespace NeuralNetworks
 
 			int nrLayers;
 			is >> nrLayers;
+
+			std::cout << "Loading network with " << nrLayers + 1 << " layers" << std::endl;
 			
 			hiddenLayers.resize(nrLayers);
 
 			// load all layers
 			for (int i = 0; i < hiddenLayers.size(); ++i)
-				if (!hiddenLayers[i].loadLayer(is)) return false;
+				if (!hiddenLayers[i].loadLayer(is)) {
+					std::cout << "Couldn't load layer nr: " << i << std::endl;
+					return false;
+				}
 
 			return lastLayer.loadLayer(is);
 		}

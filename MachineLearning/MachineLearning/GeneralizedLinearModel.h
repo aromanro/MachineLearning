@@ -104,14 +104,23 @@ namespace GLM {
 				std::string activationFunctionName;
 				is >> activationFunctionName;
 				if (activationFunctionName != solver.activationFunction.getName())
+				{
+					std::cout << "Activation function mismatch: " << activationFunctionName << " vs " << solver.activationFunction.getName() << std::endl;
 					return false;
+				}
 
 				std::string costFunctionName;
 				is >> costFunctionName;
 				if (costFunctionName != solver.lossFunction.getName())
+				{
+					std::cout << "Cost function mismatch: " << costFunctionName << " vs " << solver.lossFunction.getName() << std::endl;
 					return false;
+				}
 
 				is >> inputs >> outputs;
+				is.ignore();
+
+				std::cout << "Loading parameters for " << inputs << " inputs and " << outputs << " outputs" << std::endl;
 
 				W.resize(outputs, inputs);
 				b.resize(outputs);
@@ -132,31 +141,33 @@ namespace GLM {
 					
 					++row;
 					if (row == outputs)
+					{
+						//std::cout << "Done reading W" << std::endl;
+						//std::cout << W << std::endl;
 						break;
+					}
 				}
 
-				// should have a single column, but...
 
 				row = 0;
-				while (getline(is, matRow))
+				std::string field;
+				while (getline(is, field))
 				{
-					std::stringstream matRowStrstr(matRow);
-
-					std::string field;
-					int col = 0;
-					while (getline(matRowStrstr, field, ','))
-					{
-						b(row, col) = stod(field);
-						++col;
-					}
+					b(row) = stod(field);
 
 					++row;
 					if (row == outputs)
+					{
+						//std::cout << "Done reading b" << std::endl;
+						//std::cout << b << std::endl;
 						break;
+					}
 				}
 			}
 			catch (...)
 			{
+				std::cout << "Exception thrown while loading model" << std::endl;
+
 				return false;
 			}
 			

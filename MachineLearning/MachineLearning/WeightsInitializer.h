@@ -111,7 +111,7 @@ namespace Initializers
 
 		double get(int nrIn = 1, int nrOut = 1) override
 		{
-			const double x = sqrt(6. / (nrIn + nrOut));
+			const double x = sqrt(6. / (static_cast<double>(nrIn) + nrOut));
 			std::uniform_real_distribution<> dist(-x, x);
 			return dist(rde);
 		}
@@ -152,7 +152,7 @@ namespace Initializers
 
 		double get(int nrIn = 1, int nrOut = 1) override
 		{
-			const double x = sqrt(6. / (nrIn + nrOut));
+			const double x = sqrt(6. / (static_cast<double>(nrIn) + nrOut));
 			std::normal_distribution<> dist(0, x);
 			return dist(rde);
 		}

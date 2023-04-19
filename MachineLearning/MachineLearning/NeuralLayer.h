@@ -113,7 +113,7 @@ namespace NeuralNetworks
 
 		bool loadLayer(std::ifstream& is)
 		{
-			return layer.LoadModel(is);
+			return layer.loadModel(is);
 		}
 
 	private:
