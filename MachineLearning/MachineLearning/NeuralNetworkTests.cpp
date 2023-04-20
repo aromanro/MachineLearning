@@ -627,7 +627,7 @@ bool NeuralNetworkTestsMNIST()
 	// for simple ones the xavier initializer works well, for the deeper ones the glorot one is better
 	NeuralNetworks::MultilayerPerceptron<SGD::SoftmaxRegressionAdamSolver> neuralNetwork(/*{nrInputs, 1000, 100, nrOutputs}*/ {nrInputs, 1000, 800, 400, 100, nrOutputs}, {0.2, 0.15, 0.1, 0, 0} ); // don't use dropout right before the softmax layer
 
-#define LOAD_MODEL 1
+//#define LOAD_MODEL 1
 #ifdef LOAD_MODEL
 	// load some saved model
 
@@ -639,15 +639,15 @@ bool NeuralNetworkTestsMNIST()
 
 #else
 	// initialize the model
-	double alpha = 0.0015; // non const, so it can be adjusted
+	double alpha = 0.0001; // non const, so it can be adjusted
 	double decay = 0.95;
 	const double beta1 = 0.9;
-	const double beta2 = 0.95;
+	const double beta2 = 0.97;
 	const double lim = 10;
 
 	neuralNetwork.setParams({ alpha, lim, beta1, beta2 });
 
-	int startEpoch = 0; // set it to something different than 0 if you want to continue training
+	int startEpoch = 60; // set it to something different than 0 if you want to continue training
 
 
 	if (startEpoch == 0)
@@ -806,12 +806,14 @@ bool NeuralNetworkTestsMNIST()
 				++trainCorrect;
 		}
 
-		trainLosses[epoch] = neuralNetwork.getLoss(trainStatsRes, trainStatsOutputs) / static_cast<double>(validationRecords.size());
-		validationLosses[epoch] = neuralNetwork.getLoss(validationRes, validationOutputs) / static_cast<double>(validationRecords.size());
-		indices[epoch] = epoch;
 
-		std::cout << "Training loss: " << trainLosses[epoch] << std::endl;
-		std::cout << "Validation loss: " << validationLosses[epoch] << std::endl;
+		const int nrEpoch = epoch -	startEpoch;
+		trainLosses[nrEpoch] = neuralNetwork.getLoss(trainStatsRes, trainStatsOutputs) / static_cast<double>(validationRecords.size());
+		validationLosses[nrEpoch] = neuralNetwork.getLoss(validationRes, validationOutputs) / static_cast<double>(validationRecords.size());
+		indices[nrEpoch] = epoch;
+
+		std::cout << "Training loss: " << trainLosses[nrEpoch] << std::endl;
+		std::cout << "Validation loss: " << validationLosses[nrEpoch] << std::endl;
 
 		std::cout << "Training accuracy: " << 100. * static_cast<double>(trainCorrect) / static_cast<double>(validationRecords.size()) << "%" << std::endl;
 		std::cout << "Validation accuracy: " << 100. * static_cast<double>(validCorrect) / static_cast<double>(validationRecords.size()) << "%" << std::endl << std::endl;
