@@ -627,41 +627,38 @@ bool NeuralNetworkTestsMNIST()
 	// for simple ones the xavier initializer works well, for the deeper ones the glorot one is better
 	NeuralNetworks::MultilayerPerceptron<SGD::SoftmaxRegressionAdamSolver> neuralNetwork(/*{nrInputs, 1000, 100, nrOutputs}*/ {nrInputs, 1000, 800, 400, 100, nrOutputs}, {0.2, 0.15, 0.1, 0, 0} ); // don't use dropout right before the softmax layer
 
-//#define LOAD_MODEL 1
-#ifdef LOAD_MODEL
-	// load some saved model
-
-	if (!neuralNetwork.loadNetwork("../../data/neural45.net"))
-	{
-		std::cout << "Couldn't load the model" << std::endl;
-		return false;
-	}
-
-#else
 	// initialize the model
 	double alpha = 0.0001; // non const, so it can be adjusted
 	double decay = 0.95;
 	const double beta1 = 0.9;
-	const double beta2 = 0.97;
+	const double beta2 = 0.95;
 	const double lim = 10;
 
 	neuralNetwork.setParams({ alpha, lim, beta1, beta2 });
 
-	int startEpoch = 60; // set it to something different than 0 if you want to continue training
+
+	int startEpoch = 0; // set it to something different than 0 if you want to continue training
 
 
 	if (startEpoch == 0)
 	{
-		//Initializers::WeightsInitializerXavierUniform initializer;
-		Initializers::WeightsInitializerGlorotUniform initializer;
-		//Initializers::WeightsInitializerHeNormal initializer;
-		neuralNetwork.Initialize(initializer);
+		// load some saved model
+
+		if (!neuralNetwork.loadNetwork("../../data/pretrained.net"))
+		{
+			std::cout << "Couldn't load the pretrained model" << std::endl;
+
+			//Initializers::WeightsInitializerXavierUniform initializer;
+			Initializers::WeightsInitializerGlorotUniform initializer;
+			//Initializers::WeightsInitializerHeNormal initializer;
+			neuralNetwork.Initialize(initializer);
+		}
 	}
 	else
 		// load some saved model
 		if (!neuralNetwork.loadNetwork("../../data/neural" + std::to_string(startEpoch - 1) + ".net"))
 		{
-			std::cout << "Couldn't load the model" << std::endl;
+			std::cout << "Couldn't load the last model" << std::endl;
 			return false;
 		}
 
@@ -691,7 +688,7 @@ bool NeuralNetworkTestsMNIST()
 
 	std::chrono::high_resolution_clock::time_point t1 = std::chrono::high_resolution_clock::now();
 
-	const int nrEpochs = 60;
+	const int nrEpochs = 10;
 	
 	std::vector<double> trainLosses(nrEpochs);
 	std::vector<double> validationLosses(nrEpochs);
@@ -842,9 +839,6 @@ bool NeuralNetworkTestsMNIST()
 	plot.setCmdFileName("EMNIST.plt");
 	plot.setDataFileName("EMNIST.txt");
 	plot.Execute();
-
-#endif
-
 
 	std::vector<Utils::TestStatistics> stats(nrOutputs);
 
