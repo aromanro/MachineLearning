@@ -531,7 +531,7 @@ bool NeuralNetworkTestsMNIST()
 		return false;
 	}
 
-	std::vector<std::pair<std::vector<double>, uint8_t>> trainingRecords = minstTrainDataFiles.ReadAllImagesAndLabels();
+	std::vector<std::pair<std::vector<double>, uint8_t>> trainingRecords = minstTrainDataFiles.ReadAllImagesAndLabels(true);
 	minstTrainDataFiles.Close();
 
 	Utils::MNISTDatabase minstTestDataFiles;

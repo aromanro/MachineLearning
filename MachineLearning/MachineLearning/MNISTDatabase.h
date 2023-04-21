@@ -71,7 +71,7 @@ namespace Utils {
 			imagesStream.read((char*)&cols, sizeof(uint32_t));
 			cols = ntohlAlt(cols);
 
-			if (rows != cols || rows != 28)
+			if (rows != cols || rows != imgSize)
 			{
 				imagesStream.close();
 				return false;
@@ -118,7 +118,7 @@ namespace Utils {
 		{
 			if (!imagesStream.good()) return false;
 			
-			std::vector<uint8_t> imgbuf(28 * 28);
+			std::vector<uint8_t> imgbuf(imgSize * imgSize);
 			imagesStream.read((char*)imgbuf.data(), imgbuf.size());
 			
 			img.resize(imgbuf.size());
@@ -146,14 +146,39 @@ namespace Utils {
 			return std::make_pair(img, label);
 		}
 
-		std::vector<std::pair<std::vector<double>, uint8_t>> ReadAllImagesAndLabels()
+		std::vector<std::pair<std::vector<double>, uint8_t>> ReadAllImagesAndLabels(bool augment = false)
 		{
 			std::vector<std::pair<std::vector<double>, uint8_t>> res;
 
 			while (imagesStream.good() && labelsStream.good())
 			{
 				auto imgAndLabel = ReadImageAndLabel();
-				if (imgAndLabel.second != 0xFF) res.emplace_back(imgAndLabel);
+				if (imgAndLabel.second != 0xFF) 
+				{
+					if (augment)
+					{
+						std::vector<double> shiftedUp(imgAndLabel.first.begin() + imgSize, imgAndLabel.first.end());
+						shiftedUp.resize(imgSize * imgSize, 0);
+						res.emplace_back(make_pair(shiftedUp, imgAndLabel.second));
+
+						std::vector<double> shiftedDown(imgSize * imgSize, 0);
+						std::copy(imgAndLabel.first.begin(), imgAndLabel.first.begin() + shiftedDown.size() - imgSize, shiftedDown.begin() + imgSize);
+						res.emplace_back(make_pair(shiftedDown, imgAndLabel.second));
+
+						std::vector<double> shiftedLeft(imgSize * imgSize, 0);
+						for (int i = 0; i < imgSize; ++i)
+							std::copy(imgAndLabel.first.begin() + i * imgSize + 1, imgAndLabel.first.begin() + (i + 1) * imgSize, shiftedLeft.begin() + i * imgSize);
+						res.emplace_back(make_pair(shiftedLeft, imgAndLabel.second));
+
+						std::vector<double> shiftedRight(imgSize * imgSize, 0);
+						for (int i = 0; i < imgSize; ++i)
+							std::copy(imgAndLabel.first.begin() + i * imgSize, imgAndLabel.first.begin() + (i + 1) * imgSize - 1, shiftedRight.begin() + i * imgSize + 1);
+
+						res.emplace_back(make_pair(shiftedRight, imgAndLabel.second));
+					}
+
+					res.emplace_back(imgAndLabel);
+				}
 				else break;
 			}
 
@@ -174,6 +199,8 @@ namespace Utils {
 
 		std::ifstream imagesStream;
 		std::ifstream labelsStream;
+
+		const int imgSize = 28;
 	};
 
 }
