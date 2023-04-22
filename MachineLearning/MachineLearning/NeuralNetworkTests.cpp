@@ -11,7 +11,7 @@ bool XORNeuralNetworksTests()
 {
 	std::default_random_engine rde(42);
 	std::uniform_int_distribution<> distBool(0, 1);
-	
+
 	const int nrTests = 1;
 
 	// this alleviates the convergence issue
@@ -175,7 +175,7 @@ bool XORNeuralNetworksTests()
 
 	const int failures_first = failures;
 
-	
+
 	failures = 0;
 	x.resize(2, batchSize);
 	y.resize(1, batchSize);
@@ -185,9 +185,9 @@ bool XORNeuralNetworksTests()
 		std::cout << std::endl << "Trial: " << trial << std::endl << std::endl;
 
 		// with more neurons and even more layers it still works, for example { 2, 7, 5, 1 }, for some complex setup the initialization of weights should probably left to default
-		NeuralNetworks::MultilayerPerceptron<> neuralNetwork({2, numHiddenNeurons, 1});
+		NeuralNetworks::MultilayerPerceptron<> neuralNetwork({ 2, numHiddenNeurons, 1 });
 
-		neuralNetwork.setParams({alpha, lim, beta1, beta2});
+		neuralNetwork.setParams({ alpha, lim, beta1, beta2 });
 		neuralNetwork.InitializHiddenLayers(weightsInitializer);
 
 		int lowLoss = 0;
@@ -204,7 +204,7 @@ bool XORNeuralNetworksTests()
 			}
 
 			neuralNetwork.ForwardBackwardStep(x, y);
-			
+
 			if (i % 10000 == 0)
 			{
 				const double loss = neuralNetwork.getLoss() / batchSize;
@@ -256,7 +256,7 @@ bool XORNeuralNetworksTests()
 
 		if (lowLoss <= 5) ++failures;
 	}
-	
+
 	std::cout << std::endl << "Failures: " << failures << std::endl;
 
 	return failures_first == 0 && failures == 0;
@@ -308,7 +308,7 @@ bool IrisNeuralNetworkTest()
 	//	std::cout << std::get<0>(rec) << ", " << std::get<1>(rec) << ", " << std::get<2>(rec) << ", " << std::get<3>(rec) << ", " << std::get<4>(rec) << std::endl;
 
 	// split the data into training and test sets
-	
+
 	std::vector<Utils::IrisDataset::Record> trainingSet(records.begin(), records.begin() + nrTraining);
 	std::vector<Utils::IrisDataset::Record> testSet(records.begin() + nrTraining, records.end());
 
@@ -352,7 +352,7 @@ bool IrisNeuralNetworkTest()
 		x(1, 0) = std::get<1>(testSet[i]);
 		x(2, 0) = std::get<2>(testSet[i]);
 		x(3, 0) = std::get<3>(testSet[i]);
-		
+
 
 		x.col(0) -= avgi;
 		x.col(0) = x.col(0).cwiseProduct(istdi);
@@ -361,7 +361,7 @@ bool IrisNeuralNetworkTest()
 	}
 
 	// more layers can be added, and/or made wider, but it will take more time to train. One configuration that I tried: { 4, 246, 512, 127, 63, 27, 9, nrOutputs }
-	NeuralNetworks::MultilayerPerceptron<SGD::SoftmaxRegressionAdamSolver> neuralNetwork({4, 27, 9, nrOutputs});
+	NeuralNetworks::MultilayerPerceptron<SGD::SoftmaxRegressionAdamSolver> neuralNetwork({ 4, 27, 9, nrOutputs });
 
 	const double alpha = 0.01;
 	const double beta1 = 0.7;
@@ -625,10 +625,10 @@ bool NeuralNetworkTestsMNIST()
 	// also tested { nrInputs, 1000, 600, 100, nrOutputs } - use Glorot uniform weights initializer for it, this one I suspect that it needs different parameters and maybe more iterations
 	// a single hidden layer, should be fast enough: { nrInputs, 32, nrOutputs } - over 97%
 	// for simple ones the xavier initializer works well, for the deeper ones the glorot one is better
-	NeuralNetworks::MultilayerPerceptron<SGD::SoftmaxRegressionAdamSolver> neuralNetwork(/*{nrInputs, 1000, 100, nrOutputs}*/ {nrInputs, 1000, 800, 400, 100, nrOutputs}, {0.2, 0.15, 0.1, 0, 0} ); // don't use dropout right before the softmax layer
+	NeuralNetworks::MultilayerPerceptron<SGD::SoftmaxRegressionAdamSolver> neuralNetwork(/*{nrInputs, 1000, 100, nrOutputs}*/{ nrInputs, 1000, 800, 400, 100, nrOutputs }, {0.2, 0.15, 0.1, 0, 0}); // don't use dropout right before the softmax layer
 
 	// initialize the model
-	double alpha = 0.0001; // non const, so it can be adjusted
+	double alpha = 0.0015; // non const, so it can be adjusted
 	double decay = 0.95;
 	const double beta1 = 0.9;
 	const double beta2 = 0.95;
@@ -672,180 +672,184 @@ bool NeuralNetworkTestsMNIST()
 	std::default_random_engine rde(42);
 	std::uniform_int_distribution<> distIntBig(0, static_cast<int>(trainInputs.cols() - 1));
 
-// use dropout for input level instead!
-//#define ADD_NOISE 1
+	// use dropout for input level instead!
+	//#define ADD_NOISE 1
 #ifdef ADD_NOISE
 	const double dropProb = 0.2; // also a hyperparameter
 	std::bernoulli_distribution dist(dropProb);
 #endif
 
 	std::cout << "Training samples: " << trainInputs.cols() << std::endl;
-	const long long int nrBatches	= trainInputs.cols() / batchSize;
+	const long long int nrBatches = trainInputs.cols() / batchSize;
 	std::cout << "Traing batches / epoch: " << nrBatches << std::endl;
 
 	std::cout << "Validation samples: " << validationInputs.cols() << std::endl;
 	std::cout << "Test samples: " << testInputs.cols() << std::endl;
 
-	std::chrono::high_resolution_clock::time_point t1 = std::chrono::high_resolution_clock::now();
-
 	const int nrEpochs = 10;
-	
-	std::vector<double> trainLosses(nrEpochs);
-	std::vector<double> validationLosses(nrEpochs);
 
-	std::vector<double> indices(nrEpochs);
-
-	long long int bcnt = 0;
-	for (int epoch = startEpoch; epoch < startEpoch + nrEpochs; ++epoch)
+	if (nrEpochs > 0)
 	{
-		std::cout << "Epoch: " << epoch << " Alpha: " << alpha << std::endl;
+		std::chrono::high_resolution_clock::time_point t1 = std::chrono::high_resolution_clock::now();
 
-		double totalLoss = 0;
-		for (int batch = 0; batch < nrBatches; ++batch)
+		std::vector<double> trainLosses(nrEpochs);
+		std::vector<double> validationLosses(nrEpochs);
+
+		std::vector<double> indices(nrEpochs);
+
+		long long int bcnt = 0;
+		for (int epoch = startEpoch; epoch < startEpoch + nrEpochs; ++epoch)
 		{
-			for (int b = 0; b < batchSize; ++b)
-			{
-				const int ind = distIntBig(rde);
+			std::cout << "Epoch: " << epoch << " Alpha: " << alpha << std::endl;
 
-				in.col(b) = trainInputs.col(ind);
+			double totalLoss = 0;
+			for (int batch = 0; batch < nrBatches; ++batch)
+			{
+				for (int b = 0; b < batchSize; ++b)
+				{
+					const int ind = distIntBig(rde);
+
+					in.col(b) = trainInputs.col(ind);
 
 #ifdef ADD_NOISE
-				for (int i = 0; i < nrInputs; ++i)
-				{
-					if (distDrop(rde))
-						in(i, b) = 0;
+					for (int i = 0; i < nrInputs; ++i)
+					{
+						if (distDrop(rde))
+							in(i, b) = 0;
 				}
 #endif
 
-				out.col(b) = trainOutputs.col(ind);
+					out.col(b) = trainOutputs.col(ind);
 			}
 
-			neuralNetwork.ForwardBackwardStep(in, out);
+				neuralNetwork.ForwardBackwardStep(in, out);
 
-			const double loss = neuralNetwork.getLoss() / batchSize;
-			totalLoss += loss;
-			
-			if (bcnt % 100 == 0)
-				std::cout << "Loss: " << loss << std::endl;
-			
-			++bcnt;
+				const double loss = neuralNetwork.getLoss() / batchSize;
+				totalLoss += loss;
+
+				if (bcnt % 100 == 0)
+					std::cout << "Loss: " << loss << std::endl;
+
+				++bcnt;
 		}
 
-		std::cout << "Average loss: " << totalLoss / static_cast<double>(nrBatches) << std::endl;
+			std::cout << "Average loss: " << totalLoss / static_cast<double>(nrBatches) << std::endl;
 
 
-		// stats / epoch
+			// stats / epoch
 
-		long long int validCorrect = 0;
-		long long int trainCorrect = 0;
+			long long int validCorrect = 0;
+			long long int trainCorrect = 0;
 
-		for (int i = 0; i < validationRecords.size(); ++i)
+			for (int i = 0; i < validationRecords.size(); ++i)
+			{
+				Eigen::VectorXd res = neuralNetwork.Predict(validationInputs.col(i));
+				validationRes.col(i) = res;
+
+				double limp = 0;
+				for (int j = 0; j < nrOutputs; ++j)
+					limp = std::max(limp, res(j));
+
+				int nr = -1;
+				for (int j = 0; j < nrOutputs; ++j)
+					if (validationOutputs(j, i) > 0.5)
+					{
+						if (nr != -1)
+							std::cout << "Info from label ambiguous, should not happen: " << nr << " and " << j << std::endl;
+						nr = j;
+					}
+
+				int predn = -1;
+				for (int n = 0; n < nrOutputs; ++n)
+					if (res(n) >= limp)
+					{
+						if (predn != -1)
+							std::cout << "Ambiguous prediction: " << predn << " and " << n << std::endl;
+						predn = n;
+					}
+
+				if (predn == nr)
+					++validCorrect;
+
+
+				const int ind = distIntBig(rde);
+
+				res = neuralNetwork.Predict(trainInputs.col(ind));
+				trainStatsRes.col(i) = res;
+				trainStatsOutputs.col(i) = trainOutputs.col(ind);
+
+				limp = 0;
+
+				for (int j = 0; j < nrOutputs; ++j)
+					limp = std::max(limp, res(j));
+
+				nr = -1;
+				for (int j = 0; j < nrOutputs; ++j)
+					if (trainStatsOutputs(j, i) > 0.5)
+					{
+						if (nr != -1)
+							std::cout << "Info from label ambiguous, should not happen: " << nr << " and " << j << std::endl;
+						nr = j;
+					}
+
+				predn = -1;
+				for (int n = 0; n < nrOutputs; ++n)
+					if (res(n) >= limp)
+					{
+						if (predn != -1)
+							std::cout << "Ambiguous prediction: " << predn << " and " << n << std::endl;
+						predn = n;
+					}
+
+				if (predn == nr)
+					++trainCorrect;
+			}
+
+
+			const int nrEpoch = epoch - startEpoch;
+			trainLosses[nrEpoch] = neuralNetwork.getLoss(trainStatsRes, trainStatsOutputs) / static_cast<double>(validationRecords.size());
+			validationLosses[nrEpoch] = neuralNetwork.getLoss(validationRes, validationOutputs) / static_cast<double>(validationRecords.size());
+			indices[nrEpoch] = epoch;
+
+			std::cout << "Training loss: " << trainLosses[nrEpoch] << std::endl;
+			std::cout << "Validation loss: " << validationLosses[nrEpoch] << std::endl;
+
+			std::cout << "Training accuracy: " << 100. * static_cast<double>(trainCorrect) / static_cast<double>(validationRecords.size()) << "%" << std::endl;
+			std::cout << "Validation accuracy: " << 100. * static_cast<double>(validCorrect) / static_cast<double>(validationRecords.size()) << "%" << std::endl << std::endl;
+
+			const std::string fileName = "../../data/neural" + std::to_string(epoch) + ".net";
+			neuralNetwork.saveNetwork(fileName);
+
+			// makes the learning rate smaller each epoch
+			alpha *= decay;
+			neuralNetwork.setLearnRate(alpha);
+	}
+
+
+		std::chrono::high_resolution_clock::time_point t2 = std::chrono::high_resolution_clock::now();
+		auto dif = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();
+
+		std::cout << "Training took: " << dif / 1000. << " seconds!" << std::endl;
+
 		{
-			Eigen::VectorXd res = neuralNetwork.Predict(validationInputs.col(i));
-			validationRes.col(i) = res;
-
-			double limp = 0;
-			for (int j = 0; j < nrOutputs; ++j)
-				limp = std::max(limp, res(j));
-
-			int nr = -1;
-			for (int j = 0; j < nrOutputs; ++j)
-				if (validationOutputs(j, i) > 0.5)
-				{
-					if (nr != -1)
-						std::cout << "Info from label ambiguous, should not happen: " << nr << " and " << j << std::endl;
-					nr = j;
-				}
-
-			int predn = -1;
-			for (int n = 0; n < nrOutputs; ++n)
-				if (res(n) >= limp)
-				{
-					if (predn != -1)
-						std::cout << "Ambiguous prediction: " << predn << " and " << n << std::endl;
-					predn = n;
-				}
-
-			if (predn == nr)
-				++validCorrect;
-
-
-			const int ind = distIntBig(rde);
-
-			res = neuralNetwork.Predict(trainInputs.col(ind));
-			trainStatsRes.col(i) = res;
-			trainStatsOutputs.col(i) = trainOutputs.col(ind);
-
-			limp = 0;
-
-			for (int j = 0; j < nrOutputs; ++j)
-				limp = std::max(limp, res(j));
-
-			nr = -1;
-			for (int j = 0; j < nrOutputs; ++j)
-				if (trainStatsOutputs(j, i) > 0.5)
-				{
-					if (nr != -1)
-						std::cout << "Info from label ambiguous, should not happen: " << nr << " and " << j << std::endl;
-					nr = j;
-				}
-
-			predn = -1;
-			for (int n = 0; n < nrOutputs; ++n)
-				if (res(n) >= limp)
-				{
-					if (predn != -1)
-						std::cout << "Ambiguous prediction: " << predn << " and " << n << std::endl;
-					predn = n;
-				}
-
-			if (predn == nr)
-				++trainCorrect;
+			Utils::DataFileWriter theFile("../../data/EMNIST.txt");
+			theFile.AddDataset(indices, trainLosses);
+			theFile.AddDataset(indices, validationLosses);
 		}
 
-
-		const int nrEpoch = epoch -	startEpoch;
-		trainLosses[nrEpoch] = neuralNetwork.getLoss(trainStatsRes, trainStatsOutputs) / static_cast<double>(validationRecords.size());
-		validationLosses[nrEpoch] = neuralNetwork.getLoss(validationRes, validationOutputs) / static_cast<double>(validationRecords.size());
-		indices[nrEpoch] = epoch;
-
-		std::cout << "Training loss: " << trainLosses[nrEpoch] << std::endl;
-		std::cout << "Validation loss: " << validationLosses[nrEpoch] << std::endl;
-
-		std::cout << "Training accuracy: " << 100. * static_cast<double>(trainCorrect) / static_cast<double>(validationRecords.size()) << "%" << std::endl;
-		std::cout << "Validation accuracy: " << 100. * static_cast<double>(validCorrect) / static_cast<double>(validationRecords.size()) << "%" << std::endl << std::endl;
-
-		const std::string fileName = "../../data/neural" + std::to_string(epoch) + ".net";
-		neuralNetwork.saveNetwork(fileName);
-
-		// makes the learning rate smaller each epoch
-		alpha *= decay;
-		neuralNetwork.setLearnRate(alpha);
-	}
-
-	std::chrono::high_resolution_clock::time_point t2 = std::chrono::high_resolution_clock::now();
-	auto dif = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();
-
-	std::cout << "Training took: " << dif / 1000. << " seconds!" << std::endl;
-
-	{
-		Utils::DataFileWriter theFile("../../data/EMNIST.txt");
-		theFile.AddDataset(indices, trainLosses);
-		theFile.AddDataset(indices, validationLosses);
-	}
-
-	Utils::Gnuplot plot;
-	plot.setType(Utils::Gnuplot::ChartType::training);
-	plot.setCmdFileName("EMNIST.plt");
-	plot.setDataFileName("EMNIST.txt");
-	plot.Execute();
+		Utils::Gnuplot plot;
+		plot.setType(Utils::Gnuplot::ChartType::training);
+		plot.setCmdFileName("EMNIST.plt");
+		plot.setDataFileName("EMNIST.txt");
+		plot.Execute();
+}
 
 	std::vector<Utils::TestStatistics> stats(nrOutputs);
 
 	// first, on training set:
 
 	std::cout << std::endl << "Training set:" << std::endl;
-	
+
 	long long int correct = 0;
 
 	for (int i = 0; i < trainInputs.cols(); ++i)

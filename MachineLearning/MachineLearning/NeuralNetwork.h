@@ -162,7 +162,7 @@ namespace NeuralNetworks
 			// forward and backward for the last layer and backpropagate the gradient to the last hidden layer
 			Eigen::MatrixXd grad = lastLayer.BackpropagateBatch(lastLayer.AddBatch(inp, target));
 
-			// now backpropagate the gradient trough the hidden layers:
+			// now backpropagate the gradient through the hidden layers:
 
 			for (int i = static_cast<int>(hiddenLayers.size() - 1); i > 0; --i)
 				// now do the adjustments of the parameters as well and backpropagate for each hidden layer
