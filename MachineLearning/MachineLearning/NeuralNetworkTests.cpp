@@ -625,7 +625,7 @@ bool NeuralNetworkTestsMNIST()
 	// also tested { nrInputs, 1000, 600, 100, nrOutputs } - use Glorot uniform weights initializer for it, this one I suspect that it needs different parameters and maybe more iterations
 	// a single hidden layer, should be fast enough: { nrInputs, 32, nrOutputs } - over 97%
 	// for simple ones the xavier initializer works well, for the deeper ones the glorot one is better
-	NeuralNetworks::MultilayerPerceptron<SGD::SoftmaxRegressionAdamSolver> neuralNetwork(/*{nrInputs, 1000, 100, nrOutputs}*/{ nrInputs, 1000, 800, 400, 100, nrOutputs }, {0.2, 0.15, 0.1, 0, 0}); // don't use dropout right before the softmax layer
+	NeuralNetworks::MultilayerPerceptron<SGD::SoftmaxRegressionAdamSolver> neuralNetwork(/*{nrInputs, 1000, 100, nrOutputs}*/{ nrInputs, 1000, 800, 400, 100, nrOutputs }, { 0.2, 0.15, 0.1, 0, 0 }); // don't use dropout right before the softmax layer
 
 	// initialize the model
 	double alpha = 0.0015; // non const, so it can be adjusted
@@ -716,11 +716,11 @@ bool NeuralNetworkTestsMNIST()
 					{
 						if (distDrop(rde))
 							in(i, b) = 0;
-				}
+					}
 #endif
 
 					out.col(b) = trainOutputs.col(ind);
-			}
+				}
 
 				neuralNetwork.ForwardBackwardStep(in, out);
 
@@ -731,7 +731,7 @@ bool NeuralNetworkTestsMNIST()
 					std::cout << "Loss: " << loss << std::endl;
 
 				++bcnt;
-		}
+			}
 
 			std::cout << "Average loss: " << totalLoss / static_cast<double>(nrBatches) << std::endl;
 
@@ -823,7 +823,7 @@ bool NeuralNetworkTestsMNIST()
 			// makes the learning rate smaller each epoch
 			alpha *= decay;
 			neuralNetwork.setLearnRate(alpha);
-	}
+		}
 
 
 		std::chrono::high_resolution_clock::time_point t2 = std::chrono::high_resolution_clock::now();
@@ -842,7 +842,7 @@ bool NeuralNetworkTestsMNIST()
 		plot.setCmdFileName("EMNIST.plt");
 		plot.setDataFileName("EMNIST.txt");
 		plot.Execute();
-}
+	}
 
 	std::vector<Utils::TestStatistics> stats(nrOutputs);
 
