@@ -157,6 +157,7 @@
     <ClCompile Include="DataFile.cpp" />
     <ClCompile Include="EMNISTData.cpp" />
     <ClCompile Include="Gnuplot.cpp" />
+    <ClCompile Include="IrisData.cpp" />
     <ClCompile Include="LinearRegressionTests.cpp" />
     <ClCompile Include="LogisticRegressionTests.cpp" />
     <ClCompile Include="MachineLearning.cpp" />

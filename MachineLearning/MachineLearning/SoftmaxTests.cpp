@@ -6,6 +6,97 @@
 
 #include "Softmax.h"
 
+
+void PrintStats(const std::vector<Utils::IrisDataset::Record>& records, int nrOutputs, GLM::SoftmaxRegression<>& softmaxModel)
+{
+	Utils::TestStatistics setosaStats;
+	Utils::TestStatistics versicolorStats;
+	Utils::TestStatistics virginicaStats;
+
+	Eigen::VectorXd in(4);
+	Eigen::VectorXd out(nrOutputs);
+
+	long long int correct = 0;
+	for (const auto& record : records)
+	{
+		in(0) = std::get<0>(record);
+		in(1) = std::get<1>(record);
+		in(2) = std::get<2>(record);
+		in(3) = std::get<3>(record);
+
+		out(0) = (std::get<4>(record) == "Iris-setosa") ? 1 : 0;
+		if (nrOutputs > 1) out(1) = (std::get<4>(record) == "Iris-versicolor") ? 1 : 0;
+		if (nrOutputs > 2) out(2) = (std::get<4>(record) == "Iris-virginica") ? 1 : 0;
+
+		Eigen::VectorXd res = softmaxModel.Predict(in.col(0));
+		setosaStats.AddPrediction(res(0) > 0.5, out(0) > 0.5);
+		if (nrOutputs > 1) versicolorStats.AddPrediction(res(1) > 0.5, out(1) > 0.5);
+		if (nrOutputs > 2) virginicaStats.AddPrediction(res(2) > 0.5, out(2) > 0.5);
+
+		double limp = 0.5;
+		for (int j = 0; j < nrOutputs; ++j)
+			limp = std::max(limp, res(j));
+
+		if (res(0) == limp && out(0) > 0.5) ++correct;
+		else if (nrOutputs > 1 && res(1) == limp && out(1) > 0.5) ++correct;
+		else if (nrOutputs > 2 && res(2) == limp && out(2) > 0.5) ++correct;
+	}
+
+
+	setosaStats.PrintStatistics("Setosa");
+	if (nrOutputs > 1) {
+		versicolorStats.PrintStatistics("Versicolor");
+		if (nrOutputs > 2) virginicaStats.PrintStatistics("Virginica");
+	}
+
+	std::cout << "Accuracy (% correct): " << 100.0 * static_cast<double>(correct) / static_cast<double>(records.size()) << "%" << std::endl << std::endl;
+}
+
+
+void TrainModel(GLM::SoftmaxRegression<>& softmaxModel, int nrOutputs, int nrTraining, const std::vector<Utils::IrisDataset::Record>& trainingSet)
+{
+	softmaxModel.getSolver().alpha = 0.01;
+	softmaxModel.getSolver().beta1 = 0.7;
+	softmaxModel.getSolver().beta2 = 0.8;
+	softmaxModel.getSolver().lim = 1;
+
+	Initializers::WeightsInitializerZero initializer;
+	softmaxModel.Initialize(initializer);
+
+	// train the model
+
+	const int batchSize = 64;
+
+	Eigen::MatrixXd in(4, batchSize);
+	Eigen::MatrixXd out(nrOutputs, batchSize);
+
+	std::default_random_engine rde(42);
+	std::uniform_int_distribution<> distIntBig(0, nrTraining - 1);
+	for (int i = 0; i <= 1000; ++i)
+	{
+		for (int b = 0; b < batchSize; ++b)
+		{
+			const int ind = distIntBig(rde);
+			const auto& record = trainingSet[ind];
+
+			in(0, b) = std::get<0>(record);
+			in(1, b) = std::get<1>(record);
+			in(2, b) = std::get<2>(record);
+			in(3, b) = std::get<3>(record);
+
+			out(0, b) = (std::get<4>(record) == "Iris-setosa") ? 1 : 0;
+			if (nrOutputs > 1) out(1, b) = (std::get<4>(record) == "Iris-versicolor") ? 1 : 0;
+			if (nrOutputs > 2) out(2, b) = (std::get<4>(record) == "Iris-virginica") ? 1 : 0;
+		}
+		softmaxModel.AddBatch(in, out);
+		if (i % 100 == 0)
+		{
+			const double loss = softmaxModel.getLoss() / batchSize;
+			std::cout << "Loss: " << loss << std::endl;
+		}
+	}
+}
+
 bool SoftmaxTestsIris()
 {
 	std::cout << std::endl << "Softmax for the Iris dataset, Setosa is lineary separable from the other two, but the others two cannot be linearly separated, so expect good results for Setosa but not for the other two" << std::endl << std::endl;
@@ -20,36 +111,7 @@ bool SoftmaxTestsIris()
 
 	const int nrTraining = 100;
 
-	// shuffle the data
-
-	std::random_device rd;
-	std::mt19937 g(rd());
-
-	// ensure it's shuffled enough to have all enough samples of all classes in the test set
-	for (;;)
-	{
-		int setosa = 0;
-		int versicolor = 0;
-		int virginica = 0;
-
-		std::shuffle(records.begin(), records.end(), g);
-		std::shuffle(records.begin(), records.end(), g);
-		std::shuffle(records.begin(), records.end(), g);
-
-		for (auto it = records.begin() + nrTraining; it != records.end(); ++it)
-		{
-			const auto& rec = *it;
-			if (std::get<4>(rec) == "Iris-setosa") ++setosa;
-			if (std::get<4>(rec) == "Iris-versicolor") ++versicolor;
-			if (std::get<4>(rec) == "Iris-virginica") ++virginica;
-		}
-
-		if (setosa > 10 && versicolor > 10 && virginica > 10) break;
-	}
-
-
-	//for (auto rec : records)
-	//	std::cout << std::get<0>(rec) << ", " << std::get<1>(rec) << ", " << std::get<2>(rec) << ", " << std::get<3>(rec) << ", " << std::get<4>(rec) << std::endl;
+	Shuffle(records, nrTraining);
 
 	// split the data into training and test sets
 
@@ -107,52 +169,7 @@ bool SoftmaxTestsIris()
 	// create the model
 	GLM::SoftmaxRegression<> softmaxModel(4, nrOutputs);
 
-	softmaxModel.getSolver().alpha = 0.01;
-	softmaxModel.getSolver().beta1 = 0.7;
-	softmaxModel.getSolver().beta2 = 0.8;
-	softmaxModel.getSolver().lim = 1;
-
-	Initializers::WeightsInitializerZero initializer;
-	softmaxModel.Initialize(initializer);
-
-	// train the model
-
-	const int batchSize = 64;
-
-	Eigen::MatrixXd in(4, batchSize);
-	Eigen::MatrixXd out(nrOutputs, batchSize);
-
-	std::default_random_engine rde(42);
-	std::uniform_int_distribution<> distIntBig(0, nrTraining - 1);
-	for (int i = 0; i <= 1000; ++i)
-	{
-		for (int b = 0; b < batchSize; ++b)
-		{
-			const int ind = distIntBig(rde);
-			const auto& record = trainingSet[ind];
-
-			in(0, b) = std::get<0>(record);
-			in(1, b) = std::get<1>(record);
-			in(2, b) = std::get<2>(record);
-			in(3, b) = std::get<3>(record);
-
-			out(0, b) = (std::get<4>(record) == "Iris-setosa") ? 1 : 0;
-			if (nrOutputs > 1) out(1, b) = (std::get<4>(record) == "Iris-versicolor") ? 1 : 0;
-			if (nrOutputs > 2) out(2, b) = (std::get<4>(record) == "Iris-virginica") ? 1 : 0;
-		}
-		softmaxModel.AddBatch(in, out);
-		if (i % 100 == 0)
-		{
-			const double loss = softmaxModel.getLoss() / batchSize;
-			std::cout << "Loss: " << loss << std::endl;
-		}
-	}
-
-
-	Utils::TestStatistics setosaStats;
-	Utils::TestStatistics versicolorStats;
-	Utils::TestStatistics virginicaStats;
-
+	TrainModel(softmaxModel, nrOutputs, nrTraining, trainingSet);
 
 	// test the model
 
@@ -160,97 +177,11 @@ bool SoftmaxTestsIris()
 
 	std::cout << std::endl << "Training set:" << std::endl;
 
-	long long int correct = 0;
-	for (const auto& record : trainingSet)
-	{
-		in(0, 0) = std::get<0>(record);
-		in(1, 0) = std::get<1>(record);
-		in(2, 0) = std::get<2>(record);
-		in(3, 0) = std::get<3>(record);
-
-		out(0, 0) = (std::get<4>(record) == "Iris-setosa") ? 1 : 0;
-		if (nrOutputs > 1) out(1, 0) = (std::get<4>(record) == "Iris-versicolor") ? 1 : 0;
-		if (nrOutputs > 2) out(2, 0) = (std::get<4>(record) == "Iris-virginica") ? 1 : 0;
-
-		Eigen::VectorXd res = softmaxModel.Predict(in.col(0));
-		setosaStats.AddPrediction(res(0) > 0.5, out(0, 0) > 0.5);
-		if (nrOutputs > 1) versicolorStats.AddPrediction(res(1) > 0.5, out(1, 0) > 0.5);
-		if (nrOutputs > 2) virginicaStats.AddPrediction(res(2) > 0.5, out(2, 0) > 0.5);
-
-		double limp = 0.5;
-		for (int j = 0; j < nrOutputs; ++j)
-			limp = std::max(limp, res(j));
-
-		if (res(0) == limp && out(0, 0) > 0.5) ++correct;
-		else if (nrOutputs > 1 && res(1) == limp && out(1, 0) > 0.5) ++correct;
-		else if (nrOutputs > 2 && res(2) == limp && out(2, 0) > 0.5) ++correct;
-	}
-
-	Utils::TestStatistics totalStats;
-
-	setosaStats.PrintStatistics("Setosa");
-	if (nrOutputs > 1) {
-		versicolorStats.PrintStatistics("Versicolor");
-		if (nrOutputs > 2) virginicaStats.PrintStatistics("Virginica");
-	
-		totalStats.Add(setosaStats);
-		totalStats.Add(versicolorStats);
-		if (nrOutputs > 2) totalStats.Add(virginicaStats);
-
-		//totalStats.PrintStatistics("Overall"); //misleading
-	}
-
-	std::cout << "Accuracy (% correct): " << 100.0 * static_cast<double>(correct) / static_cast<double>(trainingSet.size()) << "%" << std::endl << std::endl;
-
-	setosaStats.Clear();
-	versicolorStats.Clear();
-	virginicaStats.Clear();
+	PrintStats(trainingSet, nrOutputs, softmaxModel);
 
 	std::cout << std::endl << "Test set:" << std::endl;
 
-	correct = 0;
-
-	for (const auto& record : testSet)
-	{
-		in(0, 0) = std::get<0>(record);
-		in(1, 0) = std::get<1>(record);
-		in(2, 0) = std::get<2>(record);
-		in(3, 0) = std::get<3>(record);
-
-		out(0, 0) = (std::get<4>(record) == "Iris-setosa") ? 1 : 0;
-		if (nrOutputs > 1) out(1, 0) = (std::get<4>(record) == "Iris-versicolor") ? 1 : 0;
-		if (nrOutputs > 2) out(2, 0) = (std::get<4>(record) == "Iris-virginica") ? 1 : 0;
-
-		Eigen::VectorXd res = softmaxModel.Predict(in.col(0));
-
-		setosaStats.AddPrediction(res(0) > 0.5, out(0, 0) > 0.5);
-		if (nrOutputs > 1) versicolorStats.AddPrediction(res(1) > 0.5, out(1, 0) > 0.5);
-		if (nrOutputs > 2) virginicaStats.AddPrediction(res(2) > 0.5, out(2, 0) > 0.5);
-
-		double limp = 0.5;
-		for (int j = 0; j < nrOutputs; ++j)
-			limp = std::max(limp, res(j));
-
-		if (res(0) == limp && out(0, 0) > 0.5) ++correct;
-		else if (nrOutputs > 1 && res(1) == limp && out(1, 0) > 0.5) ++correct;
-		else if (nrOutputs > 2 && res(2) == limp && out(2, 0) > 0.5) ++correct;
-	}
-
-	setosaStats.PrintStatistics("Setosa");
-	if (nrOutputs > 1) 
-	{
-		versicolorStats.PrintStatistics("Versicolor");
-		if (nrOutputs > 2) virginicaStats.PrintStatistics("Virginica");
-
-		totalStats.Clear();
-		totalStats.Add(setosaStats);
-		totalStats.Add(versicolorStats);
-		if (nrOutputs > 2) totalStats.Add(virginicaStats);
-
-		//totalStats.PrintStatistics("Overall"); //misleading
-	}
-
-	std::cout << "Accuracy (% correct): " << 100.0 * static_cast<double>(correct) / static_cast<double>(testSet.size()) << "%" << std::endl << std::endl;
+	PrintStats(testSet, nrOutputs, softmaxModel);
 
 	return true;
 }

@@ -332,70 +332,6 @@ bool MoreComplexLogisticRegressionTest()
 }
 
 
-void Shuffle(std::vector<Utils::IrisDataset::Record>& records, int nrTraining)
-{
-	std::random_device rd;
-	std::mt19937 g(rd());
-
-	// ensure it's shuffled enough to have all enough samples of all classes in the test set
-	for (;;)
-	{
-		int setosa = 0;
-		int versicolor = 0;
-		int virginica = 0;
-
-		std::shuffle(records.begin(), records.end(), g);
-		std::shuffle(records.begin(), records.end(), g);
-		std::shuffle(records.begin(), records.end(), g);
-
-		for (auto it = records.begin() + nrTraining; it != records.end(); ++it)
-		{
-			const auto rec = *it;
-			if (std::get<4>(rec) == "Iris-setosa") ++setosa;
-			if (std::get<4>(rec) == "Iris-versicolor") ++versicolor;
-			if (std::get<4>(rec) == "Iris-virginica") ++virginica;
-		}
-
-		if (setosa > 10 && versicolor > 10 && virginica > 10) break;
-	}
-}
-
-void PrintStats(const std::vector<Utils::IrisDataset::Record>& records, int nrOutputs, GLM::LogisticRegression<>& logisticModel)
-{
-	Utils::TestStatistics setosaStats;
-	Utils::TestStatistics versicolorStats;
-	Utils::TestStatistics virginicaStats;
-
-	// test the model
-
-	Eigen::VectorXd in(4);
-	Eigen::VectorXd out(nrOutputs);
-
-	for (const auto& record : records)
-	{
-		in(0) = std::get<0>(record);
-		in(1) = std::get<1>(record);
-		in(2) = std::get<2>(record);
-		in(3) = std::get<3>(record);
-
-		out(0) = (std::get<4>(record) == "Iris-setosa") ? 1 : 0;
-		if (nrOutputs > 1) out(1) = (std::get<4>(record) == "Iris-versicolor") ? 1 : 0;
-		if (nrOutputs > 2) out(2) = (std::get<4>(record) == "Iris-virginica") ? 1 : 0;
-
-		Eigen::VectorXd res = logisticModel.Predict(in);
-		setosaStats.AddPrediction(res(0) > 0.5, out(0) > 0.5);
-		if (nrOutputs > 1) versicolorStats.AddPrediction(res(1) > 0.5, out(1) > 0.5);
-		if (nrOutputs > 2) virginicaStats.AddPrediction(res(2) > 0.5, out(2) > 0.5);
-	}
-
-	setosaStats.PrintStatistics("Setosa");
-	if (nrOutputs > 1) {
-		versicolorStats.PrintStatistics("Versicolor");
-		if (nrOutputs > 2) virginicaStats.PrintStatistics("Virginica");
-	}
-	std::cout << std::endl;
-}
-
 void TrainModel(GLM::LogisticRegression<>& logisticModel, int nrOutputs, int nrTraining, const std::vector<Utils::IrisDataset::Record>& trainingSet)
 {
 	logisticModel.getSolver().alpha = 0.01;
@@ -439,6 +375,45 @@ void TrainModel(GLM::LogisticRegression<>& logisticModel, int nrOutputs, int nrT
 		}
 	}
 }
+
+
+
+void PrintStats(const std::vector<Utils::IrisDataset::Record>& records, int nrOutputs, GLM::LogisticRegression<>& logisticModel)
+{
+	Utils::TestStatistics setosaStats;
+	Utils::TestStatistics versicolorStats;
+	Utils::TestStatistics virginicaStats;
+
+	// test the model
+
+	Eigen::VectorXd in(4);
+	Eigen::VectorXd out(nrOutputs);
+
+	for (const auto& record : records)
+	{
+		in(0) = std::get<0>(record);
+		in(1) = std::get<1>(record);
+		in(2) = std::get<2>(record);
+		in(3) = std::get<3>(record);
+
+		out(0) = (std::get<4>(record) == "Iris-setosa") ? 1 : 0;
+		if (nrOutputs > 1) out(1) = (std::get<4>(record) == "Iris-versicolor") ? 1 : 0;
+		if (nrOutputs > 2) out(2) = (std::get<4>(record) == "Iris-virginica") ? 1 : 0;
+
+		Eigen::VectorXd res = logisticModel.Predict(in);
+		setosaStats.AddPrediction(res(0) > 0.5, out(0) > 0.5);
+		if (nrOutputs > 1) versicolorStats.AddPrediction(res(1) > 0.5, out(1) > 0.5);
+		if (nrOutputs > 2) virginicaStats.AddPrediction(res(2) > 0.5, out(2) > 0.5);
+	}
+
+	setosaStats.PrintStatistics("Setosa");
+	if (nrOutputs > 1) {
+		versicolorStats.PrintStatistics("Versicolor");
+		if (nrOutputs > 2) virginicaStats.PrintStatistics("Virginica");
+	}
+	std::cout << std::endl;
+}
+
 
 bool IrisLogisticRegressionTest()
 {

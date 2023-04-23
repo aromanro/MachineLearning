@@ -9,6 +9,9 @@
 #include "DataFile.h"
 #include "GnuPlot.h"
 
+#include "CSVDataFile.h"
+#include "TestStatistics.h"
+
 
 #include <random>
 #include <chrono>
@@ -19,6 +22,9 @@
 
 bool LoadData(std::vector<std::pair<std::vector<double>, uint8_t>>& trainingRecords, std::vector<std::pair<std::vector<double>, uint8_t>>& testRecords);
 void SetDataIntoMatrices(const std::vector<std::pair<std::vector<double>, uint8_t>>& records, Eigen::MatrixXd& inputs, Eigen::MatrixXd& outputs);
+
+void Shuffle(std::vector<Utils::IrisDataset::Record>& records, int nrTraining);
+
 
 double linearFunction(double x);
 double linearFunction2(double x);
