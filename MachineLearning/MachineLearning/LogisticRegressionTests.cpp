@@ -396,6 +396,50 @@ void PrintStats(const std::vector<Utils::IrisDataset::Record>& records, int nrOu
 	std::cout << std::endl;
 }
 
+void TrainModel(GLM::LogisticRegression<>& logisticModel, int nrOutputs, int nrTraining, const std::vector<Utils::IrisDataset::Record>& trainingSet)
+{
+	logisticModel.getSolver().alpha = 0.01;
+	logisticModel.getSolver().beta1 = 0.7;
+	logisticModel.getSolver().beta2 = 0.8;
+	logisticModel.getSolver().lim = 1;
+
+	Initializers::WeightsInitializerZero initializer;
+	logisticModel.Initialize(initializer);
+
+	// train the model
+
+	const int batchSize = 64;
+
+	Eigen::MatrixXd in(4, batchSize);
+	Eigen::MatrixXd out(nrOutputs, batchSize);
+
+	std::default_random_engine rde(42);
+	std::uniform_int_distribution<> distIntBig(0, nrTraining - 1);
+	for (int i = 0; i <= 1000; ++i)
+	{
+		for (int b = 0; b < batchSize; ++b)
+		{
+			const int ind = distIntBig(rde);
+			const auto& record = trainingSet[ind];
+
+			in(0, b) = std::get<0>(record);
+			in(1, b) = std::get<1>(record);
+			in(2, b) = std::get<2>(record);
+			in(3, b) = std::get<3>(record);
+
+			out(0, b) = (std::get<4>(record) == "Iris-setosa") ? 1 : 0;
+			if (nrOutputs > 1) out(1, b) = (std::get<4>(record) == "Iris-versicolor") ? 1 : 0;
+			if (nrOutputs > 2) out(2, b) = (std::get<4>(record) == "Iris-virginica") ? 1 : 0;
+		}
+		logisticModel.AddBatch(in, out);
+		if (i % 100 == 0)
+		{
+			const double loss = logisticModel.getLoss() / batchSize;
+			std::cout << "Loss: " << loss << std::endl;
+		}
+	}
+}
+
 bool IrisLogisticRegressionTest()
 {
 	std::cout << std::endl << "Logistic Regression for the Iris dataset, Setosa is lineary separable from the other two, but the others two cannot be linearly separated, so expect good results for Setosa but not for the other two" << std::endl << std::endl;
@@ -467,46 +511,7 @@ bool IrisLogisticRegressionTest()
 	// create the model
 	GLM::LogisticRegression<> logisticModel(4, nrOutputs);
 
-	logisticModel.getSolver().alpha = 0.01;
-	logisticModel.getSolver().beta1 = 0.7;
-	logisticModel.getSolver().beta2 = 0.8;
-	logisticModel.getSolver().lim = 1;
-
-	Initializers::WeightsInitializerZero initializer;
-	logisticModel.Initialize(initializer);
-
-	// train the model
-
-	const int batchSize = 64;
-
-	Eigen::MatrixXd in(4, batchSize);
-	Eigen::MatrixXd out(nrOutputs, batchSize);
-
-	std::default_random_engine rde(42);
-	std::uniform_int_distribution<> distIntBig(0, nrTraining - 1);
-	for (int i = 0; i <= 1000; ++i)
-	{
-		for (int b = 0; b < batchSize; ++b)
-		{
-			const int ind = distIntBig(rde);
-			const auto& record = trainingSet[ind];
-
-			in(0, b) = std::get<0>(record);
-			in(1, b) = std::get<1>(record);
-			in(2, b) = std::get<2>(record);
-			in(3, b) = std::get<3>(record);
-
-			out(0, b) = (std::get<4>(record) == "Iris-setosa") ? 1 : 0;
-			if (nrOutputs > 1) out(1, b) = (std::get<4>(record) == "Iris-versicolor") ? 1 : 0;
-			if (nrOutputs > 2) out(2, b) = (std::get<4>(record) == "Iris-virginica") ? 1 : 0;
-		}
-		logisticModel.AddBatch(in, out);
-		if (i % 100 == 0)
-		{
-			const double loss = logisticModel.getLoss() / batchSize;
-			std::cout << "Loss: " << loss << std::endl;
-		}
-	}
+	TrainModel(logisticModel, nrOutputs, nrTraining, trainingSet);
 
 	// test the model
 
