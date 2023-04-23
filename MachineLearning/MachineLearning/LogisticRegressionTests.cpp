@@ -358,7 +358,6 @@ void Shuffle(std::vector<Utils::IrisDataset::Record>& records, int nrTraining)
 
 		if (setosa > 10 && versicolor > 10 && virginica > 10) break;
 	}
-
 }
 
 void PrintStats(const std::vector<Utils::IrisDataset::Record>& records, int nrOutputs, GLM::LogisticRegression<>& logisticModel)
