@@ -559,13 +559,10 @@ bool IrisLogisticRegressionTest()
 	return true;
 }
 
-bool MNISTLogisticRegressionTests()
+
+
+bool LoadData(std::vector<std::pair<std::vector<double>, uint8_t>>& trainingRecords, std::vector<std::pair<std::vector<double>, uint8_t>>& testRecords)
 {
-	std::cout << "MNIST Logistic Regression Tests" << std::endl;
-
-	const int nrInputs = 28 * 28;
-	const int nrOutputs = 10;
-
 	// load the data
 	Utils::MNISTDatabase minstTrainDataFiles;
 	if (!minstTrainDataFiles.Open()) {
@@ -573,7 +570,7 @@ bool MNISTLogisticRegressionTests()
 		return false;
 	}
 
-	std::vector<std::pair<std::vector<double>, uint8_t>> trainingRecords = minstTrainDataFiles.ReadAllImagesAndLabels();
+	trainingRecords = minstTrainDataFiles.ReadAllImagesAndLabels();
 	minstTrainDataFiles.Close();
 
 	Utils::MNISTDatabase minstTestDataFiles;
@@ -584,13 +581,45 @@ bool MNISTLogisticRegressionTests()
 		return false;
 	}
 
-	std::vector<std::pair<std::vector<double>, uint8_t>> testRecords = minstTestDataFiles.ReadAllImagesAndLabels();
+	testRecords = minstTestDataFiles.ReadAllImagesAndLabels();
 	minstTestDataFiles.Close();
-
 
 	std::random_device rd;
 	std::mt19937 g(rd());
 	std::shuffle(trainingRecords.begin(), trainingRecords.end(), g);
+
+	return true;
+}
+
+
+void SetDataIntoMatrices(const std::vector<std::pair<std::vector<double>, uint8_t>>& records, Eigen::MatrixXd& inputs, Eigen::MatrixXd& outputs)
+{
+	int rec = 0;
+	for (const auto& record : records)
+	{
+		for (int i = 0; i < inputs.rows(); ++i)
+			inputs(i, rec) = record.first[i];
+
+		for (int i = 0; i < outputs.rows(); ++i)
+			outputs(i, rec) = (i == record.second) ? 1 : 0;
+
+		++rec;
+	}
+}
+
+
+bool MNISTLogisticRegressionTests()
+{
+	std::cout << "MNIST Logistic Regression Tests" << std::endl;
+
+	const int nrInputs = 28 * 28;
+	const int nrOutputs = 10;
+
+	std::vector<std::pair<std::vector<double>, uint8_t>> trainingRecords;
+	std::vector<std::pair<std::vector<double>, uint8_t>> testRecords;
+
+	if (!LoadData(trainingRecords, testRecords))
+		return false;
 
 	// normalize the data
 	Norm::Normalizer<> pixelsNormalizer(nrInputs, nrOutputs);
@@ -598,17 +627,7 @@ bool MNISTLogisticRegressionTests()
 	Eigen::MatrixXd trainInputs(nrInputs, trainingRecords.size());
 	Eigen::MatrixXd trainOutputs(nrOutputs, trainingRecords.size());
 
-	int rec = 0;
-	for (const auto& record : trainingRecords)
-	{
-		for (int i = 0; i < nrInputs; ++i)
-			trainInputs(i, rec) = record.first[i];
-
-		for (int i = 0; i < nrOutputs; ++i)
-			trainOutputs(i, rec) = (i == record.second) ? 1 : 0;
-
-		++rec;
-	}
+	SetDataIntoMatrices(trainingRecords, trainInputs, trainOutputs);
 
 	pixelsNormalizer.AddBatch(trainInputs, trainOutputs);
 
@@ -616,17 +635,7 @@ bool MNISTLogisticRegressionTests()
 	Eigen::MatrixXd testInputs(nrInputs, testRecords.size());
 	Eigen::MatrixXd testOutputs(nrOutputs, testRecords.size());
 
-	rec = 0;
-	for (const auto& record : testRecords)
-	{
-		for (int i = 0; i < nrInputs; ++i)
-			testInputs(i, rec) = record.first[i];
-
-		for (int i = 0; i < nrOutputs; ++i)
-			testOutputs(i, rec) = (i == record.second) ? 1 : 0;
-
-		++rec;
-	}
+	SetDataIntoMatrices(testRecords, testInputs, testOutputs);
 
 	// only inputs and only shifting the average
 
@@ -663,7 +672,6 @@ bool MNISTLogisticRegressionTests()
 
 				in.col(b) = trainInputs.col(ind);
 				out.col(b) = trainOutputs.col(ind);
-
 			}
 
 			logisticModel.AddBatch(in, out);
