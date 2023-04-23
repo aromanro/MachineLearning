@@ -1,6 +1,9 @@
 # MachineLearning
 From linear regression towards neural networks...
 
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/c40593d78ad04d23933016a6c37ffb3d)](https://app.codacy.com/gh/aromanro/MachineLearning/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
+[![CodeFactor](https://www.codefactor.io/repository/github/aromanro/machinelearning/badge/master)](https://www.codefactor.io/repository/github/aromanro/machinelearning/overview/master)
+
 In progress... might be broken/not yet functional!
 
 ### Rationale
