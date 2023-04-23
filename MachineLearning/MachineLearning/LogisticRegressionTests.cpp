@@ -619,13 +619,6 @@ bool MNISTLogisticRegressionTests()
 	for (int j = 0; j < nrOutputs; ++j)
 		stats[j].PrintStatistics(std::to_string(j));
 
-	Utils::TestStatistics totalStats;
-	for (int j = 0; j < nrOutputs; ++j)
-		totalStats.Add(stats[j]);
-
-	// totalStats.PrintStatistics("Overall"); // misleading
-
-
 	// now, on test set:
 
 	std::cout << std::endl << "Test set:" << std::endl;
@@ -642,12 +635,6 @@ bool MNISTLogisticRegressionTests()
 
 	for (int j = 0; j < nrOutputs; ++j)
 		stats[j].PrintStatistics(std::to_string(j));
-
-	totalStats.Clear();
-	for (int j = 0; j < nrOutputs; ++j)
-		totalStats.Add(stats[j]);
-
-	// totalStats.PrintStatistics("Overall"); //misleading
 
 	return true;
 }
