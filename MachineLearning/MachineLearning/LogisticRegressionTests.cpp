@@ -331,22 +331,9 @@ bool MoreComplexLogisticRegressionTest()
 	return true;
 }
 
-bool IrisLogisticRegressionTest()
+
+void Shuffle(std::vector<Utils::IrisDataset::Record>& records, int nrTraining)
 {
-	std::cout << std::endl << "Logistic Regression for the Iris dataset, Setosa is lineary separable from the other two, but the others two cannot be linearly separated, so expect good results for Setosa but not for the other two" << std::endl << std::endl;
-
-	Utils::IrisDataset irisDataset;
-	irisDataset.setRelativePath("../../Datasets/");
-	irisDataset.setDataFileName("iris.data");
-
-	if (!irisDataset.Open()) return false;
-
-	auto records = irisDataset.getAllRecords();
-
-	const int nrTraining = 100;
-
-	// shuffle the data
-
 	std::random_device rd;
 	std::mt19937 g(rd());
 
@@ -372,12 +359,61 @@ bool IrisLogisticRegressionTest()
 		if (setosa > 10 && versicolor > 10 && virginica > 10) break;
 	}
 
+}
 
-	//for (auto rec : records)
-	//	std::cout << std::get<0>(rec) << ", " << std::get<1>(rec) << ", " << std::get<2>(rec) << ", " << std::get<3>(rec) << ", " << std::get<4>(rec) << std::endl;
+void PrintStats(const std::vector<Utils::IrisDataset::Record>& records, int nrOutputs, GLM::LogisticRegression<>& logisticModel)
+{
+	Utils::TestStatistics setosaStats;
+	Utils::TestStatistics versicolorStats;
+	Utils::TestStatistics virginicaStats;
+
+	// test the model
+
+	Eigen::VectorXd in(4);
+	Eigen::VectorXd out(nrOutputs);
+
+	for (const auto& record : records)
+	{
+		in(0) = std::get<0>(record);
+		in(1) = std::get<1>(record);
+		in(2) = std::get<2>(record);
+		in(3) = std::get<3>(record);
+
+		out(0) = (std::get<4>(record) == "Iris-setosa") ? 1 : 0;
+		if (nrOutputs > 1) out(1) = (std::get<4>(record) == "Iris-versicolor") ? 1 : 0;
+		if (nrOutputs > 2) out(2) = (std::get<4>(record) == "Iris-virginica") ? 1 : 0;
+
+		Eigen::VectorXd res = logisticModel.Predict(in);
+		setosaStats.AddPrediction(res(0) > 0.5, out(0) > 0.5);
+		if (nrOutputs > 1) versicolorStats.AddPrediction(res(1) > 0.5, out(1) > 0.5);
+		if (nrOutputs > 2) virginicaStats.AddPrediction(res(2) > 0.5, out(2) > 0.5);
+	}
+
+	setosaStats.PrintStatistics("Setosa");
+	if (nrOutputs > 1) {
+		versicolorStats.PrintStatistics("Versicolor");
+		if (nrOutputs > 2) virginicaStats.PrintStatistics("Virginica");
+	}
+	std::cout << std::endl;
+}
+
+bool IrisLogisticRegressionTest()
+{
+	std::cout << std::endl << "Logistic Regression for the Iris dataset, Setosa is lineary separable from the other two, but the others two cannot be linearly separated, so expect good results for Setosa but not for the other two" << std::endl << std::endl;
+
+	Utils::IrisDataset irisDataset;
+	irisDataset.setRelativePath("../../Datasets/");
+	irisDataset.setDataFileName("iris.data");
+
+	if (!irisDataset.Open()) return false;
+
+	auto records = irisDataset.getAllRecords();
+
+	const int nrTraining = 100;
+
+	Shuffle(records, nrTraining);
 
 	// split the data into training and test sets
-
 
 	std::vector<Utils::IrisDataset::Record> trainingSet(records.begin(), records.begin() + nrTraining);
 	std::vector<Utils::IrisDataset::Record> testSet(records.begin() + nrTraining, records.end());
@@ -460,7 +496,7 @@ bool IrisLogisticRegressionTest()
 			in(1, b) = std::get<1>(record);
 			in(2, b) = std::get<2>(record);
 			in(3, b) = std::get<3>(record);
-			
+
 			out(0, b) = (std::get<4>(record) == "Iris-setosa") ? 1 : 0;
 			if (nrOutputs > 1) out(1, b) = (std::get<4>(record) == "Iris-versicolor") ? 1 : 0;
 			if (nrOutputs > 2) out(2, b) = (std::get<4>(record) == "Iris-virginica") ? 1 : 0;
@@ -473,88 +509,17 @@ bool IrisLogisticRegressionTest()
 		}
 	}
 
-
-	Utils::TestStatistics setosaStats;
-	Utils::TestStatistics versicolorStats;
-	Utils::TestStatistics virginicaStats;
-
-
 	// test the model
 
 	// first, on training set:
 
 	std::cout << std::endl << "Training set:" << std::endl;
 
-	for (const auto& record : trainingSet)
-	{
-		in(0, 0) = std::get<0>(record);
-		in(1, 0) = std::get<1>(record);
-		in(2, 0) = std::get<2>(record);
-		in(3, 0) = std::get<3>(record);
-
-		out(0, 0) = (std::get<4>(record) == "Iris-setosa") ? 1 : 0;
-		if (nrOutputs > 1) out(1, 0) = (std::get<4>(record) == "Iris-versicolor") ? 1 : 0;
-		if (nrOutputs > 2) out(2, 0) = (std::get<4>(record) == "Iris-virginica") ? 1 : 0;
-
-		Eigen::VectorXd res = logisticModel.Predict(in.col(0));
-		setosaStats.AddPrediction(res(0) > 0.5, out(0, 0) > 0.5);
-		if (nrOutputs > 1) versicolorStats.AddPrediction(res(1) > 0.5, out(1, 0) > 0.5);
-		if (nrOutputs > 2) virginicaStats.AddPrediction(res(2) > 0.5, out(2, 0) > 0.5);
-	}
-	
-	Utils::TestStatistics totalStats;
-
-	setosaStats.PrintStatistics("Setosa");
-	if (nrOutputs > 1) {
-		versicolorStats.PrintStatistics("Versicolor");
-		if (nrOutputs > 2) virginicaStats.PrintStatistics("Virginica");
-
-		totalStats.Add(setosaStats);
-		totalStats.Add(versicolorStats);
-		if (nrOutputs > 2) totalStats.Add(virginicaStats);
-
-		//totalStats.PrintStatistics("Overall"); // misleading
-	}
-	std::cout << std::endl;
-
-	setosaStats.Clear();
-	versicolorStats.Clear();
-	virginicaStats.Clear();
+	PrintStats(trainingSet, nrOutputs, logisticModel);
 
 	std::cout << std::endl << "Test set:" << std::endl;
 
-	for (const auto& record : testSet)
-	{
-		in(0, 0) = std::get<0>(record);
-		in(1, 0) = std::get<1>(record);
-		in(2, 0) = std::get<2>(record);
-		in(3, 0) = std::get<3>(record);
-
-		out(0, 0) = (std::get<4>(record) == "Iris-setosa") ? 1 : 0;
-		if (nrOutputs > 1) out(1, 0) = (std::get<4>(record) == "Iris-versicolor") ? 1 : 0;
-		if (nrOutputs > 2) out(2, 0) = (std::get<4>(record) == "Iris-virginica") ? 1 : 0;
-		
-		Eigen::VectorXd res = logisticModel.Predict(in.col(0));
-		setosaStats.AddPrediction(res(0) > 0.5, out(0, 0) > 0.5);
-		if (nrOutputs > 1) versicolorStats.AddPrediction(res(1) > 0.5, out(1, 0) > 0.5);
-		if (nrOutputs > 2) virginicaStats.AddPrediction(res(2) > 0.5, out(2, 0) > 0.5);
-	}
-
-	setosaStats.PrintStatistics("Setosa");
-	if (nrOutputs > 1)
-	{
-		versicolorStats.PrintStatistics("Versicolor");
-		if (nrOutputs > 2) virginicaStats.PrintStatistics("Virginica");
-
-		totalStats.Clear();
-		totalStats.Add(setosaStats);
-		totalStats.Add(versicolorStats);
-		if (nrOutputs > 2) totalStats.Add(virginicaStats);
-
-		//totalStats.PrintStatistics("Overall"); // misleading
-	}
-
-	std::cout << std::endl;
+	PrintStats(testSet, nrOutputs, logisticModel);
 
 	return true;
 }
