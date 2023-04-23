@@ -7,6 +7,14 @@
 #include "Softmax.h"
 
 
+void getInVals(Eigen::VectorXd& in, const Utils::IrisDataset::Record& record)
+{
+	in(0) = std::get<0>(record);
+	in(1) = std::get<1>(record);
+	in(2) = std::get<2>(record);
+	in(3) = std::get<3>(record);
+}
+
 void PrintStats(const std::vector<Utils::IrisDataset::Record>& records, int nrOutputs, GLM::SoftmaxRegression<>& softmaxModel)
 {
 	Utils::TestStatistics setosaStats;
@@ -19,10 +27,7 @@ void PrintStats(const std::vector<Utils::IrisDataset::Record>& records, int nrOu
 	long long int correct = 0;
 	for (const auto& record : records)
 	{
-		in(0) = std::get<0>(record);
-		in(1) = std::get<1>(record);
-		in(2) = std::get<2>(record);
-		in(3) = std::get<3>(record);
+		getInVals(in, record);
 
 		out(0) = (std::get<4>(record) == "Iris-setosa") ? 1 : 0;
 		if (nrOutputs > 1) out(1) = (std::get<4>(record) == "Iris-versicolor") ? 1 : 0;
@@ -30,6 +35,7 @@ void PrintStats(const std::vector<Utils::IrisDataset::Record>& records, int nrOu
 
 		Eigen::VectorXd res = softmaxModel.Predict(in.col(0));
 		setosaStats.AddPrediction(res(0) > 0.5, out(0) > 0.5);
+
 		if (nrOutputs > 1) versicolorStats.AddPrediction(res(1) > 0.5, out(1) > 0.5);
 		if (nrOutputs > 2) virginicaStats.AddPrediction(res(2) > 0.5, out(2) > 0.5);
 
