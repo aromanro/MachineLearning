@@ -15,13 +15,22 @@ void getInVals(Eigen::VectorXd& in, const Utils::IrisDataset::Record& record)
 	in(3) = std::get<3>(record);
 }
 
-double getMax(const Eigen::VectorXd& res, int nrOutputs)
+double getMax(const Eigen::VectorXd& res,int nrOutputs)
 {
 	double limp = 0.5;
 	for (int j = 0; j < nrOutputs; ++j)
 		limp = std::max(limp, res(j));
 
 	return limp;
+}
+
+void CountCorrect(const Eigen::VectorXd& res, const Eigen::VectorXd& out, int nrOutputs, long long int& correct)
+{
+	const double limp = getMax(res, nrOutputs);
+
+	if (res(0) == limp && out(0) > 0.5) ++correct;
+	else if (nrOutputs > 1 && res(1) == limp && out(1) > 0.5) ++correct;
+	else if (nrOutputs > 2 && res(2) == limp && out(2) > 0.5) ++correct;
 }
 
 void PrintStats(const std::vector<Utils::IrisDataset::Record>& records, int nrOutputs, GLM::SoftmaxRegression<>& softmaxModel)
@@ -48,13 +57,8 @@ void PrintStats(const std::vector<Utils::IrisDataset::Record>& records, int nrOu
 		if (nrOutputs > 1) versicolorStats.AddPrediction(res(1) > 0.5, out(1) > 0.5);
 		if (nrOutputs > 2) virginicaStats.AddPrediction(res(2) > 0.5, out(2) > 0.5);
 
-		const double limp = getMax(res, nrOutputs);
-
-		if (res(0) == limp && out(0) > 0.5) ++correct;
-		else if (nrOutputs > 1 && res(1) == limp && out(1) > 0.5) ++correct;
-		else if (nrOutputs > 2 && res(2) == limp && out(2) > 0.5) ++correct;
+		CountCorrect(res, out, nrOutputs, correct);
 	}
-
 
 	setosaStats.PrintStatistics("Setosa");
 	if (nrOutputs > 1) {
