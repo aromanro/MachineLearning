@@ -17,6 +17,9 @@
 #include <math.h>
 
 
+bool LoadData(std::vector<std::pair<std::vector<double>, uint8_t>>& trainingRecords, std::vector<std::pair<std::vector<double>, uint8_t>>& testRecords);
+void SetDataIntoMatrices(const std::vector<std::pair<std::vector<double>, uint8_t>>& records, Eigen::MatrixXd& inputs, Eigen::MatrixXd& outputs);
+
 double linearFunction(double x);
 double linearFunction2(double x);
 double linearFunction3(double x);

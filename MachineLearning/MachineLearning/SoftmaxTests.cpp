@@ -256,6 +256,8 @@ bool SoftmaxTestsIris()
 }
 
 
+
+
 bool SoftmaxTestsMNIST()
 {
 	std::cout << "MNIST Softmax Regression Tests" << std::endl;
@@ -263,27 +265,11 @@ bool SoftmaxTestsMNIST()
 	const int nrInputs = 28 * 28;
 	const int nrOutputs = 10;
 
-	// load the data
-	Utils::MNISTDatabase minstTrainDataFiles;
-	if (!minstTrainDataFiles.Open()) {
-		std::cout << "Couldn't load train data" << std::endl;
+	std::vector<std::pair<std::vector<double>, uint8_t>> trainingRecords;
+	std::vector<std::pair<std::vector<double>, uint8_t>> testRecords;
+
+	if (!LoadData(trainingRecords, testRecords))
 		return false;
-	}
-
-	std::vector<std::pair<std::vector<double>, uint8_t>> trainingRecords = minstTrainDataFiles.ReadAllImagesAndLabels();
-	minstTrainDataFiles.Close();
-
-	Utils::MNISTDatabase minstTestDataFiles;
-	minstTestDataFiles.setImagesFileName("emnist-digits-test-images-idx3-ubyte");
-	minstTestDataFiles.setLabelsFileName("emnist-digits-test-labels-idx1-ubyte");
-	if (!minstTestDataFiles.Open()) {
-		std::cout << "Couldn't load test data" << std::endl;
-		return false;
-	}
-
-	std::vector<std::pair<std::vector<double>, uint8_t>> testRecords = minstTestDataFiles.ReadAllImagesAndLabels();
-	minstTestDataFiles.Close();
-
 
 	std::random_device rd;
 	std::mt19937 g(rd());
@@ -295,17 +281,7 @@ bool SoftmaxTestsMNIST()
 	Eigen::MatrixXd trainInputs(nrInputs, trainingRecords.size());
 	Eigen::MatrixXd trainOutputs(nrOutputs, trainingRecords.size());
 
-	int rec = 0;
-	for (const auto& record : trainingRecords)
-	{
-		for (int i = 0; i < nrInputs; ++i)
-			trainInputs(i, rec) = record.first[i];
-
-		for (int i = 0; i < nrOutputs; ++i)
-			trainOutputs(i, rec) = (i == record.second) ? 1 : 0;
-
-		++rec;
-	}
+	SetDataIntoMatrices(trainingRecords, trainInputs, trainOutputs);
 
 	pixelsNormalizer.AddBatch(trainInputs, trainOutputs);
 
@@ -313,17 +289,7 @@ bool SoftmaxTestsMNIST()
 	Eigen::MatrixXd testInputs(nrInputs, testRecords.size());
 	Eigen::MatrixXd testOutputs(nrOutputs, testRecords.size());
 
-	rec = 0;
-	for (const auto& record : testRecords)
-	{
-		for (int i = 0; i < nrInputs; ++i)
-			testInputs(i, rec) = record.first[i];
-
-		for (int i = 0; i < nrOutputs; ++i)
-			testOutputs(i, rec) = (i == record.second) ? 1 : 0;
-
-		++rec;
-	}
+	SetDataIntoMatrices(testRecords, testInputs, testOutputs);
 
 	// only inputs and only shifting the average
 

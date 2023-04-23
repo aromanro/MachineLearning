@@ -155,6 +155,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="DataFile.cpp" />
+    <ClCompile Include="EMNISTData.cpp" />
     <ClCompile Include="Gnuplot.cpp" />
     <ClCompile Include="LinearRegressionTests.cpp" />
     <ClCompile Include="LogisticRegressionTests.cpp" />
