@@ -256,6 +256,56 @@ bool SoftmaxTestsIris()
 }
 
 
+void PrintStats(const Eigen::MatrixXd& inputs, const Eigen::MatrixXd& outputs, int nrOutputs, GLM::SoftmaxRegression<>& softmaxModel)
+{
+	std::vector<Utils::TestStatistics> stats(nrOutputs);
+
+	// first, on training set:
+
+	std::cout << std::endl << "Training set:" << std::endl;
+
+	long long int correct = 0;
+
+	for (int i = 0; i < inputs.cols(); ++i)
+	{
+		Eigen::VectorXd res = softmaxModel.Predict(inputs.col(i));
+
+		double lim = 0;
+		for (int j = 0; j < nrOutputs; ++j)
+			lim = std::max(lim, res(j));
+
+		int nr = -1;
+		for (int j = 0; j < nrOutputs; ++j)
+		{
+			stats[j].AddPrediction(res(j) >= lim, outputs(j, i) > 0.5);
+
+			if (outputs(j, i) > 0.5)
+			{
+				if (nr != -1)
+					std::cout << "Info from label ambiguous, should not happen: " << nr << " and " << j << std::endl;
+				nr = j;
+			}
+		}
+
+		int predn = -1;
+		for (int n = 0; n < nrOutputs; ++n)
+			if (res(n) >= lim)
+			{
+				if (predn != -1)
+					std::cout << "Ambiguous prediction: " << predn << " and " << n << std::endl;
+				predn = n;
+			}
+
+		if (predn == nr)
+			++correct;
+	}
+
+	for (int j = 0; j < nrOutputs; ++j)
+		stats[j].PrintStatistics(std::to_string(j));
+
+	std::cout << "Accuracy (% correct): " << 100.0 * static_cast<double>(correct) / static_cast<double>(inputs.cols()) << "%" << std::endl;
+}
+
 
 
 bool SoftmaxTestsMNIST()
@@ -339,110 +389,13 @@ bool SoftmaxTestsMNIST()
 
 	// first, on training set:
 
-	std::cout << std::endl << "Training set:" << std::endl;
-
-	long long int correct = 0;
-
-	for (int i = 0; i < trainInputs.cols(); ++i)
-	{
-		Eigen::VectorXd res = softmaxModel.Predict(trainInputs.col(i));
-
-		double lim = 0;
-		for (int j = 0; j < nrOutputs; ++j)
-			lim = std::max(lim, res(j));
-
-		int nr = -1;
-		for (int j = 0; j < nrOutputs; ++j)
-		{
-			stats[j].AddPrediction(res(j) >= lim, trainOutputs(j, i) > 0.5);
-
-			if (trainOutputs(j, i) > 0.5)
-			{
-				if (nr != -1)
-					std::cout << "Info from label ambiguous, should not happen: " << nr << " and " << j << std::endl;
-				nr = j;
-			}
-		}
-
-		int predn = -1;
-		for (int n = 0; n < nrOutputs; ++n)
-			if (res(n) >= lim)
-			{
-				if (predn != -1)
-					std::cout << "Ambiguous prediction: " << predn << " and " << n << std::endl;
-				predn = n;
-			}
-
-		if (predn == nr)
-			++correct;
-	}
-
-	for (int j = 0; j < nrOutputs; ++j)
-		stats[j].PrintStatistics(std::to_string(j));
-
-	Utils::TestStatistics totalStats;
-	for (int j = 0; j < nrOutputs; ++j)
-		totalStats.Add(stats[j]);
-
-	//totalStats.PrintStatistics("Overall"); //misleading
-
-	std::cout << "Accuracy (% correct): " << 100.0 * static_cast<double>(correct) / static_cast<double>(trainInputs.cols()) << "%" << std::endl;
+	PrintStats(trainInputs, trainOutputs, nrOutputs, softmaxModel);
 
 	// now, on test set:
 
 	std::cout << std::endl << "Test set:" << std::endl;
 
-	for (int j = 0; j < nrOutputs; ++j)
-		stats[j].Clear();
-
-	correct = 0;
-	for (int i = 0; i < testInputs.cols(); ++i)
-	{
-		Eigen::VectorXd res = softmaxModel.Predict(testInputs.col(i));
-
-		double lim = 0;
-		for (int j = 0; j < nrOutputs; ++j)
-			lim = std::max(lim, res(j));
-
-		int nr = -1;
-		for (int j = 0; j < nrOutputs; ++j)
-		{
-			stats[j].AddPrediction(res(j) >= lim, testOutputs(j, i) > 0.5);
-
-			if (testOutputs(j, i) > 0.5)
-			{
-				if (nr != -1)
-					std::cout << "Info from label ambiguous, should not happen: " << nr << " and " << j << std::endl;
-				nr = j;
-			}
-		}
-
-		int predn = -1;
-		for (int n = 0; n < nrOutputs; ++n)
-			if (res(n) >= lim)
-			{
-				if (predn != -1)
-					std::cout << "Ambiguous prediction: " << predn << " and " << n << std::endl;
-				predn = n;
-			}
-
-		if (predn == nr)
-			++correct;
-
-		if (i % 1000 == 0)
-			std::cout << "Number: " << nr << " Prediction: " << predn << ((nr == predn) ? " Correct!" : " Wrong!") << std::endl;
-	}
-
-	for (int j = 0; j < nrOutputs; ++j)
-		stats[j].PrintStatistics(std::to_string(j));
-
-	totalStats.Clear();
-	for (int j = 0; j < nrOutputs; ++j)
-		totalStats.Add(stats[j]);
-
-	//totalStats.PrintStatistics("Overall"); //misleading
-
-	std::cout << "Accuracy (% correct): " << 100.0 * static_cast<double>(correct) / static_cast<double>(testInputs.cols()) << "%" << std::endl;
+	PrintStats(testInputs, testOutputs, nrOutputs, softmaxModel);
 
 	return true;
 }
