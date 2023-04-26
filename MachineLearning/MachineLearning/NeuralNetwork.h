@@ -31,7 +31,7 @@ namespace NeuralNetworks
 			if (neurons.empty()) return;
 			else if (neurons.size() == 1)
 			{
-				lastLayer = NeuralLayer<LastSolver>(neurons[0]);
+				lastLayer = NeuralLayerPerceptron<LastSolver>(neurons[0]);
 				lastLayer.setLastLayer();
 				return;
 			}
@@ -40,7 +40,7 @@ namespace NeuralNetworks
 			for (int i = 1; i < neurons.size() - 1; ++i)
 			{
 				const int outputs = neurons[i];
-				hiddenLayers.emplace_back(NeuralLayer<Solver>(inputs, outputs));
+				hiddenLayers.emplace_back(NeuralLayerPerceptron<Solver>(inputs, outputs));
 				const int hidInd = i - 1;
 				hiddenLayers[hidInd].setLastLayer(false);
 				hiddenLayers[hidInd].setFirstLayer(false);
@@ -49,7 +49,7 @@ namespace NeuralNetworks
 			}
 			if (!hiddenLayers.empty()) hiddenLayers.front().setFirstLayer();
 
-			lastLayer = NeuralLayer<LastSolver>(inputs, neurons.back());
+			lastLayer = NeuralLayerPerceptron<LastSolver>(inputs, neurons.back());
 			lastLayer.setLastLayer();
 			lastLayer.setFirstLayer(false);
 
@@ -146,13 +146,14 @@ namespace NeuralNetworks
 				hiddenLayers[i].AddBatchNoParamsAdjustment(inp, t);
 				inp = hiddenLayers[i].getPrediction();
 
-				if (dropout.size() > i + 1 && dropout[i + 1] > 0.)
+				const int ip1 = i + 1;
+				if (dropout.size() > ip1 && dropout[ip1] > 0.)
 				{
 					const Eigen::RowVectorXd zeroRow = Eigen::RowVectorXd::Zero(inp.cols());
 					for (int j = 0; j < inp.rows(); ++j)
-						if (distDrop(rde) < dropout[i + 1]) inp.row(j) = zeroRow;
+						if (distDrop(rde) < dropout[ip1]) inp.row(j) = zeroRow;
 
-					inp /= (1. - dropout[i + 1]);
+					inp /= (1. - dropout[ip1]);
 
 					// change the prediction, too, for backpropagation 
 					hiddenLayers[i].setPrediction(inp);
@@ -224,8 +225,8 @@ namespace NeuralNetworks
 		}
 
 	private:
-		NeuralLayer<LastSolver> lastLayer;
-		std::vector<NeuralLayer<Solver>> hiddenLayers;
+		NeuralLayerPerceptron<LastSolver> lastLayer;
+		std::vector<NeuralLayerPerceptron<Solver>> hiddenLayers;
 
 		std::vector<double> dropout;
 
