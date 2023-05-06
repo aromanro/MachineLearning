@@ -628,7 +628,7 @@ bool NeuralNetworkTestsMNIST()
 	NeuralNetworks::MultilayerPerceptron<SGD::SoftmaxRegressionAdamSolver> neuralNetwork(/*{nrInputs, 1000, 100, nrOutputs}*/{ nrInputs, 1000, 800, 400, 100, nrOutputs }, { 0.2, 0.15, 0.1, 0, 0 }); // don't use dropout right before the softmax layer
 
 	// initialize the model
-	double alpha = 0.0015; // non const, so it can be adjusted
+	double alpha = 0.001; // non const, so it can be adjusted
 	double decay = 0.95;
 	const double beta1 = 0.9;
 	const double beta2 = 0.95;
