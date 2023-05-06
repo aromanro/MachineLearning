@@ -4,6 +4,7 @@
 #include <iostream>
 #include <filesystem>
 
+
 namespace Utils
 {
 
@@ -42,7 +43,7 @@ namespace Utils
 			}
 		}
 
-		std::string cmd = std::string("start /b gnuplot ") + cmdPath;
+		std::string cmd = std::string("start /b gnuplot --persist ") + cmdPath;
 
 		system(cmd.c_str());
 	}

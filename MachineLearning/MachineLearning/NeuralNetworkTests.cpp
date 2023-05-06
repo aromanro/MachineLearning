@@ -628,7 +628,7 @@ bool NeuralNetworkTestsMNIST()
 	NeuralNetworks::MultilayerPerceptron<SGD::SoftmaxRegressionAdamSolver> neuralNetwork(/*{nrInputs, 1000, 100, nrOutputs}*/{ nrInputs, 1000, 800, 400, 100, nrOutputs }, { 0.2, 0.15, 0.1, 0, 0 }); // don't use dropout right before the softmax layer
 
 	// initialize the model
-	double alpha = 0.001; // non const, so it can be adjusted
+	double alpha = 0.0015; // non const, so it can be adjusted
 	double decay = 0.95;
 	const double beta1 = 0.9;
 	const double beta2 = 0.95;
@@ -639,6 +639,7 @@ bool NeuralNetworkTestsMNIST()
 
 	int startEpoch = 0; // set it to something different than 0 if you want to continue training
 
+	bool hasPretrained = false;
 
 	if (startEpoch == 0)
 	{
@@ -653,6 +654,12 @@ bool NeuralNetworkTestsMNIST()
 			//Initializers::WeightsInitializerHeNormal initializer;
 			neuralNetwork.Initialize(initializer);
 		}
+		else
+		{
+			alpha *= 0.01;
+			neuralNetwork.setParams({ alpha, lim, beta1, beta2 });
+			hasPretrained = true;
+		}
 	}
 	else
 		// load some saved model
@@ -661,6 +668,7 @@ bool NeuralNetworkTestsMNIST()
 			std::cout << "Couldn't load the last model" << std::endl;
 			return false;
 		}
+
 
 	// train the model
 
@@ -686,7 +694,7 @@ bool NeuralNetworkTestsMNIST()
 	std::cout << "Validation samples: " << validationInputs.cols() << std::endl;
 	std::cout << "Test samples: " << testInputs.cols() << std::endl;
 
-	const int nrEpochs = 10;
+	const int nrEpochs = hasPretrained ? 4 : 10;
 
 	if (nrEpochs > 0)
 	{
