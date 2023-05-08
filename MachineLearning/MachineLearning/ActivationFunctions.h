@@ -227,16 +227,14 @@ namespace ActivationFunctions
 			InputOutputType v(input.size());
 
 			for (int i = 0; i < input.size(); ++i)			
-				v(i) = exp(input(i)) + 1;
+				v(i) = log(exp(input(i)) + 1);
 
 			return v;
 		}
 
-		InputOutputType derivative(const InputOutputType& input) const
+		InputOutputType derivative(const InputOutputType& input)
 		{
-			const InputOutputType fx = operator()(-input);
-
-			return fx.cwiseInverse();
+			return sigmoid(input);
 		}
 
 		static bool isDerivativeJacobianMatrix()
@@ -248,6 +246,9 @@ namespace ActivationFunctions
 		{
 			return "Softplus";
 		}
+
+	private:
+		SigmoidFunction<InputOutputType, InputOutputType> sigmoid;
 	};
 
 	template<> class SoftplusFunction<double>
@@ -259,14 +260,12 @@ namespace ActivationFunctions
 
 		double operator()(const double& input) const
 		{
-			return 1. + exp(input);
+			return log(1. + exp(input));
 		}
 
-		double derivative(const double& input) const
+		double derivative(const double& input)
 		{
-			const double fx = operator()(-input);
-
-			return 1. / fx;
+			return sigmoid(input);
 		}
 
 		static bool isDerivativeJacobianMatrix()
@@ -278,6 +277,9 @@ namespace ActivationFunctions
 		{
 			return "Softplus";
 		}
+
+	private:
+		SigmoidFunction<double, double> sigmoid;
 	};
 
 

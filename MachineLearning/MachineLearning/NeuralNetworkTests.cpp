@@ -694,7 +694,7 @@ bool NeuralNetworkTestsMNIST()
 	std::cout << "Validation samples: " << validationInputs.cols() << std::endl;
 	std::cout << "Test samples: " << testInputs.cols() << std::endl;
 
-	const int nrEpochs = hasPretrained ? 4 : 10;
+	const int nrEpochs = hasPretrained ? 5 : 10;
 
 	if (nrEpochs > 0)
 	{
