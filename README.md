@@ -28,7 +28,7 @@ Another thing that I don't want to repeat in many places is that - unless specif
 
 ### A warning
 
-With the default hyperparameters, computing can take quite some time for training the multilayer perceptron on the EMNIST dataset. If you want to try it as it is, you should have min 32 gigabytes of RAM and a quite good processor. To use less memory, you should change to false (or simply remove) the parameter of the `ReadAllImagesAndLabels` call in `NeuralNetworkTestsMNIST`. As it is, the training dataset is increased to 5x the size of the original dataset by augmenting the data (simply a single pixel offset in the horizontal and vertical directions). Also you might want to reduce the number of the traing epochs.
+With the default hyperparameters, computing can take quite some time for training the multilayer perceptron on the EMNIST dataset. If you want to try it as it is, you should have min 32 gigabytes of RAM and a quite good processor. To use less memory, you should change to false (or simply remove) the parameter of the `ReadAllImagesAndLabels` call in `NeuralNetworkTestsMNIST`. As it is, the training dataset is increased to 5x the size of the original dataset by augmenting the data (simply a single pixel offset in the horizontal and vertical directions). Also you might want to reduce the number of the training epochs.
 The project has openmp and AVX2 turned on, it will use close to 100% all the cores, when training.
 
 ### Some utility classes
