@@ -41,7 +41,7 @@ How they are used can be seen in [LinearRegressionTests.cpp](MachineLearning/Mac
 
 Here is a chart I've got with it:
 
-[!Screenshot](img/LinearRegression.png)
+![Screenshot](img/LinearRegression.png)
 
 #### General Linear regression
 
@@ -59,8 +59,8 @@ You'll find examples of it in [LinearRegressionTests.cpp](MachineLearning/Machin
 
 Here are some charts I've got with that code:
 
-[!Screenshot](img/PolynomialRegressionQuartic.png)
-[!Screenshot](img/PolynomialRegressionSecondOrder.png)
+![Screenshot](img/PolynomialRegressionQuartic.png)
+![Screenshot](img/PolynomialRegressionSecondOrder.png)
 
 #### Generalized linear regression
 
@@ -71,11 +71,11 @@ The [generalized linear model](https://en.wikipedia.org/wiki/Generalized_linear_
 The [logistic regression](https://en.wikipedia.org/wiki/Logistic_regression) is one special case of the generalized linear regression: the output function is the [sigmoid function](https://en.wikipedia.org/wiki/Sigmoid_function) and the loss is the log loss. Implementation is in [LogisticRegression.h](MachineLearning/MachineLearning/LogisticRegression.h) and it's used in [LogisticRegressionTests.cpp](MachineLearning/MachineLearning/LogisticRegressionTests.cpp).
 `SimpleLogisticRegressionTest` does something very simple, as the name suggests, that is it linearily separates two classes:
 
-[!Screenshot](img/LogisticRegression.png)
+![Screenshot](img/LogisticRegression.png)
 
 The `MoreComplexLogisticRegressionTest` uses a similar 'trick' as the one used for polynomial regression to obtain this:
 
-[!Screenshot](img/LogisticRegressionPolar.png)
+![Screenshot](img/LogisticRegressionPolar.png)
 
 I simply switched the inputs from cartesian coordinates to polar ones. In there you might also notice the `Normalizer` class usage, which will be used for now on to normalize the data, so here is its implementation: [Normalizer.h](MachineLearning/MachineLearning/Normalizer.h).
 
