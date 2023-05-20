@@ -26,14 +26,19 @@ One thing I should mention here is that in order to simplify the template parame
 
 Another thing that I don't want to repeat in many places is that - unless specified otherwise - the L2 loss is used. The [loss functions](https://en.wikipedia.org/wiki/Loss_function) are implemented in [CostFunctions.h](MachineLearning/MachineLearning/CostFunctions.h).
 
+### A warning
+
+With the default hyperparameters, computing can take quite some time for training the multilayer perceptron on the EMNIST dataset. If you want to try it as it is, you should have min 32 gigabytes of RAM and a quite good processor. To use less memory, you should change to false (or simply remove) the parameter of the `ReadAllImagesAndLabels` call in `NeuralNetworkTestsMNIST`. As it is, the training dataset is increased to 5x the size of the original dataset by augmenting the data (simply a single pixel offset in the horizontal and vertical directions). Also you might want to reduce the number of the traing epochs.
+The project has openmp and AVX2 turned on, it will use close to 100% all the cores, when training.
+
 ### Some utility classes
 
 There are some charts displayed with Gnuplot, the implementation for that is in [Gnuplot.h](MachineLearning/MachineLearning/Gnuplot.h) and [Gnuplot.cpp](MachineLearning/MachineLearning/Gnuplot.cpp). As the Iris dataset is in csv files, I implements a (very, very basic, it doesn't work in general with csv files, but it's good enough for its purpose) csv file loader along with a derived `IrisDataset` class in [CSVDataFile.h](MachineLearning/MachineLearning/CSVDataFile.h). 
-I also used the EMNIST dataset, so I implemented a `MNISTDatabase` class in [MNISTDatabase.h](MachineLearning/MachineLearning/MNISTDatabase.h) and some utility functions in [EMNISTData.cpp](MachineLearning/MachineLearning/EMNISTData.cpp).
+I also used the EMNIST dataset (only digits for now), so I implemented a `MNISTDatabase` class in [MNISTDatabase.h](MachineLearning/MachineLearning/MNISTDatabase.h) and some utility functions in [EMNISTData.cpp](MachineLearning/MachineLearning/EMNISTData.cpp).
 
 #### Simple Linear regression
 
-As the name suggests, it's simple. One input, one output, linear. Wikipedia link: https://en.wikipedia.org/wiki/Simple_linear_regression
+As the name suggests, it's simple. One input, one output, linear. Wikipedia link: [simple linear regression](https://en.wikipedia.org/wiki/Simple_linear_regression).
 
 The implementation is in [SimpleLinearRegression.h](MachineLearning/MachineLearning/SimpleLinearRegression.h) and [SimpleLinearRegressionSolver.h](MachineLearning/MachineLearning/SimpleLinearRegressionSolver.h). The reason for having a separate class for the solver is that for the next - not so simple - models, there are several stochastic gradient solvers that work for all of them, so I had a similarly separate implementation for this particular case as well, although it wouldn't really be needed. I implemented the simple linear regression not only for the one input one output case, but also for n inputs, n ouptuts, it's just a bunch of independant simple linear models.
 
@@ -356,14 +361,31 @@ By the way, some stats that are displayed are calculated with the help of `TestS
 
 ### Neural networks
 
-At this point, things are ready for implementing a neural network. Without much ado, here is the typical neuron implementation: [Neuron.h](MachineLearning/MachineLearning/Neuron.h). Quite simple, it's just a generalized linear model with a single output. This implementation is not used anywhere (yet?) in the code, it's there just as an example. For the multilayer perceptron I chose to use a single generalized linear model for the whole layer, but about that, later.
+At this point, things are ready for implementing a neural network. Without much ado, here is the typical neuron implementation: [Neuron.h](MachineLearning/MachineLearning/Neuron.h). Quite simple, it's just a generalized linear model with a single output. This implementation is not used anywhere (yet?) in the code, it's there just as an example. For the multilayer perceptron I chose to use a single generalized linear model for the whole layey. Details below.
 
-#### XOR
+#### The multilayer perceptron
 
-#### Iris dataset
+Here it is, the goal I estabilished when I started this project (I might go further in the future, but for now it should do): the [multilayer perceptron](https://en.wikipedia.org/wiki/Multilayer_perceptron).
+The implementation starts with [NeuralSublayer](MachineLearning/MachineLearning/NeuralSublayer.h) which adds very little to the generalized linear model from which it is derived (but there is some functionality needed for neural models already added to the generalized linear model implementation). The reason I have the 'sublayer' and not directly a layer implementation is that in some cases a layer might need more than one such 'sublayer'. It's not yet needed in this project, but it can be the case, for example you might want an output layer with a softmax classification and also some other regression in there, with some other activation function.
+A layer for the multilayer perceptron is implemented in [NeuralLayer.h](MachineLearning/MachineLearning/NeuralLayer.h). It's just a decorator (mostly a proxy, actually) for a single 'sublayer' and that's about it. The multilayer perceptron is implemented in [NeuralNetwork.h](MachineLearning/MachineLearning/NeuralNetwork.h).
+It contains the last layer and the hidden layers and adds some implementation for prediction, forward/backward step, saving/loading the model, initialization, dropout and so on. 
 
-#### EMNIST dataset
+##### XOR
 
+The multilayer perceptron usage is exemplified in [NeuralNetworkTests.cpp](MachineLearning/MachineLearning/NeuralNetworkTests.cpp). The `XORNeuralNetworksTests` function exemplifies it for a XOR, a simple but not so trivial example. It cannot be solved with a single neuron (unless you use some 'triks' like here: https://arxiv.org/abs/2108.12943 or here: https://arxiv.org/abs/2110.06871v1), you need two layers, a hidden one with two neurons and the output one with a single neuron. There is some nasty issue that the problem has local minimums where the neural network can get 'stuck', so I implemented an initializer that initializes the weights to some random values that avoid starting in such position (but it still could get there with a big enough learn rate).
+The `XORNeuralNetworksTests` function repeats the same thing twice: once explicitely, without using the `MultilayerPerceptron` class, but a `LogisticRegression` object for the last layer and a `GeneralizedLinearModel` object for the hidden layer... and once as expected, using a `MultilayerPerceptron` object. The reason is that I implemented the first part before having any neural network code implemented yet and I thought it could be helpful to let it there to see how those things can implement a neural network, without having to look into the neural network implementation code.
+
+##### Iris dataset
+
+The multilayer perceptron usage on the Iris dataset is in `IrisNeuralNetworkTest`. There isn't much to say about this, it resembles the logistic and softmax tests, but it uses the neural network instead.
+
+##### EMNIST dataset
+
+Implementation of the test is in `NeuralNetworkTestsMNIST`. The training data can be loaded 'as is' or it can be augmented. At first I also added a way to regularize by adding noise to the training images (see the code with `#ifdef ADD_NOISE`) but then I decided to add dropout, this one not only can 'drop' the pixels in the training images, but can also 'drop' outputs from neurons. 
+It's also a kind of regularization and can be thought as training multiple neural networks together and averaging them (as in 'ensemble learning') so it can improve results quite a bit. 
+I didn't play much with the hyperparameters, I played a little first with a simpler network then I switched to the more complex one that is currently in the code. 
+I reached something like 98.9% accuracy on the test set, which is ok for the purpose of this project (details here: https://arxiv.org/abs/1702.05373 and here: https://paperswithcode.com/dataset/emnist).
+I don't think that as it is it can go much better, unless implementing convolutional networks or perhaps training a denoising autoencoder then using the encoder part with at least a softmax added on top to train further... anyway, those are things postponed for later.
 
 ### Bibliography
 
