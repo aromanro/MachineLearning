@@ -391,11 +391,11 @@ Here is a chart that shows how loss is evolving during training:
 
 ![Screenshot](img/TrainingLoss.png)
 
-And here is one with overfitting badly:
+And here is one with a very bad overfit:
 
 ![Screenshot](img/TrainingLossOverfit99.99.png)
 
-It reached something like 99.99% or so on the training set!
+It reached something like 99.99% accuracy or so on the training set!
 
 
 ### Bibliography
