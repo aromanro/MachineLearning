@@ -333,8 +333,6 @@ bool SoftmaxTestsMNIST()
 		std::cout << "Loss: " << loss << std::endl;
 	}
 
-	std::vector<Utils::TestStatistics> stats(nrOutputs);
-
 	// first, on training set:
 
 	PrintStats(trainInputs, trainOutputs, nrOutputs, softmaxModel);

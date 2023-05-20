@@ -162,7 +162,7 @@ namespace ActivationFunctions
 	public:
 		InputOutputType operator()(const InputOutputType& input) const
 		{
-			const SigmoidFunction<InputOutputType, InputOutputType> sigmoid(static_cast<int>(input.size()));
+			SigmoidFunction<InputOutputType, InputOutputType> sigmoid(static_cast<int>(input.size()));
 
 			return 2. * sigmoid(2. * input) - InputOutputType::Ones(input.rows(), input.cols());
 		}
