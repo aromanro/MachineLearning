@@ -361,7 +361,7 @@ By the way, some stats that are displayed are calculated with the help of `TestS
 
 ### Neural networks
 
-At this point, things are ready for implementing a neural network. Without much ado, here is the typical neuron implementation: [Neuron.h](MachineLearning/MachineLearning/Neuron.h). Quite simple, it's just a generalized linear model with a single output. This implementation is not used anywhere (yet?) in the code, it's there just as an example. For the multilayer perceptron I chose to use a single generalized linear model for the whole layey. Details below.
+At this point, things are ready for implementing a neural network. Without much ado, here is the typical neuron implementation: [Neuron.h](MachineLearning/MachineLearning/Neuron.h). Quite simple, it's just a generalized linear model with a single output. This implementation is not used anywhere (yet?) in the code, it's there just as an example. For the multilayer perceptron I chose to use a single generalized linear model for the whole layer. Details below.
 
 #### The multilayer perceptron
 
