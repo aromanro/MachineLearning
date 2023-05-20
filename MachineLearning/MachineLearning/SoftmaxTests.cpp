@@ -210,8 +210,6 @@ void PrintStats(const Eigen::MatrixXd& inputs, const Eigen::MatrixXd& outputs, i
 
 	// first, on training set:
 
-	std::cout << std::endl << "Training set:" << std::endl;
-
 	long long int correct = 0;
 
 	for (int i = 0; i < inputs.cols(); ++i)
@@ -334,6 +332,8 @@ bool SoftmaxTestsMNIST()
 	}
 
 	// first, on training set:
+
+	std::cout << std::endl << "Training set:" << std::endl;
 
 	PrintStats(trainInputs, trainOutputs, nrOutputs, softmaxModel);
 

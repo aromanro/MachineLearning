@@ -268,8 +268,6 @@ Accuracy (% correct): 94.4192%
 
 Test set:
 
-Training set:
-
 0 true positives: 3854, true negatives: 35846, false positives: 154, false negatives: 146
 0 accuracy: 0.9925
 0 specificity: 0.995722
