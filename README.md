@@ -64,8 +64,8 @@ You'll find examples of it in [LinearRegressionTests.cpp](MachineLearning/Machin
 
 Here are some charts I've got with that code:
 
-![Screenshot](img/PolynomialRegressionQuartic.png)
 ![Screenshot](img/PolynomialRegressionSecondOrder.png)
+![Screenshot](img/PolynomialRegressionQuartic.png)
 
 #### Generalized linear regression
 
