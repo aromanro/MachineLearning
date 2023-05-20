@@ -369,11 +369,15 @@ At this point, things are ready for implementing a neural network. Without much 
 
 A selection of freely available books:
 
-[The Elements of Statistical Learning](https://hastie.su.domains/ElemStatLearn/)
-[Pattern Recognition and Machine Learning](https://www.microsoft.com/en-us/research/publication/pattern-recognition-machine-learning/)
-[Probabilistic Machine Learning: An Introduction](https://probml.github.io/pml-book/book1.html)
-[Probabilistic Machine Learning: Advanced Topics](https://probml.github.io/pml-book/book2.html)
-[Deep Learning](https://www.deeplearningbook.org/)
+	[The Elements of Statistical Learning](https://hastie.su.domains/ElemStatLearn/)
+
+	[Pattern Recognition and Machine Learning](https://www.microsoft.com/en-us/research/publication/pattern-recognition-machine-learning/)
+
+	[Probabilistic Machine Learning: An Introduction](https://probml.github.io/pml-book/book1.html)
+
+	[Probabilistic Machine Learning: Advanced Topics](https://probml.github.io/pml-book/book2.html)
+
+	[Deep Learning](https://www.deeplearningbook.org/)
 
 
 
