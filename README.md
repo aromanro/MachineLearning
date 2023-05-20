@@ -387,6 +387,17 @@ I didn't play much with the hyperparameters, I played a little first with a simp
 I reached something like 98.9% accuracy on the test set, which is ok for the purpose of this project (details here: https://arxiv.org/abs/1702.05373 and here: https://paperswithcode.com/dataset/emnist).
 I don't think that as it is it can go much better, unless implementing convolutional networks or perhaps training a denoising autoencoder then using the encoder part with at least a softmax added on top to train further... anyway, those are things postponed for later.
 
+Here is a chart that shows how loss is evolving during training:
+
+![Screenshot](img/TrainingLoss.png)
+
+And here is one with overfitting badly:
+
+![Screenshot](img/TrainingLossOverfit99.99.png)
+
+It reached something like 99.99% or so on the training set!
+
+
 ### Bibliography
 
 A selection of freely available books:
