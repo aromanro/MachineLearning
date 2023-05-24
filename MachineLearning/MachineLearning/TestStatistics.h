@@ -19,44 +19,157 @@ namespace Utils {
 			}
 		}
 
+		// hit
 		long long int getTruePositives() const
 		{
 			return truePositives;
 		}
 
+		// correct rejection
 		long long int getTrueNegatives() const
 		{
 			return trueNegatives;
 		}
 
+		// type I error
 		long long int getFalsePositives() const
 		{
 			return falsePositives;
 		}
 
+		// type II error
 		long long int getFalseNegatives() const
 		{
 			return falseNegatives;
 		}
 
+		long long int getPositives() const
+		{
+			return truePositives + falseNegatives;
+		}
+
+		long long int getNegatives() const
+		{
+			return trueNegatives + falsePositives;
+		}
+
+		long long int getPositivePredictions() const
+		{
+			return truePositives + falsePositives;
+		}
+
+		long long int getNegativePredictions() const
+		{
+			return trueNegatives + falseNegatives;
+		}
+
+
+		long long int getTotal() const
+		{
+			return getPositives() + getNegatives();
+		}
+
+		double getPrevalence() const
+		{
+			return static_cast<double>(getPositives()) / static_cast<double>(getTotal());
+		}
+
+		// correct predictions / total predictions
 		double getAccuracy() const
 		{
-			return static_cast<double>(truePositives + trueNegatives) / static_cast<double>(truePositives + trueNegatives + falsePositives + falseNegatives);
+			return static_cast<double>(truePositives + trueNegatives) / static_cast<double>(getTotal());
 		}
 
+		// true negative rate, selectivity
 		double getSpecificity() const
 		{
-			return static_cast<double>(trueNegatives) / static_cast<double>(trueNegatives + falsePositives);
+			return static_cast<double>(trueNegatives) / static_cast<double>(getNegatives());
 		}
 
+		// positive predictive value
 		double getPrecision() const
 		{
-			return static_cast<double>(truePositives) / static_cast<double>(truePositives + falsePositives);
+			return static_cast<double>(truePositives) / static_cast<double>(getPositivePredictions());
 		}
 
+		// 1 - precision
+		double getFalseDiscoveryRate() const
+		{
+			return static_cast<double>(falsePositives) / static_cast<double>(getPositivePredictions());
+		}
+
+		// also called true positive rate, hit rate, sensitivity
 		double getRecall() const
 		{
-			return static_cast<double>(truePositives) / static_cast<double>(truePositives + falseNegatives);
+			return static_cast<double>(truePositives) / static_cast<double>(getPositives());
+		}
+
+		// false negative rate: 1 - true positive rate
+		double getMissRate() const
+		{
+			return static_cast<double>(falseNegatives) / static_cast<double>(getPositives());
+		}
+
+		// false positive rate, fall-out
+		double getFalsePositiveRate() const
+		{
+			return static_cast<double>(falsePositives) / static_cast<double>(getNegatives());
+		}
+
+		// 1 - negative predictive value
+		double getFalseOmissionRate() const
+		{
+			return static_cast<double>(falseNegatives) / static_cast<double>(getNegativePredictions());
+		}
+
+		// 1 - false omission rate
+		double getNegativePredictiveValue() const
+		{
+			return static_cast<double>(trueNegatives) / static_cast<double>(getNegativePredictions());
+		}
+
+		// true positive rate / false positive rate
+		double getPositiveLikelihoodRatio() const
+		{
+			return getRecall() / getFalsePositiveRate();
+		}
+
+		// false negative rate / true negative rate
+		double getNegativeLikelihoodRatio() const
+		{
+			return getMissRate() / getSpecificity();
+		}
+
+		// diagnostic odds ratio
+		double getDiagnosticOddsRatio() const
+		{
+			return getPositiveLikelihoodRatio() / getNegativeLikelihoodRatio();
+		}
+
+		// critical success index
+		double getThreatScore() const
+		{
+			return static_cast<double>(truePositives) / static_cast<double>(getPositives() + falsePositives);
+		}
+
+		// prevalence threshold
+		double getPrevalenceThreshold() const
+		{
+			const double sfpr = sqrt(getFalsePositiveRate());
+
+			return sfpr / (sqrt(getMissRate()) + sfpr);
+		}
+
+		// informedness
+		double getInformedness() const
+		{
+			return getRecall() +  getSpecificity() - 1.;
+		}
+
+		// markedness
+		double getMarkedness() const
+		{
+			return getPrecision() + getNegativePredictiveValue() - 1.;
 		}
 
 		double getF1Score() const
