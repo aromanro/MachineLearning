@@ -36,6 +36,10 @@ bool SimpleLinearRegressionTests();
 bool LinearRegressionTests();
 bool LogisticRegressionTests();
 bool SoftmaxTests();
+
+bool XORNeuralNetworksTests();
+bool IrisNeuralNetworkTest();
+bool NeuralNetworkTestsMNIST();
 bool NeuralNetworksTests();
 
 bool AllTests();

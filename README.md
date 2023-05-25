@@ -48,6 +48,8 @@ Here is a chart I've got with it:
 
 ![Screenshot](img/LinearRegression.png)
 
+I displayed in this chart the line that was used for generating the data (just by adding gaussian noise to the points on the line) along with the linear regression result. Something analogous is in the other charts as well.
+
 #### General Linear regression
 
 It's time to go to a more complex model, with multiple inputs and multiple outputs and a little more than simply a bunch of simple linear regressions together. Here is the wikipedia link: [General Linear model](https://en.wikipedia.org/wiki/General_linear_model).
@@ -395,7 +397,7 @@ And here is one with a very bad overfit:
 
 ![Screenshot](img/TrainingLossOverfit99.99.png)
 
-It reached something like 99.99% accuracy or so on the training set!
+It reached something like 99.98% accuracy or so on the training set, while having way worse accuracy on the test set (but still over 98%)!
 
 
 ### Bibliography

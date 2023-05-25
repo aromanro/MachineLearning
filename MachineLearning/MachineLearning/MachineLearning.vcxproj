@@ -163,6 +163,9 @@
     <ClCompile Include="LogisticRegressionTests.cpp" />
     <ClCompile Include="MachineLearning.cpp" />
     <ClCompile Include="NeuralNetworkTests.cpp" />
+    <ClCompile Include="NeuralNetworkTestsIris.cpp" />
+    <ClCompile Include="NeuralNetworkTestsMNIST.cpp" />
+    <ClCompile Include="NeuralNetworTestsXOR.cpp" />
     <ClCompile Include="SimpleLinearTests.cpp" />
     <ClCompile Include="SoftmaxTests.cpp" />
     <ClCompile Include="Tests.cpp" />
