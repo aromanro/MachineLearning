@@ -38,7 +38,7 @@ void TrainModel(GLM::SoftmaxRegression<>& softmaxModel, int nrOutputs, int nrTra
 			if (nrOutputs > 1) out(1, b) = (std::get<4>(record) == "Iris-versicolor") ? 1 : 0;
 			if (nrOutputs > 2) out(2, b) = (std::get<4>(record) == "Iris-virginica") ? 1 : 0;
 		}
-		softmaxModel.AddBatch(in, out);
+		softmaxModel.AddBatchWithParamsAdjusment(in, out);
 		if (i % 100 == 0)
 		{
 			const double loss = softmaxModel.getLoss() / batchSize;
@@ -200,7 +200,7 @@ bool SoftmaxTestsMNIST()
 				out.col(b) = trainOutputs.col(ind);
 			}
 
-			softmaxModel.AddBatch(in, out);
+			softmaxModel.AddBatchWithParamsAdjusment(in, out);
 		}
 
 		const double loss = softmaxModel.getLoss() / batchSize;

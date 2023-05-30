@@ -29,7 +29,7 @@ namespace GLM {
 			return solver.activationFunction(W * input + b);
 		}
 
-		virtual BatchOutputType AddBatch(const BatchInputType& batchInput, const BatchOutputType& batchOutput)
+		virtual BatchOutputType AddBatchWithParamsAdjusment(const BatchInputType& batchInput, const BatchOutputType& batchOutput)
 		{
 			static_cast<DerivedClass*>(this)->AddBatchNoParamsAdjustment(batchInput, batchOutput);
 

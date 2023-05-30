@@ -57,7 +57,7 @@ bool Test1()
 				y(b) = yvals[ind];
 			}
 
-			generalLinearModel.AddBatch(x, y);
+			generalLinearModel.AddBatchWithParamsAdjusment(x, y);
 
 			if (i % 500 == 0)
 			{
@@ -136,7 +136,7 @@ bool Test2()
 				y(2, b) = yvals3[ind];
 			}
 
-			generalLinearModel.AddBatch(x, y);
+			generalLinearModel.AddBatchWithParamsAdjusment(x, y);
 
 			if (i % 500 == 0)
 			{
@@ -219,7 +219,7 @@ bool Test3()
 				y(0, b) = yvals[ind];
 			}
 
-			generalLinearModel.AddBatch(x, y);
+			generalLinearModel.AddBatchWithParamsAdjusment(x, y);
 
 			if (i % 100 == 0)
 			{
@@ -331,7 +331,7 @@ bool Test4()
 				y(0, b) = yvals[ind];
 			}
 
-			generalLinearModel.AddBatch(x, y);
+			generalLinearModel.AddBatchWithParamsAdjusment(x, y);
 
 			if (i % 10000 == 0)
 			{

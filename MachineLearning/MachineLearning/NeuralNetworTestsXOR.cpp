@@ -98,13 +98,13 @@ bool XORNeuralNetworksTests()
 			Eigen::MatrixXd pred = hiddenLayerModel.getPrediction();
 
 			// forward and backward for the last layer:
-			const Eigen::MatrixXd grad = modelLastLayer.AddBatch(pred, y);
+			const Eigen::MatrixXd grad = modelLastLayer.AddBatchWithParamsAdjusment(pred, y);
 
 			// now backpropagate the gradient to previous layer:
 			pred = modelLastLayer.BackpropagateBatch(grad);
 
 			// now do the adjustments as well in the first layer
-			hiddenLayerModel.AddBatch(x, pred);
+			hiddenLayerModel.AddBatchWithParamsAdjusment(x, pred);
 
 			if (i % 10000 == 0)
 			{

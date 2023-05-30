@@ -23,7 +23,7 @@ bool SimpleLinearRegressionTests()
 			y(i) = linearFunction(i) + dist(rde);
 		}
 
-		simpleLinearRegression.AddBatch(x, y);
+		simpleLinearRegression.AddBatchWithParamsAdjusment(x, y);
 
 		const double loss = simpleLinearRegression.getLoss() / nrPoints;
 		std::cout << "Loss: " << loss << std::endl;
@@ -50,7 +50,7 @@ bool SimpleLinearRegressionTests()
 			y(2, i) = linearFunction3(i) + dist(rde);
 		}
 
-		multivariateSimpleLinearRegression.AddBatch(x, y);
+		multivariateSimpleLinearRegression.AddBatchWithParamsAdjusment(x, y);
 
 		const double loss = multivariateSimpleLinearRegression.getLoss() / nrPoints;
 		std::cout << "Loss: " << loss << std::endl;
@@ -82,7 +82,7 @@ bool SimpleLinearRegressionTests()
 			y(2, i) = linearFunction3(i) + dist(rde);
 		}
 
-		multivariateSimpleLinearRegression.AddBatch(x, y);
+		multivariateSimpleLinearRegression.AddBatchWithParamsAdjusment(x, y);
 
 
 		const double loss = multivariateSimpleLinearRegression.getLoss() / nrPoints;

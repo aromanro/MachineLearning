@@ -81,9 +81,9 @@ namespace NeuralNetworks
 			layer.AddBatchNoParamsAdjustment(batchInput, batchOutput);
 		}
 
-		Eigen::MatrixXd AddBatch(const Eigen::MatrixXd& batchInput, const Eigen::MatrixXd& batchOutput)
+		Eigen::MatrixXd AddBatchWithParamsAdjusment(const Eigen::MatrixXd& batchInput, const Eigen::MatrixXd& batchOutput)
 		{
-			return layer.AddBatch(batchInput, batchOutput);
+			return layer.AddBatchWithParamsAdjusment(batchInput, batchOutput);
 		}
 
 		Eigen::MatrixXd getPrediction() const

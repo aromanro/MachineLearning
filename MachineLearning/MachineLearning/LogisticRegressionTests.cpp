@@ -75,7 +75,7 @@ bool SimpleLogisticRegressionTest()
 				y(0, b) = ovals[ind];
 			}
 
-			logisticModel.AddBatch(x, y);
+			logisticModel.AddBatchWithParamsAdjusment(x, y);
 
 			if (i % 10000 == 0)
 			{
@@ -260,7 +260,7 @@ bool MoreComplexLogisticRegressionTest()
 				y(0, b) = ovals[ind];
 			}
 
-			logisticModel.AddBatch(x, y);
+			logisticModel.AddBatchWithParamsAdjusment(x, y);
 
 			if (i % 10000 == 0)
 			{
@@ -364,7 +364,7 @@ void TrainModel(GLM::LogisticRegression<>& logisticModel, int nrOutputs, int nrT
 			if (nrOutputs > 1) out(1, b) = (std::get<4>(record) == "Iris-versicolor") ? 1 : 0;
 			if (nrOutputs > 2) out(2, b) = (std::get<4>(record) == "Iris-virginica") ? 1 : 0;
 		}
-		logisticModel.AddBatch(in, out);
+		logisticModel.AddBatchWithParamsAdjusment(in, out);
 		if (i % 100 == 0)
 		{
 			const double loss = logisticModel.getLoss() / batchSize;
@@ -523,7 +523,7 @@ bool MNISTLogisticRegressionTests()
 				out.col(b) = trainOutputs.col(ind);
 			}
 
-			logisticModel.AddBatch(in, out);
+			logisticModel.AddBatchWithParamsAdjusment(in, out);
 		}
 
 		const double loss = logisticModel.getLoss() / batchSize;

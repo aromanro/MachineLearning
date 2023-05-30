@@ -130,12 +130,19 @@ namespace NeuralNetworks
 			// forward
 			Eigen::MatrixXd inp = input;
 
+			std::vector<Eigen::VectorXd> dropoutMasks(dropout.size());
+
 			// dropout for input
 			if (!dropout.empty() && dropout[0] > 0.)
 			{
 				const Eigen::RowVectorXd zeroRow = Eigen::RowVectorXd::Zero(inp.cols());
+				dropoutMasks[0] = Eigen::VectorXd::Ones(inp.rows());
 				for (int i = 0; i < inp.rows(); ++i)
-					if (distDrop(rde) < dropout[0]) inp.row(i) = zeroRow;
+					if (distDrop(rde) < dropout[0])
+					{
+						inp.row(i) = zeroRow;
+						dropoutMasks[0](i) = 0.;
+					}
 
 				inp /= (1. - dropout[0]);
 			}
@@ -150,8 +157,13 @@ namespace NeuralNetworks
 				if (dropout.size() > ip1 && dropout[ip1] > 0.)
 				{
 					const Eigen::RowVectorXd zeroRow = Eigen::RowVectorXd::Zero(inp.cols());
+					dropoutMasks[ip1] = Eigen::VectorXd::Ones(inp.rows());
 					for (int j = 0; j < inp.rows(); ++j)
-						if (distDrop(rde) < dropout[ip1]) inp.row(j) = zeroRow;
+						if (distDrop(rde) < dropout[ip1])
+						{
+							inp.row(j) = zeroRow;
+							dropoutMasks[ip1](j) = 0.;
+						}
 
 					inp /= (1. - dropout[ip1]);
 
@@ -161,18 +173,35 @@ namespace NeuralNetworks
 			}
 
 			// forward and backward for the last layer and backpropagate the gradient to the last hidden layer
-			Eigen::MatrixXd grad = lastLayer.BackpropagateBatch(lastLayer.AddBatch(inp, target));
+			Eigen::MatrixXd grad = lastLayer.BackpropagateBatch(lastLayer.AddBatchWithParamsAdjusment(inp, target));
 
 			// backward: now backpropagate the gradient through the hidden layers:
 
 			for (int i = static_cast<int>(hiddenLayers.size() - 1); i > 0; --i)
+			{
+				// zero out the gradient for the dropped out neurons
+				if (dropout.size() > i && dropout[i] > 0.)
+				{
+					for (int j = 0; j < grad.rows(); ++j)
+						grad.row(j) *= dropoutMasks[i](j);
+				}
+
 				// do the adjustments of the parameters as well and backpropagate for each hidden layer
-				grad = hiddenLayers[i].BackpropagateBatch(hiddenLayers[i].AddBatch(hiddenLayers[i].getInput(), grad));
+				grad = hiddenLayers[i].BackpropagateBatch(hiddenLayers[i].AddBatchWithParamsAdjusment(hiddenLayers[i].getInput(), grad));
+			}
 
 			// the first layer does not need to backpropagate gradient to the input layer, that one cannot be adjusted
 			// TODO: this could be part of a larger network, even as a single 'layer', before it there could be more layers, for example a convolutional network, in such a case the gradient needs to be backpropagated
 			if (!hiddenLayers.empty())
-				hiddenLayers[0].AddBatch(hiddenLayers[0].getInput(), grad);
+			{
+				if (dropout.size() > 2 && dropout[1] > 0.)
+				{
+					for (int j = 0; j < grad.rows(); ++j)
+						grad.row(j) *= dropoutMasks[1](j);
+				}
+
+				hiddenLayers[0].AddBatchWithParamsAdjusment(hiddenLayers[0].getInput(), grad);
+			}
 		}
 
 		bool saveNetwork(const std::string& name) const
