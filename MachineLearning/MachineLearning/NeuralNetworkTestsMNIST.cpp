@@ -6,6 +6,53 @@
 #include "MNISTDatabase.h"
 #include "Softmax.h"
 
+
+template<class Model> void PrintMNISTStats(Model& neuralNetwork, const Eigen::MatrixXd& Inputs, const Eigen::MatrixXd& Outputs, int nrOutputs = 10)
+{
+	std::vector<Utils::TestStatistics> stats(nrOutputs);
+
+	long long int correct = 0;
+
+	for (int i = 0; i < Inputs.cols(); ++i)
+	{
+		Eigen::VectorXd res = neuralNetwork.Predict(Inputs.col(i));
+
+		double limp = 0;
+		for (int j = 0; j < nrOutputs; ++j)
+			limp = std::max(limp, res(j));
+
+		int nr = -1;
+		for (int j = 0; j < nrOutputs; ++j)
+		{
+			stats[j].AddPrediction(res(j) >= limp, Outputs(j, i) > 0.5);
+
+			if (Outputs(j, i) > 0.5)
+			{
+				if (nr != -1)
+					std::cout << "Info from label ambiguous, should not happen: " << nr << " and " << j << std::endl;
+				nr = j;
+			}
+		}
+
+		int predn = -1;
+		for (int n = 0; n < nrOutputs; ++n)
+			if (res(n) >= limp)
+			{
+				if (predn != -1)
+					std::cout << "Ambiguous prediction: " << predn << " and " << n << std::endl;
+				predn = n;
+			}
+
+		if (predn == nr)
+			++correct;
+	}
+
+	for (int j = 0; j < nrOutputs; ++j)
+		stats[j].PrintStatistics(std::to_string(j));
+
+	std::cout << "Accuracy (% correct): " << 100.0 * static_cast<double>(correct) / static_cast<double>(Inputs.cols()) << "%" << std::endl;
+}
+
 bool NeuralNetworkTestsMNIST()
 {
 	std::cout << "MNIST Neural Network Tests, it will take a long time..." << std::endl;
@@ -346,114 +393,18 @@ bool NeuralNetworkTestsMNIST()
 		plot.Execute();
 	}
 
-	std::vector<Utils::TestStatistics> stats(nrOutputs);
-
 	// first, on training set:
 
 	std::cout << std::endl << "Training set:" << std::endl;
 
-	long long int correct = 0;
+	PrintMNISTStats(neuralNetwork, trainInputs, trainOutputs, nrOutputs);
 
-	for (int i = 0; i < trainInputs.cols(); ++i)
-	{
-		Eigen::VectorXd res = neuralNetwork.Predict(trainInputs.col(i));
-
-		double limp = 0;
-		for (int j = 0; j < nrOutputs; ++j)
-			limp = std::max(limp, res(j));
-
-		int nr = -1;
-		for (int j = 0; j < nrOutputs; ++j)
-		{
-			stats[j].AddPrediction(res(j) >= limp, trainOutputs(j, i) > 0.5);
-
-			if (trainOutputs(j, i) > 0.5)
-			{
-				if (nr != -1)
-					std::cout << "Info from label ambiguous, should not happen: " << nr << " and " << j << std::endl;
-				nr = j;
-			}
-		}
-
-		int predn = -1;
-		for (int n = 0; n < nrOutputs; ++n)
-			if (res(n) >= limp)
-			{
-				if (predn != -1)
-					std::cout << "Ambiguous prediction: " << predn << " and " << n << std::endl;
-				predn = n;
-			}
-
-		if (predn == nr)
-			++correct;
-	}
-
-	for (int j = 0; j < nrOutputs; ++j)
-		stats[j].PrintStatistics(std::to_string(j));
-
-	Utils::TestStatistics totalStats;
-	for (int j = 0; j < nrOutputs; ++j)
-		totalStats.Add(stats[j]);
-
-	//totalStats.PrintStatistics("Overall"); //misleading
-
-	std::cout << "Accuracy (% correct): " << 100.0 * static_cast<double>(correct) / static_cast<double>(trainInputs.cols()) << "%" << std::endl;
 
 	// now, on test set:
 
 	std::cout << std::endl << "Test set:" << std::endl;
 
-	for (int j = 0; j < nrOutputs; ++j)
-		stats[j].Clear();
-
-	correct = 0;
-	for (int i = 0; i < testInputs.cols(); ++i)
-	{
-		Eigen::VectorXd res = neuralNetwork.Predict(testInputs.col(i));
-
-		double limp = 0;
-		for (int j = 0; j < nrOutputs; ++j)
-			limp = std::max(limp, res(j));
-
-		int nr = -1;
-		for (int j = 0; j < nrOutputs; ++j)
-		{
-			stats[j].AddPrediction(res(j) >= limp, testOutputs(j, i) > 0.5);
-
-			if (testOutputs(j, i) > 0.5)
-			{
-				if (nr != -1)
-					std::cout << "Info from label ambiguous, should not happen: " << nr << " and " << j << std::endl;
-				nr = j;
-			}
-		}
-
-		int predn = -1;
-		for (int n = 0; n < nrOutputs; ++n)
-			if (res(n) >= limp)
-			{
-				if (predn != -1)
-					std::cout << "Ambiguous prediction: " << predn << " and " << n << std::endl;
-				predn = n;
-			}
-
-		if (predn == nr)
-			++correct;
-
-		if (i % 1000 == 0)
-			std::cout << "Number: " << nr << " Prediction: " << predn << ((nr == predn) ? " Correct!" : " Wrong!") << std::endl;
-	}
-
-	for (int j = 0; j < nrOutputs; ++j)
-		stats[j].PrintStatistics(std::to_string(j));
-
-	totalStats.Clear();
-	for (int j = 0; j < nrOutputs; ++j)
-		totalStats.Add(stats[j]);
-
-	//totalStats.PrintStatistics("Overall"); //misleading
-
-	std::cout << "Accuracy (% correct): " << 100.0 * static_cast<double>(correct) / static_cast<double>(testInputs.cols()) << "%" << std::endl;
+	PrintMNISTStats(neuralNetwork, testInputs, testOutputs, nrOutputs);
 
 	return true;
 }
