@@ -132,6 +132,15 @@ namespace Utils {
 			if (res(0) == limp && out(0) > 0.5) ++correct;
 			else if (nrOutputs > 1 && res(1) == limp && out(1) > 0.5) ++correct;
 			else if (nrOutputs > 2 && res(2) == limp && out(2) > 0.5) ++correct;
+			else if (limp == 0.5 && nrOutputs < 3)
+			{
+				// all predictions are either 0.5 or less
+				bool isCorrect = true;
+				if (out(0) > 0.5) isCorrect = false;
+				if (nrOutputs > 1 && out(1) > 0.5) isCorrect = false;
+
+				if (isCorrect) ++correct;
+			}
 		}
 	};
 

@@ -399,6 +399,9 @@ And here is one with a very bad overfit:
 
 It reached something like 99.98% accuracy or so on the training set, while having way worse accuracy on the test set (but still over 98%)!
 
+### Changes since the above were written
+
+The results and charts mentioned above for the EMNIST dataset were generated with an issue in dropout: I forgot to 'drop out' the values of the gradient to avoid changing the parameters for the neurons that were dropped out in the forward pass. The network learned quite well even so... I changed it now and it seems that I can get over 99% accuracy (for now only ~99.01% on the test set for the committed 'pretrained' variant).
 
 ### Bibliography
 
