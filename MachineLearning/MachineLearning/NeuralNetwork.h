@@ -180,10 +180,11 @@ namespace NeuralNetworks
 			for (int i = static_cast<int>(hiddenLayers.size() - 1); i > 0; --i)
 			{
 				// zero out the gradient for the dropped out neurons
-				if (dropout.size() > i && dropout[i] > 0.)
+				const int ip1 = i + 1;
+				if (dropout.size() > ip1 && dropout[ip1] > 0.)
 				{
 					for (int j = 0; j < grad.rows(); ++j)
-						grad.row(j) *= dropoutMasks[i](j);
+						grad.row(j) *= dropoutMasks[ip1](j);
 				}
 
 				// do the adjustments of the parameters as well and backpropagate for each hidden layer
