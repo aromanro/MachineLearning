@@ -163,13 +163,14 @@ namespace NeuralNetworks
 			// forward and backward for the last layer and backpropagate the gradient to the last hidden layer
 			Eigen::MatrixXd grad = lastLayer.BackpropagateBatch(lastLayer.AddBatch(inp, target));
 
-			// now backpropagate the gradient through the hidden layers:
+			// backward: now backpropagate the gradient through the hidden layers:
 
 			for (int i = static_cast<int>(hiddenLayers.size() - 1); i > 0; --i)
-				// now do the adjustments of the parameters as well and backpropagate for each hidden layer
+				// do the adjustments of the parameters as well and backpropagate for each hidden layer
 				grad = hiddenLayers[i].BackpropagateBatch(hiddenLayers[i].AddBatch(hiddenLayers[i].getInput(), grad));
 
-			// the first layer does not need to backpropagate gradient to the output layer, that one cannot be adjusted
+			// the first layer does not need to backpropagate gradient to the input layer, that one cannot be adjusted
+			// TODO: this could be part of a larger network, even as a single 'layer', before it there could be more layers, for example a convolutional network, in such a case the gradient needs to be backpropagated
 			if (!hiddenLayers.empty())
 				hiddenLayers[0].AddBatch(hiddenLayers[0].getInput(), grad);
 		}
