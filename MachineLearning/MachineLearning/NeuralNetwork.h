@@ -194,7 +194,7 @@ namespace NeuralNetworks
 			// TODO: this could be part of a larger network, even as a single 'layer', before it there could be more layers, for example a convolutional network, in such a case the gradient needs to be backpropagated
 			if (!hiddenLayers.empty())
 			{
-				if (dropout.size() > 2 && dropout[1] > 0.)
+				if (dropout.size() > 1 && dropout[1] > 0.)
 				{
 					for (int j = 0; j < grad.rows(); ++j)
 						grad.row(j) *= dropoutMasks[1](j);
