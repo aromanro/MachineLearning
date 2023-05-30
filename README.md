@@ -404,15 +404,15 @@ It reached something like 99.98% accuracy or so on the training set, while havin
 
 A selection of freely available books:
 
-* [The Elements of Statistical Learning](https://hastie.su.domains/ElemStatLearn/)
+*   [The Elements of Statistical Learning](https://hastie.su.domains/ElemStatLearn/)
 
-* [Pattern Recognition and Machine Learning](https://www.microsoft.com/en-us/research/publication/pattern-recognition-machine-learning/)
+*   [Pattern Recognition and Machine Learning](https://www.microsoft.com/en-us/research/publication/pattern-recognition-machine-learning/)
 
-* [Probabilistic Machine Learning: An Introduction](https://probml.github.io/pml-book/book1.html)
+*   [Probabilistic Machine Learning: An Introduction](https://probml.github.io/pml-book/book1.html)
 
-* [Probabilistic Machine Learning: Advanced Topics](https://probml.github.io/pml-book/book2.html)
+*   [Probabilistic Machine Learning: Advanced Topics](https://probml.github.io/pml-book/book2.html)
 
-* [Deep Learning](https://www.deeplearningbook.org/)
+*   [Deep Learning](https://www.deeplearningbook.org/)
 
 
 
