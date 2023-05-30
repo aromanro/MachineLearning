@@ -180,12 +180,7 @@ namespace NeuralNetworks
 			for (int i = static_cast<int>(hiddenLayers.size() - 1); i > 0; --i)
 			{
 				// zero out the gradient for the dropped out neurons
-				const int ip1 = i + 1;
-				if (dropout.size() > ip1 && dropout[ip1] > 0.)
-				{
-					for (int j = 0; j < grad.rows(); ++j)
-						grad.row(j) *= dropoutMasks[ip1](j);
-				}
+				DropoutGradient(i + 1, grad, dropoutMasks);
 
 				// do the adjustments of the parameters as well and backpropagate for each hidden layer
 				grad = hiddenLayers[i].BackpropagateBatch(hiddenLayers[i].AddBatchWithParamsAdjusment(hiddenLayers[i].getInput(), grad));
@@ -195,11 +190,7 @@ namespace NeuralNetworks
 			// TODO: this could be part of a larger network, even as a single 'layer', before it there could be more layers, for example a convolutional network, in such a case the gradient needs to be backpropagated
 			if (!hiddenLayers.empty())
 			{
-				if (dropout.size() > 1 && dropout[1] > 0.)
-				{
-					for (int j = 0; j < grad.rows(); ++j)
-						grad.row(j) *= dropoutMasks[1](j);
-				}
+				DropoutGradient(1, grad, dropoutMasks);
 
 				hiddenLayers[0].AddBatchWithParamsAdjusment(hiddenLayers[0].getInput(), grad);
 			}
@@ -256,6 +247,16 @@ namespace NeuralNetworks
 		}
 
 	private:
+		void DropoutGradient(int index, Eigen::MatrixXd& grad, const std::vector<Eigen::VectorXd>& dropoutMasks)
+		{
+			if (dropout.size() > index && dropout[index] > 0.)
+			{
+				for (int j = 0; j < grad.rows(); ++j)
+					grad.row(j) *= dropoutMasks[index](j);
+			}
+		}
+
+
 		NeuralLayerPerceptron<LastSolver> lastLayer;
 		std::vector<NeuralLayerPerceptron<Solver>> hiddenLayers;
 
