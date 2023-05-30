@@ -1,73 +1,9 @@
 #include "Tests.h"
 #include "CSVDataFile.h"
-#include "TestStatistics.h"
 #include "MNISTDatabase.h"
 #include "Normalizer.h"
 
 #include "Softmax.h"
-
-
-void getInVals(Eigen::VectorXd& in, const Utils::IrisDataset::Record& record)
-{
-	in(0) = std::get<0>(record);
-	in(1) = std::get<1>(record);
-	in(2) = std::get<2>(record);
-	in(3) = std::get<3>(record);
-}
-
-double getMax(const Eigen::VectorXd& res,int nrOutputs)
-{
-	double limp = 0.5;
-	for (int j = 0; j < nrOutputs; ++j)
-		limp = std::max(limp, res(j));
-
-	return limp;
-}
-
-void CountCorrect(const Eigen::VectorXd& res, const Eigen::VectorXd& out, int nrOutputs, long long int& correct)
-{
-	const double limp = getMax(res, nrOutputs);
-
-	if (res(0) == limp && out(0) > 0.5) ++correct;
-	else if (nrOutputs > 1 && res(1) == limp && out(1) > 0.5) ++correct;
-	else if (nrOutputs > 2 && res(2) == limp && out(2) > 0.5) ++correct;
-}
-
-void PrintStats(const std::vector<Utils::IrisDataset::Record>& records, int nrOutputs, GLM::SoftmaxRegression<>& softmaxModel)
-{
-	Utils::TestStatistics setosaStats;
-	Utils::TestStatistics versicolorStats;
-	Utils::TestStatistics virginicaStats;
-
-	Eigen::VectorXd in(4);
-	Eigen::VectorXd out(nrOutputs);
-
-	long long int correct = 0;
-	for (const auto& record : records)
-	{
-		getInVals(in, record);
-
-		out(0) = (std::get<4>(record) == "Iris-setosa") ? 1 : 0;
-		if (nrOutputs > 1) out(1) = (std::get<4>(record) == "Iris-versicolor") ? 1 : 0;
-		if (nrOutputs > 2) out(2) = (std::get<4>(record) == "Iris-virginica") ? 1 : 0;
-
-		Eigen::VectorXd res = softmaxModel.Predict(in.col(0));
-		setosaStats.AddPrediction(res(0) > 0.5, out(0) > 0.5);
-
-		if (nrOutputs > 1) versicolorStats.AddPrediction(res(1) > 0.5, out(1) > 0.5);
-		if (nrOutputs > 2) virginicaStats.AddPrediction(res(2) > 0.5, out(2) > 0.5);
-
-		CountCorrect(res, out, nrOutputs, correct);
-	}
-
-	setosaStats.PrintStatistics("Setosa");
-	if (nrOutputs > 1) {
-		versicolorStats.PrintStatistics("Versicolor");
-		if (nrOutputs > 2) virginicaStats.PrintStatistics("Virginica");
-	}
-
-	std::cout << "Accuracy (% correct): " << 100.0 * static_cast<double>(correct) / static_cast<double>(records.size()) << "%" << std::endl << std::endl;
-}
 
 
 void TrainModel(GLM::SoftmaxRegression<>& softmaxModel, int nrOutputs, int nrTraining, const std::vector<Utils::IrisDataset::Record>& trainingSet)
@@ -96,10 +32,7 @@ void TrainModel(GLM::SoftmaxRegression<>& softmaxModel, int nrOutputs, int nrTra
 			const int ind = distIntBig(rde);
 			const auto& record = trainingSet[ind];
 
-			in(0, b) = std::get<0>(record);
-			in(1, b) = std::get<1>(record);
-			in(2, b) = std::get<2>(record);
-			in(3, b) = std::get<3>(record);
+			Utils::IrisDataset::Get(record, in, b);
 
 			out(0, b) = (std::get<4>(record) == "Iris-setosa") ? 1 : 0;
 			if (nrOutputs > 1) out(1, b) = (std::get<4>(record) == "Iris-versicolor") ? 1 : 0;
@@ -145,10 +78,7 @@ bool SoftmaxTestsIris()
 
 	for (int i = 0; i < nrTraining; ++i)
 	{
-		x(0, i) = std::get<0>(trainingSet[i]);
-		x(1, i) = std::get<1>(trainingSet[i]);
-		x(2, i) = std::get<2>(trainingSet[i]);
-		x(3, i) = std::get<3>(trainingSet[i]);
+		Utils::IrisDataset::Get(trainingSet, x, i, i);
 
 		y(0, i) = (std::get<4>(trainingSet[i]) == "Iris-setosa") ? 1 : 0;
 		if (nrOutputs > 1) y(1, i) = (std::get<4>(trainingSet[i]) == "Iris-versicolor") ? 1 : 0;
@@ -171,11 +101,7 @@ bool SoftmaxTestsIris()
 	x.resize(4, 1);
 	for (int i = 0; i < testSet.size(); ++i)
 	{
-		x(0, 0) = std::get<0>(testSet[i]);
-		x(1, 0) = std::get<1>(testSet[i]);
-		x(2, 0) = std::get<2>(testSet[i]);
-		x(3, 0) = std::get<3>(testSet[i]);
-
+		Utils::IrisDataset::Get(testSet, x, i, 0);
 
 		x.col(0) -= avgi;
 		x.col(0) = x.col(0).cwiseProduct(istdi);
@@ -194,64 +120,14 @@ bool SoftmaxTestsIris()
 
 	std::cout << std::endl << "Training set:" << std::endl;
 
-	PrintStats(trainingSet, nrOutputs, softmaxModel);
+	Utils::IrisDataset::PrintStats(trainingSet, nrOutputs, softmaxModel);
 
 	std::cout << std::endl << "Test set:" << std::endl;
 
-	PrintStats(testSet, nrOutputs, softmaxModel);
+	Utils::IrisDataset::PrintStats(testSet, nrOutputs, softmaxModel);
 
 	return true;
 }
-
-
-void PrintStats(const Eigen::MatrixXd& inputs, const Eigen::MatrixXd& outputs, int nrOutputs, GLM::SoftmaxRegression<>& softmaxModel)
-{
-	std::vector<Utils::TestStatistics> stats(nrOutputs);
-
-	// first, on training set:
-
-	long long int correct = 0;
-
-	for (int i = 0; i < inputs.cols(); ++i)
-	{
-		Eigen::VectorXd res = softmaxModel.Predict(inputs.col(i));
-
-		double lim = 0;
-		for (int j = 0; j < nrOutputs; ++j)
-			lim = std::max(lim, res(j));
-
-		int nr = -1;
-		for (int j = 0; j < nrOutputs; ++j)
-		{
-			stats[j].AddPrediction(res(j) >= lim, outputs(j, i) > 0.5);
-
-			if (outputs(j, i) > 0.5)
-			{
-				if (nr != -1)
-					std::cout << "Info from label ambiguous, should not happen: " << nr << " and " << j << std::endl;
-				nr = j;
-			}
-		}
-
-		int predn = -1;
-		for (int n = 0; n < nrOutputs; ++n)
-			if (res(n) >= lim)
-			{
-				if (predn != -1)
-					std::cout << "Ambiguous prediction: " << predn << " and " << n << std::endl;
-				predn = n;
-			}
-
-		if (predn == nr)
-			++correct;
-	}
-
-	for (int j = 0; j < nrOutputs; ++j)
-		stats[j].PrintStatistics(std::to_string(j));
-
-	std::cout << "Accuracy (% correct): " << 100.0 * static_cast<double>(correct) / static_cast<double>(inputs.cols()) << "%" << std::endl;
-}
-
 
 
 bool SoftmaxTestsMNIST()
@@ -335,13 +211,13 @@ bool SoftmaxTestsMNIST()
 
 	std::cout << std::endl << "Training set:" << std::endl;
 
-	PrintStats(trainInputs, trainOutputs, nrOutputs, softmaxModel);
+	Utils::MNISTDatabase::PrintStats(softmaxModel, trainInputs, trainOutputs, nrOutputs);
 
 	// now, on test set:
 
 	std::cout << std::endl << "Test set:" << std::endl;
 
-	PrintStats(testInputs, testOutputs, nrOutputs, softmaxModel);
+	Utils::MNISTDatabase::PrintStats(softmaxModel, testInputs, testOutputs, nrOutputs);
 
 	return true;
 }

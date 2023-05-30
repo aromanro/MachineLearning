@@ -358,10 +358,7 @@ void TrainModel(GLM::LogisticRegression<>& logisticModel, int nrOutputs, int nrT
 			const int ind = distIntBig(rde);
 			const auto& record = trainingSet[ind];
 
-			in(0, b) = std::get<0>(record);
-			in(1, b) = std::get<1>(record);
-			in(2, b) = std::get<2>(record);
-			in(3, b) = std::get<3>(record);
+			Utils::IrisDataset::Get(record, in, b);
 
 			out(0, b) = (std::get<4>(record) == "Iris-setosa") ? 1 : 0;
 			if (nrOutputs > 1) out(1, b) = (std::get<4>(record) == "Iris-versicolor") ? 1 : 0;
@@ -374,44 +371,6 @@ void TrainModel(GLM::LogisticRegression<>& logisticModel, int nrOutputs, int nrT
 			std::cout << "Loss: " << loss << std::endl;
 		}
 	}
-}
-
-
-
-void PrintStats(const std::vector<Utils::IrisDataset::Record>& records, int nrOutputs, GLM::LogisticRegression<>& logisticModel)
-{
-	Utils::TestStatistics setosaStats;
-	Utils::TestStatistics versicolorStats;
-	Utils::TestStatistics virginicaStats;
-
-	// test the model
-
-	Eigen::VectorXd in(4);
-	Eigen::VectorXd out(nrOutputs);
-
-	for (const auto& record : records)
-	{
-		in(0) = std::get<0>(record);
-		in(1) = std::get<1>(record);
-		in(2) = std::get<2>(record);
-		in(3) = std::get<3>(record);
-
-		out(0) = (std::get<4>(record) == "Iris-setosa") ? 1 : 0;
-		if (nrOutputs > 1) out(1) = (std::get<4>(record) == "Iris-versicolor") ? 1 : 0;
-		if (nrOutputs > 2) out(2) = (std::get<4>(record) == "Iris-virginica") ? 1 : 0;
-
-		Eigen::VectorXd res = logisticModel.Predict(in);
-		setosaStats.AddPrediction(res(0) > 0.5, out(0) > 0.5);
-		if (nrOutputs > 1) versicolorStats.AddPrediction(res(1) > 0.5, out(1) > 0.5);
-		if (nrOutputs > 2) virginicaStats.AddPrediction(res(2) > 0.5, out(2) > 0.5);
-	}
-
-	setosaStats.PrintStatistics("Setosa");
-	if (nrOutputs > 1) {
-		versicolorStats.PrintStatistics("Versicolor");
-		if (nrOutputs > 2) virginicaStats.PrintStatistics("Virginica");
-	}
-	std::cout << std::endl;
 }
 
 
@@ -445,10 +404,7 @@ bool IrisLogisticRegressionTest()
 
 	for (int i = 0; i < nrTraining; ++i)
 	{
-		x(0, i) = std::get<0>(trainingSet[i]);
-		x(1, i) = std::get<1>(trainingSet[i]);
-		x(2, i) = std::get<2>(trainingSet[i]);
-		x(3, i) = std::get<3>(trainingSet[i]);
+		Utils::IrisDataset::Get(trainingSet, x, i, i);
 
 		y(0, i) = (std::get<4>(trainingSet[i]) == "Iris-setosa") ? 1 : 0;
 		if (nrOutputs > 1) y(1, i) = (std::get<4>(trainingSet[i]) == "Iris-versicolor") ? 1 : 0;
@@ -471,11 +427,7 @@ bool IrisLogisticRegressionTest()
 	x.resize(4, 1);
 	for (int i = 0; i < testSet.size(); ++i)
 	{
-		x(0, 0) = std::get<0>(testSet[i]);
-		x(1, 0) = std::get<1>(testSet[i]);
-		x(2, 0) = std::get<2>(testSet[i]);
-		x(3, 0) = std::get<3>(testSet[i]);
-
+		Utils::IrisDataset::Get(testSet, x, i, 0);
 
 		x.col(0) -= avgi;
 		x.col(0) = x.col(0).cwiseProduct(istdi);
@@ -494,11 +446,11 @@ bool IrisLogisticRegressionTest()
 
 	std::cout << std::endl << "Training set:" << std::endl;
 
-	PrintStats(trainingSet, nrOutputs, logisticModel);
+	Utils::IrisDataset::PrintStats(trainingSet, nrOutputs, logisticModel);
 
 	std::cout << std::endl << "Test set:" << std::endl;
 
-	PrintStats(testSet, nrOutputs, logisticModel);
+	Utils::IrisDataset::PrintStats(testSet, nrOutputs, logisticModel);
 
 	return true;
 }

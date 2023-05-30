@@ -185,6 +185,53 @@ namespace Utils {
 			return res;
 		}
 
+
+		template<class Model> static void PrintStats(Model& neuralNetwork, const Eigen::MatrixXd& Inputs, const Eigen::MatrixXd& Outputs, int nrOutputs = 10)
+		{
+			std::vector<Utils::TestStatistics> stats(nrOutputs);
+
+			long long int correct = 0;
+
+			for (int i = 0; i < Inputs.cols(); ++i)
+			{
+				Eigen::VectorXd res = neuralNetwork.Predict(Inputs.col(i));
+
+				double limp = 0;
+				for (int j = 0; j < nrOutputs; ++j)
+					limp = std::max(limp, res(j));
+
+				int nr = -1;
+				for (int j = 0; j < nrOutputs; ++j)
+				{
+					stats[j].AddPrediction(res(j) >= limp, Outputs(j, i) > 0.5);
+
+					if (Outputs(j, i) > 0.5)
+					{
+						if (nr != -1)
+							std::cout << "Info from label ambiguous, should not happen: " << nr << " and " << j << std::endl;
+						nr = j;
+					}
+				}
+
+				int predn = -1;
+				for (int n = 0; n < nrOutputs; ++n)
+					if (res(n) >= limp)
+					{
+						if (predn != -1)
+							std::cout << "Ambiguous prediction: " << predn << " and " << n << std::endl;
+						predn = n;
+					}
+
+				if (predn == nr)
+					++correct;
+			}
+
+			for (int j = 0; j < nrOutputs; ++j)
+				stats[j].PrintStatistics(std::to_string(j));
+
+			std::cout << "Accuracy (% correct): " << 100.0 * static_cast<double>(correct) / static_cast<double>(Inputs.cols()) << "%" << std::endl;
+		}
+
 	private:
 		static uint32_t ntohlAlt(uint32_t val)
 		{
