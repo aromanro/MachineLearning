@@ -254,6 +254,8 @@ namespace NeuralNetworks
 				for (int j = 0; j < grad.rows(); ++j)
 					grad.row(j) *= dropoutMasks[index](j);
 			}
+
+			grad /= (1. - dropout[index]);
 		}
 
 
