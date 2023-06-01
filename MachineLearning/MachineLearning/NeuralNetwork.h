@@ -126,50 +126,21 @@ namespace NeuralNetworks
 		void ForwardBackwardStep(const Eigen::MatrixXd& input, const Eigen::MatrixXd& target)
 		{
 			const int batchSize = static_cast<int>(input.cols());
+			std::vector<Eigen::VectorXd> dropoutMasks(dropout.size());
 
 			// forward
 			Eigen::MatrixXd inp = input;
 
-			std::vector<Eigen::VectorXd> dropoutMasks(dropout.size());
-
 			// dropout for input
-			if (!dropout.empty() && dropout[0] > 0.)
-			{
-				const Eigen::RowVectorXd zeroRow = Eigen::RowVectorXd::Zero(inp.cols());
-				dropoutMasks[0] = Eigen::VectorXd::Ones(inp.rows());
-				for (int i = 0; i < inp.rows(); ++i)
-					if (distDrop(rde) < dropout[0])
-					{
-						inp.row(i) = zeroRow;
-						dropoutMasks[0](i) = 0.;
-					}
-
-				inp /= (1. - dropout[0]);
-			}
-
+			Dropout(0, inp, dropoutMasks);
+			
 			for (int i = 0; i < hiddenLayers.size(); ++i)
 			{
 				t.resize(hiddenLayers[i].getNrOutputs(), batchSize);
 				hiddenLayers[i].AddBatchNoParamsAdjustment(inp, t);
 				inp = hiddenLayers[i].getPrediction();
 
-				const int ip1 = i + 1;
-				if (dropout.size() > ip1 && dropout[ip1] > 0.)
-				{
-					const Eigen::RowVectorXd zeroRow = Eigen::RowVectorXd::Zero(inp.cols());
-					dropoutMasks[ip1] = Eigen::VectorXd::Ones(inp.rows());
-					for (int j = 0; j < inp.rows(); ++j)
-						if (distDrop(rde) < dropout[ip1])
-						{
-							inp.row(j) = zeroRow;
-							dropoutMasks[ip1](j) = 0.;
-						}
-
-					inp /= (1. - dropout[ip1]);
-
-					// change the prediction, too, for backpropagation 
-					hiddenLayers[i].setPrediction(inp);
-				}
+				Dropout(i + 1, inp, dropoutMasks);
 			}
 
 			// forward and backward for the last layer and backpropagate the gradient to the last hidden layer
@@ -247,6 +218,26 @@ namespace NeuralNetworks
 		}
 
 	private:
+		void Dropout(int index, Eigen::MatrixXd& inp, std::vector<Eigen::VectorXd>& dropoutMasks)
+		{
+			if (dropout.size() > index && dropout[index] > 0.)
+			{
+				const Eigen::RowVectorXd zeroRow = Eigen::RowVectorXd::Zero(inp.cols());
+				dropoutMasks[index] = Eigen::VectorXd::Ones(inp.rows());
+				for (int j = 0; j < inp.rows(); ++j)
+					if (distDrop(rde) < dropout[index])
+					{
+						inp.row(j) = zeroRow;
+						dropoutMasks[index](j) = 0.;
+					}
+
+				inp /= (1. - dropout[index]);
+
+				// change the prediction, too, for backpropagation 
+				if (index > 0) hiddenLayers[index - 1].setPrediction(inp);
+			}
+		}
+
 		void DropoutGradient(int index, Eigen::MatrixXd& grad, const std::vector<Eigen::VectorXd>& dropoutMasks)
 		{
 			if (dropout.size() > index && dropout[index] > 0.)
