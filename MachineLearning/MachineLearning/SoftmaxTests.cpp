@@ -72,7 +72,7 @@ bool SoftmaxTestsIris()
 	const int nrOutputs = 3;
 
 	// normalize the inputs
-	Norm::Normalizer normalizer(4, nrOutputs);
+	Norm::InputOutputNormalizer normalizer(4, nrOutputs);
 	Eigen::MatrixXd x(4, nrTraining);
 	Eigen::MatrixXd y(nrOutputs, nrTraining);
 
@@ -148,7 +148,7 @@ bool SoftmaxTestsMNIST()
 	std::shuffle(trainingRecords.begin(), trainingRecords.end(), g);
 
 	// normalize the data
-	Norm::Normalizer<> pixelsNormalizer(nrInputs, nrOutputs);
+	Norm::InputOutputNormalizer<> pixelsNormalizer(nrInputs, nrOutputs);
 
 	Eigen::MatrixXd trainInputs(nrInputs, trainingRecords.size());
 	Eigen::MatrixXd trainOutputs(nrOutputs, trainingRecords.size());

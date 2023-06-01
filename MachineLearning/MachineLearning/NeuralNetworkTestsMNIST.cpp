@@ -48,7 +48,7 @@ bool NeuralNetworkTestsMNIST()
 	trainingRecords.resize(nrTrainingRecords);
 
 	// normalize the data
-	Norm::Normalizer<> pixelsNormalizer(nrInputs, nrOutputs);
+	Norm::InputOutputNormalizer<> pixelsNormalizer(nrInputs, nrOutputs);
 
 	Eigen::MatrixXd trainInputs(nrInputs, trainingRecords.size());
 	Eigen::MatrixXd trainOutputs(nrOutputs, trainingRecords.size());
@@ -189,7 +189,7 @@ bool NeuralNetworkTestsMNIST()
 	std::cout << "Validation samples: " << validationInputs.cols() << std::endl;
 	std::cout << "Test samples: " << testInputs.cols() << std::endl;
 
-	const int nrEpochs = hasPretrained ? 4 : 15;
+	const int nrEpochs = hasPretrained ? 4 : 20; // bigger dropout, more epochs - less if starting from a pretrained model
 
 	if (nrEpochs > 0)
 	{

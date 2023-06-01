@@ -39,7 +39,7 @@ void NormalizeIris(std::vector<Utils::IrisDataset::Record>& trainingSet, std::ve
 	// normalize the inputs
 	const int nrTraining = static_cast<int>(trainingSet.size());
 
-	Norm::Normalizer normalizer(4, nrOutputs);
+	Norm::InputOutputNormalizer normalizer(4, nrOutputs);
 	Eigen::MatrixXd x(4, nrTraining);
 	Eigen::MatrixXd y(nrOutputs, nrTraining);
 

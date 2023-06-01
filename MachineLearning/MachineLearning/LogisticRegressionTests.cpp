@@ -165,7 +165,7 @@ bool MoreComplexLogisticRegressionTest()
 		std::vector<double> fy(nrPoints);
 
 		// this is done like this because I also want to test the normalizer class
-		Norm::Normalizer normalizer(2, 1);
+		Norm::InputOutputNormalizer normalizer(2, 1);
 
 		Eigen::MatrixXd x, y;
 		x.resize(2, nrPoints);
@@ -398,7 +398,7 @@ bool IrisLogisticRegressionTest()
 	const int nrOutputs = 1; // 1 only for Setosa, 3 if all three classes are to be predicted
 
 	// normalize the inputs
-	Norm::Normalizer normalizer(4, nrOutputs);
+	Norm::InputOutputNormalizer normalizer(4, nrOutputs);
 	Eigen::MatrixXd x(4, nrTraining);
 	Eigen::MatrixXd y(nrOutputs, nrTraining);
 
@@ -471,7 +471,7 @@ bool MNISTLogisticRegressionTests()
 		return false;
 
 	// normalize the data
-	Norm::Normalizer<> pixelsNormalizer(nrInputs, nrOutputs);
+	Norm::InputOutputNormalizer<> pixelsNormalizer(nrInputs, nrOutputs);
 
 	Eigen::MatrixXd trainInputs(nrInputs, trainingRecords.size());
 	Eigen::MatrixXd trainOutputs(nrOutputs, trainingRecords.size());
