@@ -322,14 +322,12 @@ namespace SGD
 
 
 	//*************************************************************************************************************************************************************************************************************************************************************************************************************
-	// Momentum
+	// Momentum Base
 	//*************************************************************************************************************************************************************************************************************************************************************************************************************
 
-
-
-	template<typename InputType = Eigen::VectorXd, typename OutputType = InputType, typename WeightsType = Eigen::MatrixXd, typename BatchInputType = Eigen::MatrixXd, typename BatchOutputType = BatchInputType, 
+	template<typename InputType = Eigen::VectorXd, typename OutputType = InputType, typename WeightsType = Eigen::MatrixXd, typename BatchInputType = Eigen::MatrixXd, typename BatchOutputType = BatchInputType,
 		class ActivationFunction = ActivationFunctions::IdentityFunction<OutputType>, class LossFunction = LossFunctions::L2Loss<OutputType>>
-	class MomentumSolver : public GradientDescentSolverBase<InputType, OutputType, WeightsType, BatchInputType, BatchOutputType, ActivationFunction, LossFunction>
+		class MomentumBaseSolver : public GradientDescentSolverBase<InputType, OutputType, WeightsType, BatchInputType, BatchOutputType, ActivationFunction, LossFunction>
 	{
 	public:
 		using BaseType = GradientDescentSolverBase<InputType, OutputType, WeightsType, BatchInputType, BatchOutputType, ActivationFunction, LossFunction>;
@@ -340,22 +338,6 @@ namespace SGD
 			mb = OutputType::Zero(szo);
 		}
 
-		BatchOutputType getWeightsAndBias(WeightsType& w, OutputType& b)
-		{
-			const BatchOutputType lossLinkGrad = BaseType::getGrad();
-
-			mb = beta * mb - BaseType::alpha * lossLinkGrad.rowwise().sum();
-
-			b += mb;
-
-			const WeightsType wAdj = lossLinkGrad * BaseType::input.transpose();
-			mW = beta * mW - BaseType::alpha * wAdj;
-
-			w += mW;
-
-			return lossLinkGrad;
-		}
-
 		int setParams(const std::vector<double>& p)
 		{
 			int i = BaseType::setParams(p);
@@ -369,13 +351,13 @@ namespace SGD
 
 		double beta = 0.5;
 
-	private:
+	protected:
 		WeightsType mW;
 		OutputType mb;
 	};
 
 	template<class ActivationFunction, class LossFunction>
-	class MomentumSolver<double, double, double, Eigen::RowVectorXd, Eigen::RowVectorXd, ActivationFunction, LossFunction> : public GradientDescentSolverBase<double, double, double, Eigen::RowVectorXd, Eigen::RowVectorXd, ActivationFunction, LossFunction>
+	class MomentumBaseSolver<double, double, double, Eigen::RowVectorXd, Eigen::RowVectorXd, ActivationFunction, LossFunction> : public GradientDescentSolverBase<double, double, double, Eigen::RowVectorXd, Eigen::RowVectorXd, ActivationFunction, LossFunction>
 	{
 	public:
 		using BaseType = GradientDescentSolverBase<double, double, double, Eigen::RowVectorXd, Eigen::RowVectorXd, ActivationFunction, LossFunction>;
@@ -386,22 +368,6 @@ namespace SGD
 			mb = 0;
 		}
 
-		Eigen::RowVectorXd getWeightsAndBias(double& w, double& b)
-		{
-			const Eigen::RowVectorXd lossLinkGrad = BaseType::getGrad();
-
-			mb = beta * mb - BaseType::alpha * lossLinkGrad.sum();
-			b += mb;
-
-			const double wAdj = (lossLinkGrad * BaseType::input.transpose())(0);
-			mW = beta * mW - BaseType::alpha * wAdj;
-
-			w += mW;
-
-			return lossLinkGrad;
-		}
-
-
 		int setParams(const std::vector<double>& p)
 		{
 			int i = BaseType::setParams(p);
@@ -415,9 +381,114 @@ namespace SGD
 
 		double beta = 0.5;
 
-	private:
+	protected:
 		double mW;
 		double mb;
+	};
+
+	//*************************************************************************************************************************************************************************************************************************************************************************************************************
+	// Momentum
+	//*************************************************************************************************************************************************************************************************************************************************************************************************************
+
+	template<typename InputType = Eigen::VectorXd, typename OutputType = InputType, typename WeightsType = Eigen::MatrixXd, typename BatchInputType = Eigen::MatrixXd, typename BatchOutputType = BatchInputType, 
+		class ActivationFunction = ActivationFunctions::IdentityFunction<OutputType>, class LossFunction = LossFunctions::L2Loss<OutputType>>
+	class MomentumSolver : public MomentumBaseSolver<InputType, OutputType, WeightsType, BatchInputType, BatchOutputType, ActivationFunction, LossFunction>
+	{
+	public:
+		using BaseType = MomentumBaseSolver<InputType, OutputType, WeightsType, BatchInputType, BatchOutputType, ActivationFunction, LossFunction>;
+
+		BatchOutputType getWeightsAndBias(WeightsType& w, OutputType& b)
+		{
+			const BatchOutputType lossLinkGrad = BaseType::BaseType::getGrad();
+
+			BaseType::mb = BaseType::beta * BaseType::mb - BaseType::BaseType::alpha * lossLinkGrad.rowwise().sum();
+
+			b += BaseType::mb;
+
+			const WeightsType wAdj = lossLinkGrad * BaseType::BaseType::input.transpose();
+			BaseType::mW = BaseType::beta * BaseType::mW - BaseType::BaseType::alpha * wAdj;
+
+			w += BaseType::mW;
+
+			return lossLinkGrad;
+		}
+	};
+
+	template<class ActivationFunction, class LossFunction>
+	class MomentumSolver<double, double, double, Eigen::RowVectorXd, Eigen::RowVectorXd, ActivationFunction, LossFunction> : public MomentumBaseSolver<double, double, double, Eigen::RowVectorXd, Eigen::RowVectorXd, ActivationFunction, LossFunction>
+	{
+	public:
+		using BaseType = MomentumBaseSolver<double, double, double, Eigen::RowVectorXd, Eigen::RowVectorXd, ActivationFunction, LossFunction>;
+
+		Eigen::RowVectorXd getWeightsAndBias(double& w, double& b)
+		{
+			const Eigen::RowVectorXd lossLinkGrad = BaseType::BaseType::getGrad();
+
+			BaseType::mb = BaseType::beta * BaseType::mb - BaseType::BaseType::alpha * lossLinkGrad.sum();
+			b += BaseType::mb;
+
+			const double wAdj = (lossLinkGrad * BaseType::BaseType::input.transpose())(0);
+			BaseType::mW = BaseType::beta * BaseType::mW - BaseType::BaseType::alpha * wAdj;
+
+			w += BaseType::mW;
+
+			return lossLinkGrad;
+		}
+	};
+
+
+	//*************************************************************************************************************************************************************************************************************************************************************************************************************
+	// Nesterov Momentum
+	//*************************************************************************************************************************************************************************************************************************************************************************************************************
+
+
+
+	template<typename InputType = Eigen::VectorXd, typename OutputType = InputType, typename WeightsType = Eigen::MatrixXd, typename BatchInputType = Eigen::MatrixXd, typename BatchOutputType = BatchInputType,
+		class ActivationFunction = ActivationFunctions::IdentityFunction<OutputType>, class LossFunction = LossFunctions::L2Loss<OutputType>>
+		class NesterovMomentumSolver : public MomentumBaseSolver<InputType, OutputType, WeightsType, BatchInputType, BatchOutputType, ActivationFunction, LossFunction>
+	{
+	public:
+		using BaseType = MomentumBaseSolver<InputType, OutputType, WeightsType, BatchInputType, BatchOutputType, ActivationFunction, LossFunction>;
+
+		
+		BatchOutputType getWeightsAndBias(WeightsType& w, OutputType& b)
+		{
+			const BatchOutputType lossLinkGrad = BaseType::BaseType::getGrad();
+
+			const OutputType mbPrev = BaseType::mb;
+			BaseType::mb = BaseType::beta * BaseType::mb - BaseType::BaseType::alpha * lossLinkGrad.rowwise().sum();
+			b += -BaseType::beta * mbPrev + (1. + BaseType::beta) * BaseType::mb;
+
+			const WeightsType mWPrev = BaseType::mW;
+			const WeightsType wAdj = lossLinkGrad * BaseType::BaseType::input.transpose();
+			BaseType::mW = BaseType::beta * BaseType::mW - BaseType::BaseType::alpha * wAdj;
+			w += -BaseType::beta * mWPrev + (1. + BaseType::beta) * BaseType::mW;
+
+			return lossLinkGrad;
+		}
+	};
+
+	template<class ActivationFunction, class LossFunction>
+	class NesterovMomentumSolver<double, double, double, Eigen::RowVectorXd, Eigen::RowVectorXd, ActivationFunction, LossFunction> : public MomentumBaseSolver<double, double, double, Eigen::RowVectorXd, Eigen::RowVectorXd, ActivationFunction, LossFunction>
+	{
+	public:
+		using BaseType = MomentumBaseSolver<double, double, double, Eigen::RowVectorXd, Eigen::RowVectorXd, ActivationFunction, LossFunction>;
+
+		Eigen::RowVectorXd getWeightsAndBias(double& w, double& b)
+		{
+			const Eigen::RowVectorXd lossLinkGrad = BaseType::BaseType::getGrad();
+
+			const double mbPrev = BaseType::mb;
+			BaseType::mb = BaseType::beta * BaseType::mb - BaseType::BaseType::alpha * lossLinkGrad.sum();
+			b += -BaseType::beta * mbPrev + (1. + BaseType::beta) * BaseType::mb;
+
+			const double wAdjPrev = BaseType::mW;
+			const double wAdj = (lossLinkGrad * BaseType::BaseType::input.transpose())(0);
+			BaseType::mW = BaseType::beta * BaseType::mW - BaseType::BaseType::alpha * wAdj;
+			w += -BaseType::beta * wAdjPrev + (1. + BaseType::beta) * BaseType::mW;
+
+			return lossLinkGrad;
+		}
 	};
 
 
