@@ -35,8 +35,6 @@ namespace Norm
 
 		void AddBatch(const BatchInputType& batchInput)
 		{
-			assert(batchInput.cols() == batchOutput.cols());
-
 			for (int i = 0; i < batchInput.cols(); ++i)
 			{
 				sumInput += batchInput.col(i);
