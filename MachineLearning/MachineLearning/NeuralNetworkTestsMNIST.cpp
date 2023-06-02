@@ -141,6 +141,7 @@ bool NeuralNetworkTestsMNIST()
 	const double lim = 10;
 
 	neuralNetwork.setParams({ alpha, lim, beta1, beta2 });
+	neuralNetwork.setBatchNormalizationParam(0.95); // turn on batch normalization
 
 
 	int startEpoch = 0; // set it to something different than 0 if you want to continue training

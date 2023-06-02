@@ -181,7 +181,7 @@ namespace NeuralNetworks
 					normalizer.AddBatch(inp);
 
 					avgi.emplace_back(normalizer.getAverage());
-					const Eigen::VectorXd eps = Eigen::VectorXd::Constant(avgi.size(), 1E-10);
+					const Eigen::VectorXd eps = Eigen::VectorXd::Constant(avgi.back().size(), 1E-10);
 					istdi.emplace_back((normalizer.getVariance() + eps).cwiseSqrt().cwiseInverse());
 
 					inp = inp.colwise() - avgi.back();
@@ -205,7 +205,7 @@ namespace NeuralNetworks
 				normalizer.AddBatch(inp);
 
 				avgi.emplace_back(normalizer.getAverage());
-				const Eigen::VectorXd eps = Eigen::VectorXd::Constant(avgi.size(), 1E-10);
+				const Eigen::VectorXd eps = Eigen::VectorXd::Constant(avgi.back().size(), 1E-10);
 				istdi.emplace_back((normalizer.getVariance() + eps).cwiseSqrt().cwiseInverse());
 
 				inp = inp.colwise() - avgi.back();
