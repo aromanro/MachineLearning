@@ -39,7 +39,7 @@ void NormalizeIris(std::vector<Utils::IrisDataset::Record>& trainingSet, std::ve
 	// normalize the inputs
 	const int nrTraining = static_cast<int>(trainingSet.size());
 
-	Norm::InputOutputNormalizer normalizer(4, nrOutputs);
+	Norm::Normalizer normalizer(4);
 	Eigen::MatrixXd x(4, nrTraining);
 	Eigen::MatrixXd y(nrOutputs, nrTraining);
 
@@ -52,10 +52,11 @@ void NormalizeIris(std::vector<Utils::IrisDataset::Record>& trainingSet, std::ve
 		if (nrOutputs > 2) y(2, i) = (std::get<4>(trainingSet[i]) == "Iris-virginica") ? 1 : 0;
 	}
 
-	normalizer.AddBatch(x, y);
+	normalizer.AddBatch(x);
 
-	const Eigen::MatrixXd avgi = normalizer.getAverageInput();
-	const Eigen::MatrixXd istdi = normalizer.getVarianceInput().cwiseSqrt().cwiseInverse();
+	const Eigen::VectorXd avgi = normalizer.getAverage();
+	const Eigen::VectorXd eps = Eigen::VectorXd::Constant(avgi.size(), 1E-10);
+	const Eigen::VectorXd istdi = (normalizer.getVariance() + eps).cwiseSqrt().cwiseInverse();
 
 	for (int i = 0; i < nrTraining; ++i)
 	{

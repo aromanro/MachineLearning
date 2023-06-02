@@ -164,8 +164,7 @@ bool MoreComplexLogisticRegressionTest()
 		std::vector<double> fx(nrPoints);
 		std::vector<double> fy(nrPoints);
 
-		// this is done like this because I also want to test the normalizer class
-		Norm::InputOutputNormalizer normalizer(2, 1);
+		Norm::Normalizer normalizer(2);
 
 		Eigen::MatrixXd x, y;
 		x.resize(2, nrPoints);
@@ -199,11 +198,12 @@ bool MoreComplexLogisticRegressionTest()
 
 		theFile.AddDataset(fx, fy);
 
-		normalizer.AddBatch(x, y);
+		normalizer.AddBatch(x);
 
 		// now convert the points using the normalizer
-		const Eigen::MatrixXd avgi = normalizer.getAverageInput();
-		const Eigen::MatrixXd istdi = normalizer.getVarianceInput().cwiseSqrt().cwiseInverse();
+		const Eigen::VectorXd avgi = normalizer.getAverage();
+		const Eigen::VectorXd eps = Eigen::VectorXd::Constant(avgi.size(), 1E-10);
+		const Eigen::VectorXd istdi = (normalizer.getVariance() + eps).cwiseSqrt().cwiseInverse();
 
 		std::cout << std::endl << "Averages for input:" << std::endl << avgi << std::endl << std::endl;
 		std::cout << "Inverse of std for input:" << std::endl << istdi << std::endl << std::endl;
@@ -398,7 +398,7 @@ bool IrisLogisticRegressionTest()
 	const int nrOutputs = 1; // 1 only for Setosa, 3 if all three classes are to be predicted
 
 	// normalize the inputs
-	Norm::InputOutputNormalizer normalizer(4, nrOutputs);
+	Norm::Normalizer normalizer(4);
 	Eigen::MatrixXd x(4, nrTraining);
 	Eigen::MatrixXd y(nrOutputs, nrTraining);
 
@@ -411,10 +411,11 @@ bool IrisLogisticRegressionTest()
 		if (nrOutputs > 2) y(2, i) = (std::get<4>(trainingSet[i]) == "Iris-virginica") ? 1 : 0;
 	}
 
-	normalizer.AddBatch(x, y);
+	normalizer.AddBatch(x);
 
-	const Eigen::MatrixXd avgi = normalizer.getAverageInput();
-	const Eigen::MatrixXd istdi = normalizer.getVarianceInput().cwiseSqrt().cwiseInverse();
+	const Eigen::VectorXd avgi = normalizer.getAverage();
+	const Eigen::VectorXd eps = Eigen::VectorXd::Constant(avgi.size(), 1E-10);
+	const Eigen::VectorXd istdi = (normalizer.getVariance() + eps).cwiseSqrt().cwiseInverse();
 
 	for (int i = 0; i < nrTraining; ++i)
 	{

@@ -7,13 +7,8 @@
 #include "Softmax.h"
 
 
-bool NeuralNetworkTestsMNIST()
+bool LoadData(std::vector<std::pair<std::vector<double>, uint8_t>>& trainingRecords, std::vector<std::pair<std::vector<double>, uint8_t>>& validationRecords, std::vector<std::pair<std::vector<double>, uint8_t>>& testRecords)
 {
-	std::cout << "MNIST Neural Network Tests, it will take a long time..." << std::endl;
-
-	const int nrInputs = 28 * 28;
-	const int nrOutputs = 10;
-
 	// load the data
 	Utils::MNISTDatabase minstTrainDataFiles;
 	if (!minstTrainDataFiles.Open()) {
@@ -21,7 +16,7 @@ bool NeuralNetworkTestsMNIST()
 		return false;
 	}
 
-	std::vector<std::pair<std::vector<double>, uint8_t>> trainingRecords = minstTrainDataFiles.ReadAllImagesAndLabels(true);
+	trainingRecords = minstTrainDataFiles.ReadAllImagesAndLabels(true);
 	minstTrainDataFiles.Close();
 
 	Utils::MNISTDatabase minstTestDataFiles;
@@ -32,7 +27,7 @@ bool NeuralNetworkTestsMNIST()
 		return false;
 	}
 
-	std::vector<std::pair<std::vector<double>, uint8_t>> testRecords = minstTestDataFiles.ReadAllImagesAndLabels();
+	testRecords = minstTestDataFiles.ReadAllImagesAndLabels();
 	minstTestDataFiles.Close();
 
 
@@ -44,11 +39,27 @@ bool NeuralNetworkTestsMNIST()
 
 	const int nrTrainingRecords = static_cast<int>(trainingRecords.size() * 0.95);
 
-	std::vector<std::pair<std::vector<double>, uint8_t>> validationRecords(trainingRecords.begin() + nrTrainingRecords, trainingRecords.end());
+	validationRecords = std::vector<std::pair<std::vector<double>, uint8_t>>(trainingRecords.begin() + nrTrainingRecords, trainingRecords.end());
 	trainingRecords.resize(nrTrainingRecords);
 
+	return true;
+}
+
+
+bool NeuralNetworkTestsMNIST()
+{
+	std::cout << "MNIST Neural Network Tests, it will take a long time..." << std::endl;
+
+	const int nrInputs = 28 * 28;
+	const int nrOutputs = 10;
+
+	std::vector<std::pair<std::vector<double>, uint8_t>> trainingRecords, validationRecords, testRecords;
+	if (!LoadData(trainingRecords, validationRecords, testRecords))
+		return false;
+
+
 	// normalize the data
-	Norm::InputOutputNormalizer<> pixelsNormalizer(nrInputs, nrOutputs);
+	Norm::Normalizer<> pixelsNormalizer(nrInputs);
 
 	Eigen::MatrixXd trainInputs(nrInputs, trainingRecords.size());
 	Eigen::MatrixXd trainOutputs(nrOutputs, trainingRecords.size());
@@ -65,7 +76,7 @@ bool NeuralNetworkTestsMNIST()
 		++rec;
 	}
 
-	pixelsNormalizer.AddBatch(trainInputs, trainOutputs);
+	pixelsNormalizer.AddBatch(trainInputs);
 
 
 	Eigen::MatrixXd validationInputs(nrInputs, validationRecords.size());
@@ -106,9 +117,9 @@ bool NeuralNetworkTestsMNIST()
 
 	// only inputs and only shifting the average
 
-	trainInputs = trainInputs.colwise() - pixelsNormalizer.getAverageInput();
-	validationInputs = validationInputs.colwise() - pixelsNormalizer.getAverageInput();
-	testInputs = testInputs.colwise() - pixelsNormalizer.getAverageInput();
+	trainInputs = trainInputs.colwise() - pixelsNormalizer.getAverage();
+	validationInputs = validationInputs.colwise() - pixelsNormalizer.getAverage();
+	testInputs = testInputs.colwise() - pixelsNormalizer.getAverage();
 
 	// create the model
 	// two hidden layers works quite well: { nrInputs, 1000, 100, nrOutputs } - use XavierUniform weights initializer for it - over 98%
