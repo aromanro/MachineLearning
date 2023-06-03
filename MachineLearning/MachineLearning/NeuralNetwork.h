@@ -28,7 +28,7 @@ namespace NeuralNetworks
 		// neurons contains the number of neurons in each layer including the input layer 
 		// which is not explicitly represented in the implementation, but the number is used for the number of inputs
 		explicit MultilayerPerceptron(const std::vector<int>& neurons, const std::vector<double>& drop = {})
-			: batchNormParam(1.)
+			: batchNormParam(1.), noBatchNormalizationOnInput(true)
 		{
 			if (neurons.empty()) return;
 			else if (neurons.size() == 1)
@@ -105,6 +105,21 @@ namespace NeuralNetworks
 			batchNormParam = val;
 		}
 
+		double getBatchNormalizationParam() const
+		{
+			return batchNormParam;
+		}
+
+		void setNoBatchNormalizationOnInput(bool val = true)
+		{
+			noBatchNormalizationOnInput = val;
+		}
+
+		bool getNoBatchNormalizationOnInput() const
+		{
+			return noBatchNormalizationOnInput;
+		}
+
 		void Initialize(Initializers::WeightsInitializerInterface& initializer)
 		{
 			InitializeLastLayer(initializer);
@@ -128,13 +143,13 @@ namespace NeuralNetworks
 
 			for (int i = 0; i < hiddenLayers.size(); ++i)
 			{
-				if (batchNormParam != 1.)
+				if (batchNormParam != 1. && !(i == 0 && noBatchNormalizationOnInput))
 					v = (v - batchNormMeans[i]).cwiseProduct(batchNormInvStds[i]);
 				
 				v = hiddenLayers[i].Predict(v);
 			}
 
-			if (batchNormParam != 1.)
+			if (batchNormParam != 1. && !(hiddenLayers.empty() && noBatchNormalizationOnInput))
 				v = (v - batchNormMeans.back()).cwiseProduct(batchNormInvStds.back());
 
 			return lastLayer.Predict(v);
@@ -177,18 +192,26 @@ namespace NeuralNetworks
 			{
 				if (batchNormParam != 1.)
 				{
-					Norm::Normalizer normalizer(static_cast<int>(inp.rows()));
-					normalizer.AddBatch(inp);
+					if (i != 0 || !noBatchNormalizationOnInput)
+					{
+						Norm::Normalizer normalizer(static_cast<int>(inp.rows()));
+						normalizer.AddBatch(inp);
 
-					avgi.emplace_back(normalizer.getAverage());
-					const Eigen::VectorXd eps = Eigen::VectorXd::Constant(avgi.back().size(), 1E-10);
-					istdi.emplace_back((normalizer.getVariance() + eps).cwiseSqrt().cwiseInverse());
+						avgi.emplace_back(normalizer.getAverage());
+						const Eigen::VectorXd eps = Eigen::VectorXd::Constant(avgi.back().size(), 1E-10);
+						istdi.emplace_back((normalizer.getVariance() + eps).cwiseSqrt().cwiseInverse());
 
-					inp = inp.colwise() - avgi.back();
-					inp = inp.array().colwise() * istdi.back().array();
-					
-					batchNormMeans[i] = batchNormParam * batchNormMeans[i] + oneMinusBatchNormParam * avgi.back();
-					batchNormInvStds[i] = batchNormParam * batchNormInvStds[i] + oneMinusBatchNormParam * istdi.back();
+						inp = inp.colwise() - avgi.back();
+						inp = inp.array().colwise() * istdi.back().array();
+
+						batchNormMeans[i] = batchNormParam * batchNormMeans[i] + oneMinusBatchNormParam * avgi.back();
+						batchNormInvStds[i] = batchNormParam * batchNormInvStds[i] + oneMinusBatchNormParam * istdi.back();
+					}
+					else
+					{
+						avgi.emplace_back(Eigen::VectorXd::Zero(inp.rows()));
+						istdi.emplace_back(Eigen::VectorXd::Ones(inp.rows()));
+					}
 				}
 
 				t.resize(hiddenLayers[i].getNrOutputs(), batchSize);
@@ -199,7 +222,7 @@ namespace NeuralNetworks
 			}
 
 
-			if (batchNormParam != 1.)
+			if (batchNormParam != 1. && !(hiddenLayers.empty() && noBatchNormalizationOnInput))
 			{
 				Norm::Normalizer normalizer(static_cast<int>(inp.rows()));
 				normalizer.AddBatch(inp);
@@ -223,7 +246,7 @@ namespace NeuralNetworks
 			for (int i = static_cast<int>(hiddenLayers.size() - 1); i > 0; --i)
 			{
 				const int ip1 = i + 1;
-				if (batchNormParam != 1.)
+				if (batchNormParam != 1. && !(i == 0 && noBatchNormalizationOnInput))
 					grad = grad.array().colwise() * istdi[ip1].array();
 
 				// zero out the gradient for the dropped out neurons
@@ -237,7 +260,7 @@ namespace NeuralNetworks
 			// TODO: this could be part of a larger network, even as a single 'layer', before it there could be more layers, for example a convolutional network, in such a case the gradient needs to be backpropagated
 			if (!hiddenLayers.empty())
 			{
-				if (batchNormParam != 1.)
+				if (batchNormParam != 1. && !(hiddenLayers.empty() && noBatchNormalizationOnInput))
 					grad = grad.array().colwise() * istdi[1].array();
 
 				DropoutGradient(1, grad, dropoutMasks);
@@ -401,6 +424,7 @@ namespace NeuralNetworks
 		Eigen::MatrixXd t; // bogus, used only for its size during forward-backward step
 
 		double batchNormParam;
+		bool noBatchNormalizationOnInput;
 		std::vector<Eigen::VectorXd> batchNormMeans;
 		std::vector<Eigen::VectorXd> batchNormInvStds;
 	};

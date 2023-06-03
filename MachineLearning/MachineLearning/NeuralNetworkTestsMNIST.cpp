@@ -131,7 +131,9 @@ bool NeuralNetworkTestsMNIST()
 	// uncomment this and the commented template parameter if you want to try it, but it won't start from a pretrained network that had leaky relu (as the one I commited on github) 
 	//typedef  SGD::AdamSolver<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, Eigen::MatrixXd, Eigen::MatrixXd, ActivationFunctions::TanhFunction<>> HiddenLayerAlternative;
 
-	NeuralNetworks::MultilayerPerceptron<SGD::SoftmaxRegressionAdamSolver/*, HiddenLayerAlternative*/> neuralNetwork(/*{nrInputs, 1000, 100, nrOutputs}*/{ nrInputs, 1000, 800, 400, 100, nrOutputs }, { 0.2, 0.2, 0.1, 0, 0 }); // don't use dropout right before the softmax layer
+	NeuralNetworks::MultilayerPerceptron<SGD::SoftmaxRegressionAdamSolver/*, HiddenLayerAlternative*/> neuralNetwork(/*{nrInputs, 1000, 100, nrOutputs}*/{ nrInputs, 1000, 800, 400, 100, nrOutputs }, { 0.2, /*0.2, 0.1*/0, 0, 0, 0 }); // don't use dropout right before the softmax layer
+	// also dropout is less useful if batch normalization is used, so I commented out what I used without batch normalization, using zero instead
+	// the only place where I allow it is for the first layer, it's like adding noise to the input
 
 	// initialize the model
 	double alpha = 0.0015; // non const, so it can be adjusted
@@ -140,8 +142,9 @@ bool NeuralNetworkTestsMNIST()
 	const double beta2 = 0.95;
 	const double lim = 10;
 
+	//alpha *= 10; // if batch normalization is used, the learning rate should be higher
 	neuralNetwork.setParams({ alpha, lim, beta1, beta2 });
-	neuralNetwork.setBatchNormalizationParam(0.95); // turn on batch normalization
+	neuralNetwork.setBatchNormalizationParam(0.995); // turn on batch normalization
 
 
 	int startEpoch = 0; // set it to something different than 0 if you want to continue training
