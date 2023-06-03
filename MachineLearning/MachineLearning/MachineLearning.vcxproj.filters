@@ -122,5 +122,8 @@
     <ClInclude Include="MNISTDatabase.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Ensemble.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
