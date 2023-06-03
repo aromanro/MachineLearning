@@ -179,9 +179,6 @@ namespace NeuralNetworks
 				istdi.reserve(batchNormInvStds.size());
 			}
 
-
-			const double oneMinusBatchNormParam = 1. - batchNormParam;
-
 			// forward
 			Eigen::MatrixXd inp = input;
 
@@ -190,30 +187,8 @@ namespace NeuralNetworks
 			
 			for (int i = 0; i < hiddenLayers.size(); ++i)
 			{
-				if (batchNormParam != 1.)
-				{
-					if (i != 0 || !noBatchNormalizationOnInput)
-					{
-						Norm::Normalizer normalizer(static_cast<int>(inp.rows()));
-						normalizer.AddBatch(inp);
-
-						avgi.emplace_back(normalizer.getAverage());
-						const Eigen::VectorXd eps = Eigen::VectorXd::Constant(avgi.back().size(), 1E-10);
-						istdi.emplace_back((normalizer.getVariance() + eps).cwiseSqrt().cwiseInverse());
-
-						inp = inp.colwise() - avgi.back();
-						inp = inp.array().colwise() * istdi.back().array();
-
-						batchNormMeans[i] = batchNormParam * batchNormMeans[i] + oneMinusBatchNormParam * avgi.back();
-						batchNormInvStds[i] = batchNormParam * batchNormInvStds[i] + oneMinusBatchNormParam * istdi.back();
-					}
-					else
-					{
-						avgi.emplace_back(Eigen::VectorXd::Zero(inp.rows()));
-						istdi.emplace_back(Eigen::VectorXd::Ones(inp.rows()));
-					}
-				}
-
+				BatchNormalize(avgi, istdi, i, inp);
+				
 				t.resize(hiddenLayers[i].getNrOutputs(), batchSize);
 				hiddenLayers[i].AddBatchNoParamsAdjustment(inp, t);
 				inp = hiddenLayers[i].getPrediction();
@@ -221,22 +196,7 @@ namespace NeuralNetworks
 				Dropout(i + 1, inp, dropoutMasks);
 			}
 
-
-			if (batchNormParam != 1. && !(hiddenLayers.empty() && noBatchNormalizationOnInput))
-			{
-				Norm::Normalizer normalizer(static_cast<int>(inp.rows()));
-				normalizer.AddBatch(inp);
-
-				avgi.emplace_back(normalizer.getAverage());
-				const Eigen::VectorXd eps = Eigen::VectorXd::Constant(avgi.back().size(), 1E-10);
-				istdi.emplace_back((normalizer.getVariance() + eps).cwiseSqrt().cwiseInverse());
-
-				inp = inp.colwise() - avgi.back();
-				inp = inp.array().colwise() * istdi.back().array();
-
-				batchNormMeans.back() = batchNormParam * batchNormMeans.back() + oneMinusBatchNormParam * avgi.back();
-				batchNormInvStds.back() = batchNormParam * batchNormInvStds.back() + oneMinusBatchNormParam * istdi.back();
-			}
+			BatchNormalize(avgi, istdi, static_cast<int>(hiddenLayers.size()), inp);
 
 			// forward and backward for the last layer and backpropagate the gradient to the last hidden layer
 			Eigen::MatrixXd grad = lastLayer.BackpropagateBatch(lastLayer.AddBatchWithParamsAdjusment(inp, target));
@@ -246,8 +206,8 @@ namespace NeuralNetworks
 			for (int i = static_cast<int>(hiddenLayers.size() - 1); i > 0; --i)
 			{
 				const int ip1 = i + 1;
-				if (batchNormParam != 1. && !(i == 0 && noBatchNormalizationOnInput))
-					grad = grad.array().colwise() * istdi[ip1].array();
+
+				BatchNormalizeGradient(istdi, ip1, grad);
 
 				// zero out the gradient for the dropped out neurons
 				DropoutGradient(ip1, grad, dropoutMasks);
@@ -260,8 +220,7 @@ namespace NeuralNetworks
 			// TODO: this could be part of a larger network, even as a single 'layer', before it there could be more layers, for example a convolutional network, in such a case the gradient needs to be backpropagated
 			if (!hiddenLayers.empty())
 			{
-				if (batchNormParam != 1. && !(hiddenLayers.empty() && noBatchNormalizationOnInput))
-					grad = grad.array().colwise() * istdi[1].array();
+				BatchNormalizeGradient(istdi, 1, grad);
 
 				DropoutGradient(1, grad, dropoutMasks);
 
@@ -381,6 +340,41 @@ namespace NeuralNetworks
 		}
 
 	private:
+		void BatchNormalize(std::vector<Eigen::VectorXd>& avgi, std::vector<Eigen::VectorXd>& istdi, int i, Eigen::MatrixXd& inp)
+		{
+			if (batchNormParam != 1.)
+			{
+				if (i != 0 || !noBatchNormalizationOnInput)
+				{
+					const double oneMinusBatchNormParam = 1. - batchNormParam;
+
+					Norm::Normalizer normalizer(static_cast<int>(inp.rows()));
+					normalizer.AddBatch(inp);
+
+					avgi.emplace_back(normalizer.getAverage());
+					const Eigen::VectorXd eps = Eigen::VectorXd::Constant(avgi.back().size(), 1E-10);
+					istdi.emplace_back((normalizer.getVariance() + eps).cwiseSqrt().cwiseInverse());
+
+					inp = inp.colwise() - avgi.back();
+					inp = inp.array().colwise() * istdi.back().array();
+
+					batchNormMeans[i] = batchNormParam * batchNormMeans[i] + oneMinusBatchNormParam * avgi.back();
+					batchNormInvStds[i] = batchNormParam * batchNormInvStds[i] + oneMinusBatchNormParam * istdi.back();
+				}
+				else
+				{
+					avgi.emplace_back(Eigen::VectorXd::Zero(inp.rows()));
+					istdi.emplace_back(Eigen::VectorXd::Ones(inp.rows()));
+				}
+			}
+		}
+
+		void BatchNormalizeGradient(const std::vector<Eigen::VectorXd>& istdi, int index, Eigen::MatrixXd& grad)
+		{
+			if (batchNormParam != 1.)
+				grad = grad.array().colwise() * istdi[index].array();
+		}
+
 		void Dropout(int index, Eigen::MatrixXd& inp, std::vector<Eigen::VectorXd>& dropoutMasks)
 		{
 			if (dropout.size() > index && dropout[index] > 0.)
