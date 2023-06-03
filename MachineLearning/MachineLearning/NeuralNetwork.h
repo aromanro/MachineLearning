@@ -292,6 +292,7 @@ namespace NeuralNetworks
 			{
 				batchNormParam = 1.;
 				is >> batchNormParam;
+				is.ignore();
 			}
 			catch (...)
 			{
