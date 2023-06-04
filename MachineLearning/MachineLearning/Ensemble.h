@@ -12,15 +12,17 @@ public:
 		weights.push_back(weight);
 	}
 
-	OutputType predict(const InputType& x)
+	OutputType Predict(const InputType& x)
 	{
 		OutputType prediction;
 		if (models.size() == 0)
 			return prediction;
 		
-		prediction = weights[0] * models[0]->predict(x);
+		prediction = weights[0] * models[0]->Predict(x);
 		for (int i = 1; i < models.size(); ++i)
-			prediction += weights[i] * models[i]->predict(x);
+			prediction += weights[i] * models[i]->Predict(x);
+
+		prediction.normalize();
 
 		return prediction;
 	}

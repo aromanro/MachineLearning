@@ -5,35 +5,13 @@
 #include "TestStatistics.h"
 #include "MNISTDatabase.h"
 #include "Softmax.h"
+#include "Ensemble.h"
 
 
-bool LoadData(std::vector<std::pair<std::vector<double>, uint8_t>>& trainingRecords, std::vector<std::pair<std::vector<double>, uint8_t>>& validationRecords, std::vector<std::pair<std::vector<double>, uint8_t>>& testRecords)
+bool LoadData(std::vector<std::pair<std::vector<double>, uint8_t>>& trainingRecords, std::vector<std::pair<std::vector<double>, uint8_t>>& validationRecords, std::vector<std::pair<std::vector<double>, uint8_t>>& testRecords, bool augment = false)
 {
-	// load the data
-	Utils::MNISTDatabase minstTrainDataFiles;
-	if (!minstTrainDataFiles.Open()) {
-		std::cout << "Couldn't load train data" << std::endl;
+	if (!LoadData(trainingRecords, testRecords, augment))
 		return false;
-	}
-
-	trainingRecords = minstTrainDataFiles.ReadAllImagesAndLabels(true);
-	minstTrainDataFiles.Close();
-
-	Utils::MNISTDatabase minstTestDataFiles;
-	minstTestDataFiles.setImagesFileName("emnist-digits-test-images-idx3-ubyte");
-	minstTestDataFiles.setLabelsFileName("emnist-digits-test-labels-idx1-ubyte");
-	if (!minstTestDataFiles.Open()) {
-		std::cout << "Couldn't load test data" << std::endl;
-		return false;
-	}
-
-	testRecords = minstTestDataFiles.ReadAllImagesAndLabels();
-	minstTestDataFiles.Close();
-
-
-	std::random_device rd;
-	std::mt19937 g(rd());
-	std::shuffle(trainingRecords.begin(), trainingRecords.end(), g);
 
 	// split the training data into training and validation sets
 
@@ -54,15 +32,22 @@ bool NeuralNetworkTestsMNIST()
 	const int nrOutputs = 10;
 
 	std::vector<std::pair<std::vector<double>, uint8_t>> trainingRecords, validationRecords, testRecords;
-	if (!LoadData(trainingRecords, validationRecords, testRecords))
+	if (!LoadData(trainingRecords, validationRecords, testRecords, true))
 		return false;
 
 
 	// normalize the data
-	Norm::Normalizer<> pixelsNormalizer(nrInputs);
 
 	Eigen::MatrixXd trainInputs(nrInputs, trainingRecords.size());
 	Eigen::MatrixXd trainOutputs(nrOutputs, trainingRecords.size());
+
+	Eigen::MatrixXd validationInputs(nrInputs, validationRecords.size());
+	Eigen::MatrixXd validationOutputs(nrOutputs, validationRecords.size());
+
+	Eigen::MatrixXd testInputs(nrInputs, testRecords.size());
+	Eigen::MatrixXd testOutputs(nrOutputs, testRecords.size());
+
+	Norm::Normalizer<> pixelsNormalizer(nrInputs);
 
 	int rec = 0;
 	for (const auto& record : trainingRecords)
@@ -79,14 +64,6 @@ bool NeuralNetworkTestsMNIST()
 	pixelsNormalizer.AddBatch(trainInputs);
 
 
-	Eigen::MatrixXd validationInputs(nrInputs, validationRecords.size());
-	Eigen::MatrixXd validationOutputs(nrOutputs, validationRecords.size());
-	Eigen::MatrixXd validationRes(nrOutputs, validationRecords.size());
-
-
-	Eigen::MatrixXd trainStatsOutputs(nrOutputs, validationRecords.size());
-	Eigen::MatrixXd trainStatsRes(nrOutputs, validationRecords.size());
-
 	rec = 0;
 	for (const auto& record : validationRecords)
 	{
@@ -98,9 +75,6 @@ bool NeuralNetworkTestsMNIST()
 		++rec;
 	}
 
-
-	Eigen::MatrixXd testInputs(nrInputs, testRecords.size());
-	Eigen::MatrixXd testOutputs(nrOutputs, testRecords.size());
 
 
 	rec = 0;
@@ -131,7 +105,9 @@ bool NeuralNetworkTestsMNIST()
 	// uncomment this and the commented template parameter if you want to try it, but it won't start from a pretrained network that had leaky relu (as the one I commited on github) 
 	//typedef  SGD::AdamSolver<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, Eigen::MatrixXd, Eigen::MatrixXd, ActivationFunctions::TanhFunction<>> HiddenLayerAlternative;
 
-	NeuralNetworks::MultilayerPerceptron<SGD::SoftmaxRegressionAdamSolver/*, HiddenLayerAlternative*/> neuralNetwork(/*{nrInputs, 1000, 100, nrOutputs}*/{ nrInputs, 1000, 800, 400, 100, nrOutputs }, { 0.2, /*0.2, 0.1*/0, 0, 0, 0 }); // don't use dropout right before the softmax layer
+	typedef NeuralNetworks::MultilayerPerceptron<SGD::SoftmaxRegressionAdamSolver/*, HiddenLayerAlternative*/> NeuralNetworkType;
+
+	NeuralNetworkType neuralNetwork(/*{nrInputs, 1000, 100, nrOutputs}*/{ nrInputs, 1000, 800, 400, 100, nrOutputs }, { 0.2, /*0.2, 0.1*/0, 0, 0, 0 }); // don't use dropout right before the softmax layer
 	// also dropout is less useful if batch normalization is used, so I commented out what I used without batch normalization, using zero instead
 	// the only place where I allow it is for the first layer, it's like adding noise to the input
 
@@ -204,6 +180,9 @@ bool NeuralNetworkTestsMNIST()
 	std::cout << "Validation samples: " << validationInputs.cols() << std::endl;
 	std::cout << "Test samples: " << testInputs.cols() << std::endl;
 
+	// if nrEpochs is 0 if 'has pretrained' is true it means: do not train further the pretrained model (it has ~99.35% accuracy on the test set)
+	// just testing together with some other models in an ensemble to see if it can be improved
+
 	const int nrEpochs = hasPretrained ? 4 : 20; // bigger dropout, more epochs - less if starting from a pretrained model
 
 	if (nrEpochs > 0)
@@ -214,6 +193,12 @@ bool NeuralNetworkTestsMNIST()
 		std::vector<double> validationLosses(nrEpochs);
 
 		std::vector<double> indices(nrEpochs);
+
+
+		Eigen::MatrixXd validationRes(nrOutputs, validationRecords.size());
+
+		Eigen::MatrixXd trainStatsOutputs(nrOutputs, validationRecords.size());
+		Eigen::MatrixXd trainStatsRes(nrOutputs, validationRecords.size());
 
 		long long int bcnt = 0;
 		for (int epoch = startEpoch; epoch < startEpoch + nrEpochs; ++epoch)
@@ -374,6 +359,35 @@ bool NeuralNetworkTestsMNIST()
 	std::cout << std::endl << "Test set:" << std::endl;
 
 	Utils::MNISTDatabase::PrintStats(neuralNetwork, testInputs, testOutputs, nrOutputs);
+
+	std::cout << std::endl;
+
+	// I'll have to train better models for this, for now I obtain only a slightly better result than with a single network, because the majority of the others are not that good as the last 'pretrained' one
+
+	/*
+	NeuralNetworkType neuralNetwork1({ nrInputs, 1000, 800, 400, 100, nrOutputs });
+	NeuralNetworkType neuralNetwork2({ nrInputs, 1000, 800, 400, 100, nrOutputs });
+	NeuralNetworkType neuralNetwork3({ nrInputs, 1000, 800, 400, 100, nrOutputs });
+	NeuralNetworkType neuralNetwork4({ nrInputs, 1000, 800, 400, 100, nrOutputs });
+
+	if (!neuralNetwork1.loadNetwork("../../data/pretrained1.net")) return false;
+	if (!neuralNetwork2.loadNetwork("../../data/pretrained2.net")) return false;
+	if (!neuralNetwork3.loadNetwork("../../data/pretrained3.net")) return false;
+	if (!neuralNetwork4.loadNetwork("../../data/pretrained4.net")) return false;
+
+	Ensemble<NeuralNetworkType> ensemble;
+
+	// a better weight could be estimated from training/validation set, but since all have > 99% accuracy, I won't bother
+	ensemble.addModel(&neuralNetwork, 0.3);
+	ensemble.addModel(&neuralNetwork1, 0.5 / 3.);
+	ensemble.addModel(&neuralNetwork2, 0.5 / 3.);
+	ensemble.addModel(&neuralNetwork3, 0.5 / 3.);
+	ensemble.addModel(&neuralNetwork4, 0.2);
+
+	std::cout << std::endl << "Ensemble on the test set:" << std::endl;
+
+	Utils::MNISTDatabase::PrintStats(ensemble, testInputs, testOutputs, nrOutputs);
+	*/
 
 	return true;
 }

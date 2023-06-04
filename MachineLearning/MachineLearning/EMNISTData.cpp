@@ -2,7 +2,7 @@
 #include "MNISTDatabase.h"
 
 
-bool LoadData(std::vector<std::pair<std::vector<double>, uint8_t>>& trainingRecords, std::vector<std::pair<std::vector<double>, uint8_t>>& testRecords)
+bool LoadData(std::vector<std::pair<std::vector<double>, uint8_t>>& trainingRecords, std::vector<std::pair<std::vector<double>, uint8_t>>& testRecords, bool augment)
 {
 	// load the data
 	Utils::MNISTDatabase minstTrainDataFiles;
@@ -11,7 +11,7 @@ bool LoadData(std::vector<std::pair<std::vector<double>, uint8_t>>& trainingReco
 		return false;
 	}
 
-	trainingRecords = minstTrainDataFiles.ReadAllImagesAndLabels();
+	trainingRecords = minstTrainDataFiles.ReadAllImagesAndLabels(augment);
 	minstTrainDataFiles.Close();
 
 	Utils::MNISTDatabase minstTestDataFiles;
