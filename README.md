@@ -403,7 +403,9 @@ It reached something like 99.98% accuracy or so on the training set, while havin
 
 ### Changes since the above were written
 
-The results and charts mentioned above for the EMNIST dataset were generated with an issue in dropout: I forgot to 'drop out' the values of the gradient to avoid changing the parameters for the neurons that were dropped out in the forward pass. The network learned quite well even so... I changed it now and it seems that I can get over 99% accuracy (for now only ~99.01% on the test set for the committed 'pretrained' variant).
+The results and charts mentioned above for the EMNIST dataset were generated with an issue in dropout: I forgot to 'drop out' the values of the gradient to avoid changing the parameters for the neurons that were dropped out in the forward pass. The network learned quite well even so... I changed it now and after that I could get over 99% accuracy (not much more).
+
+Then I added batch normalization and dropped the dropout (they tend to not work well together) except on the input layer and got ~99.35% accuracy. I also added an Ensemble class that allows using an ensemble of models to improve the results a little. Because I didn't want to complicate things too much, I added the batch normalization after the activation, unlike the original paper. Seems to work ok that way, too.
 
 ### Bibliography
 
