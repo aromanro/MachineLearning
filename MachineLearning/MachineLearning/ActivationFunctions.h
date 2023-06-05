@@ -8,14 +8,27 @@
 
 namespace ActivationFunctions
 {
-
-	template<typename InputOutputType = Eigen::VectorXd> class IdentityFunction
+	template <typename InputOutputType = Eigen::VectorXd> class BaseIdentity
 	{
 	public:
-		IdentityFunction(int size = 1)
+		BaseIdentity(int size = 1)
 		{
 		}
 
+		static bool isDerivativeJacobianMatrix()
+		{
+			return false;
+		}
+
+		static std::string getName()
+		{
+			return "Identity";
+		}
+	};
+
+	template<typename InputOutputType = Eigen::VectorXd> class IdentityFunction : public BaseIdentity<InputOutputType>
+	{
+	public:
 		const InputOutputType& operator()(const InputOutputType& input) const
 		{
 			return input;
@@ -25,25 +38,11 @@ namespace ActivationFunctions
 		{
 			return InputOutputType::Ones(input.size());
 		}
-
-		static bool isDerivativeJacobianMatrix()
-		{
-			return false;
-		}
-
-		static std::string getName()
-		{
-			return "Identity";
-		}
 	};
 
-	template<> class IdentityFunction<double>
+	template<> class IdentityFunction<double> : public BaseIdentity<double>
 	{
 	public:
-		IdentityFunction(int size = 1)
-		{
-		}
-
 		const double& operator()(const double& input) const
 		{
 			return input;
@@ -53,7 +52,11 @@ namespace ActivationFunctions
 		{
 			return 1;
 		}
+	};
 
+	template<typename InputOutputType = Eigen::VectorXd> class BaseSigmoid
+	{
+	public:
 		static bool isDerivativeJacobianMatrix()
 		{
 			return false;
@@ -61,38 +64,43 @@ namespace ActivationFunctions
 
 		static std::string getName()
 		{
-			return "Identity";
+			return "Sigmoid";
 		}
+
+	protected:
+		InputOutputType beta0;
+		InputOutputType beta;
 	};
 
-
-	template<typename InputOutputType = Eigen::VectorXd, typename WeightsType = InputOutputType> class SigmoidFunction
+	template<typename InputOutputType = Eigen::VectorXd, typename WeightsType = InputOutputType> class SigmoidFunction : public BaseSigmoid<InputOutputType>
 	{
 	public:
+		using BaseType = BaseSigmoid<InputOutputType>;
+
 		SigmoidFunction(int size = 1)
 		{
-			beta0 = InputOutputType::Zero(size);
-			beta = InputOutputType::Ones(size);
+			BaseType::beta0 = InputOutputType::Zero(size);
+			BaseType::beta = InputOutputType::Ones(size);
 		}
 
 		void setParams(const WeightsType& b0, const WeightsType& b)
 		{
-			beta0 = b0;
-			beta = b;
+			BaseType::beta0 = b0;
+			BaseType::beta = b;
 		}
 
 		InputOutputType operator()(const InputOutputType& input)
 		{
-			if (beta0.size() != input.size() || beta.size() != input.size())
+			if (BaseType::beta0.size() != input.size() || BaseType::beta.size() != input.size())
 			{
-				beta0 = InputOutputType::Zero(input.size());
-				beta = InputOutputType::Ones(input.size());
+				BaseType::beta0 = InputOutputType::Zero(input.size());
+				BaseType::beta = InputOutputType::Ones(input.size());
 			}
 
 			InputOutputType v(input.size());
 
 			for (int i = 0; i < input.size(); ++i)
-				v(i) = exp(-(beta(i) * input(i) + beta0(i)));
+				v(i) = exp(-(BaseType::beta(i) * input(i) + BaseType::beta0(i)));
 
 			return (InputOutputType::Ones(input.size()) + v).cwiseInverse();
 		}
@@ -103,34 +111,22 @@ namespace ActivationFunctions
 
 			return fx.cwiseProduct(InputOutputType::Ones(fx.rows(), fx.cols()) - fx);
 		}
-
-		static bool isDerivativeJacobianMatrix()
-		{
-			return false;
-		}
-
-		static std::string getName()
-		{
-			return "Sigmoid";
-		}
-
-	private:
-		InputOutputType beta0;
-		InputOutputType beta;
 	};
 
-	template<> class SigmoidFunction<double, double>
+	template<> class SigmoidFunction<double, double> : public BaseSigmoid<double>
 	{
 	public:
+		using BaseType = BaseSigmoid<double>;
+
 		void setParams(double b0, double b)
 		{
-			beta0 = b0;
-			beta = b;
+			BaseType::beta0 = b0;
+			BaseType::beta = b;
 		}
 
 		double operator()(const double& input)
 		{
-			return 1. / (1. + exp(-(input * beta + beta0)));
+			return 1. / (1. + exp(-(input * BaseType::beta + BaseType::beta0)));
 		}
 
 		double derivative(const double& input)
@@ -139,6 +135,14 @@ namespace ActivationFunctions
 
 			return fx * (1. - fx);
 		}
+	};
+
+	template<typename InputOutputType = Eigen::VectorXd> class BaseTanh
+	{
+	public:
+		BaseTanh(int size = 1)
+		{
+		}
 
 		static bool isDerivativeJacobianMatrix()
 		{
@@ -147,17 +151,12 @@ namespace ActivationFunctions
 
 		static std::string getName()
 		{
-			return "Sigmoid";
+			return "Tanh";
 		}
-
-	private:
-		double beta0 = 0;
-		double beta = 1;
 	};
 
 
-
-	template<typename InputOutputType = Eigen::VectorXd> class TanhFunction
+	template<typename InputOutputType = Eigen::VectorXd> class TanhFunction : public BaseTanh<InputOutputType>
 	{
 	public:
 		InputOutputType operator()(const InputOutputType& input) const
@@ -173,25 +172,11 @@ namespace ActivationFunctions
 
 			return InputOutputType::Ones(fx.rows(), fx.cols()) - fx.cwiseProduct(fx);
 		}
-
-		static bool isDerivativeJacobianMatrix()
-		{
-			return false;
-		}
-
-		static std::string getName()
-		{
-			return "Tanh";
-		}
 	};
 
-	template<> class TanhFunction<double>
+	template<> class TanhFunction<double> : public BaseTanh<double>
 	{
 	public:
-		TanhFunction(int size = 1)
-		{
-		}
-
 		double operator()(const double& input) const
 		{
 			return tanh(input);
@@ -203,6 +188,15 @@ namespace ActivationFunctions
 
 			return 1. - fx * fx;
 		}
+	};
+
+
+	template<typename InputOutputType = Eigen::VectorXd> class BaseSoftplus
+	{
+	public:
+		BaseSoftplus(int size = 1)
+		{
+		}
 
 		static bool isDerivativeJacobianMatrix()
 		{
@@ -211,17 +205,13 @@ namespace ActivationFunctions
 
 		static std::string getName()
 		{
-			return "Tanh";
+			return "Softplus";
 		}
 	};
 
-	template<typename InputOutputType = Eigen::VectorXd> class SoftplusFunction
+	template<typename InputOutputType = Eigen::VectorXd> class SoftplusFunction : public BaseSoftplus<InputOutputType>
 	{
 	public:
-		SoftplusFunction(int size = 1)
-		{
-		}
-
 		InputOutputType operator()(const InputOutputType& input) const
 		{
 			InputOutputType v(input.size());
@@ -237,27 +227,13 @@ namespace ActivationFunctions
 			return sigmoid(input);
 		}
 
-		static bool isDerivativeJacobianMatrix()
-		{
-			return false;
-		}
-
-		static std::string getName()
-		{
-			return "Softplus";
-		}
-
 	private:
 		SigmoidFunction<InputOutputType, InputOutputType> sigmoid;
 	};
 
-	template<> class SoftplusFunction<double>
+	template<> class SoftplusFunction<double> : public BaseSoftplus<double>
 	{
 	public:
-		SoftplusFunction(int size = 1)
-		{
-		}
-
 		double operator()(const double& input) const
 		{
 			return log(1. + exp(input));
@@ -268,6 +244,18 @@ namespace ActivationFunctions
 			return sigmoid(input);
 		}
 
+	private:
+		SigmoidFunction<double, double> sigmoid;
+	};
+
+
+	template<typename InputOutputType = Eigen::VectorXd> class BaseRELU
+	{
+	public:
+		BaseRELU(int size = 1)
+		{
+		}
+
 		static bool isDerivativeJacobianMatrix()
 		{
 			return false;
@@ -275,22 +263,13 @@ namespace ActivationFunctions
 
 		static std::string getName()
 		{
-			return "Softplus";
+			return "RELU";
 		}
-
-	private:
-		SigmoidFunction<double, double> sigmoid;
 	};
 
-
-
-	template<typename InputOutputType = Eigen::VectorXd> class RELUFunction
+	template<typename InputOutputType = Eigen::VectorXd> class RELUFunction : public BaseRELU<InputOutputType>
 	{
 	public:
-		RELUFunction(int size = 1)
-		{
-		}
-
 		InputOutputType operator()(const InputOutputType& input) const
 		{
 			InputOutputType out = input;
@@ -311,25 +290,11 @@ namespace ActivationFunctions
 
 			return out;
 		}
-
-		static bool isDerivativeJacobianMatrix()
-		{
-			return false;
-		}
-
-		static std::string getName()
-		{
-			return "RELU";
-		}
 	};
 
-	template<> class RELUFunction<double>
+	template<> class RELUFunction<double> : public BaseRELU<double>
 	{
 	public:
-		RELUFunction(int size = 1)
-		{
-		}
-
 		double operator()(const double& input) const
 		{
 			return (input < 0) ? 0 : input;
@@ -339,37 +304,47 @@ namespace ActivationFunctions
 		{
 			return (input < 0) ? 0 : 1;
 		}
+	};
 
-		bool isDerivativeJacobianMatrix() const
+
+	template<typename InputOutputType = Eigen::VectorXd> class BaseLeakyRELU
+	{
+	public:
+		BaseLeakyRELU(int size = 1)
+		{
+		}
+		
+		void setParams(double a)
+		{
+			alpha = a;
+		}
+
+		static bool isDerivativeJacobianMatrix()
 		{
 			return false;
 		}
 
 		static std::string getName()
 		{
-			return "RELU";
+			return "LeakyRELU";
 		}
+
+	protected:
+		double alpha = 0.01;
 	};
 
 
-	template<typename InputOutputType = Eigen::VectorXd> class LeakyRELUFunction
+	template<typename InputOutputType = Eigen::VectorXd> class LeakyRELUFunction : public BaseLeakyRELU<InputOutputType>
 	{
 	public:
-		LeakyRELUFunction(int size = 1)
-		{
-		}
-
-		void setParams(double a)
-		{
-			alpha = a;
-		}
+		using BaseType = BaseLeakyRELU<InputOutputType>;
 
 		InputOutputType operator()(const InputOutputType& input) const
 		{
 			InputOutputType out = input;
 
 			for (unsigned int i = 0; i < out.size(); ++i)
-				out(i) *= ((out(i) < 0) ? alpha : 1.);
+				out(i) *= ((out(i) < 0) ? BaseType::alpha : 1.);
 
 			return out;
 		}
@@ -379,45 +354,40 @@ namespace ActivationFunctions
 			InputOutputType out = input;
 
 			for (unsigned int i = 0; i < out.size(); ++i)
-				out(i) = (out(i) < 0) ? alpha : 1.;
+				out(i) = (out(i) < 0) ? BaseType::alpha : 1.;
 
 			return out;
 		}
-
-		static bool isDerivativeJacobianMatrix()
-		{
-			return false;
-		}
-
-		static std::string getName()
-		{
-			return "LeakyRELU";
-		}
-
-	protected:
-		double alpha = 0.01;
 	};
 
-	template<> class LeakyRELUFunction<double>
+	template<> class LeakyRELUFunction<double> : public BaseLeakyRELU<double>
 	{
 	public:
-		LeakyRELUFunction(int size = 1)
-		{
-		}
-
-		void setParams(double a)
-		{
-			alpha = a;
-		}
+		using BaseType = BaseLeakyRELU<double>;
 
 		double operator()(const double& input) const
 		{
-			return ((input < 0) ? alpha : 1.) * input;
+			return ((input < 0) ? BaseType::alpha : 1.) * input;
 		}
 
 		double derivative(const double& input) const
 		{
-			return (input < 0) ? alpha : 1.;
+			return (input < 0) ? BaseType::alpha : 1.;
+		}
+	};
+
+
+	template<typename InputOutputType = Eigen::VectorXd> class BaseSELU
+	{
+	public:
+		BaseSELU(int size = 1)
+		{
+		}
+
+		void setParams(double a, double b)
+		{
+			alpha = a;
+			scale = b;
 		}
 
 		static bool isDerivativeJacobianMatrix()
@@ -427,12 +397,56 @@ namespace ActivationFunctions
 
 		static std::string getName()
 		{
-			return "LeakyRELU";
+			return "SELU";
 		}
 
 	protected:
-		double alpha = 0.01;
+		double alpha = 1.67326324;
+		double scale = 1.05070098;
 	};
+
+	template<typename InputOutputType = Eigen::VectorXd> class SELUFunction : public BaseSELU<InputOutputType>
+	{
+	public:
+		using BaseType = BaseSELU<InputOutputType>;
+
+		InputOutputType operator()(const InputOutputType& input) const
+		{
+			InputOutputType out(input.size());
+
+			for (unsigned int i = 0; i < out.size(); ++i)
+				out(i) = BaseType::scale * ((input(i) < 0) ? BaseType::alpha * (exp(input(i)) - 1.) : input(i));
+
+			return out;
+		}
+
+		InputOutputType derivative(const InputOutputType& input) const
+		{
+			InputOutputType out(input.size());
+
+			for (unsigned int i = 0; i < out.size(); ++i)
+				out(i) = BaseType::scale * ((input(i) < 0) ? BaseType::alpha * exp(input(i)) : 1.);
+
+			return out;
+		}
+	};
+
+	template<> class SELUFunction<double> : public BaseSELU<double>
+	{
+	public:
+		using BaseType = BaseSELU<double>;
+
+		double operator()(const double& input) const
+		{
+			return BaseType::scale * ((input < 0) ? BaseType::alpha * (exp(input) - 1.) : input);
+		}
+
+		double derivative(const double& input) const
+		{
+			return BaseType::scale * ((input < 0) ? BaseType::alpha * exp(input) : 1.);
+		}
+	};
+
 
 	template<typename InputOutputType = Eigen::VectorXd> class SoftmaxFunction
 	{
