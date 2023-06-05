@@ -378,11 +378,12 @@ bool NeuralNetworkTestsMNIST()
 	Ensemble<NeuralNetworkType> ensemble;
 
 	// a better weight could be estimated from training/validation set, but since all have > 99% accuracy, I won't bother
-	ensemble.addModel(&neuralNetwork, 0.3);
-	ensemble.addModel(&neuralNetwork1, 0.5 / 3.);
-	ensemble.addModel(&neuralNetwork2, 0.5 / 3.);
-	ensemble.addModel(&neuralNetwork3, 0.5 / 3.);
-	ensemble.addModel(&neuralNetwork4, 0.2);
+	const double weight = 1. / 5;
+	ensemble.addModel(&neuralNetwork, weight);
+	ensemble.addModel(&neuralNetwork1, weight);
+	ensemble.addModel(&neuralNetwork2, weight);
+	ensemble.addModel(&neuralNetwork3, weight);
+	ensemble.addModel(&neuralNetwork4, weight);
 
 	std::cout << std::endl << "Ensemble on the test set:" << std::endl;
 
