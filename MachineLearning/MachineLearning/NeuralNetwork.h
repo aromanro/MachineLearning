@@ -165,7 +165,7 @@ namespace NeuralNetworks
 			return lastLayer.getLoss(prediction, target);
 		}
 
-		void ForwardBackwardStep(const Eigen::MatrixXd& input, const Eigen::MatrixXd& target)
+		Eigen::MatrixXd ForwardBackwardStep(const Eigen::MatrixXd& input, const Eigen::MatrixXd& target, bool backpropagateToInput = false)
 		{
 			const int batchSize = static_cast<int>(input.cols());
 			std::vector<Eigen::VectorXd> dropoutMasks(dropout.size());
@@ -225,7 +225,11 @@ namespace NeuralNetworks
 				DropoutGradient(1, grad, dropoutMasks);
 
 				hiddenLayers[0].AddBatchWithParamsAdjusment(hiddenLayers[0].getInput(), grad);
+
+				if (backpropagateToInput) grad = hiddenLayers[0].BackpropagateBatch(grad);
 			}
+
+			return grad;
 		}
 
 		bool saveNetwork(const std::string& name) const
