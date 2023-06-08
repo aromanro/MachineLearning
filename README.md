@@ -407,6 +407,8 @@ The results and charts mentioned above for the EMNIST dataset were generated wit
 
 Then I added batch normalization and dropped the dropout (they tend to not work well together) except on the input layer and got ~99.35% accuracy. I also added an Ensemble class that allows using an ensemble of models to improve the results a little. Because I didn't want to complicate things too much, I added the batch normalization after the activation, unlike the original paper. Seems to work ok that way, too.
 
+The ensemble with five 'pretrained' networks reached about 99.45% on the test set, sensibly higher than any of the included networks (max: ~99.37%, min: ~99.29%).
+
 ### Bibliography
 
 A selection of freely available books:
