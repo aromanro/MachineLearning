@@ -183,7 +183,7 @@ bool NeuralNetworkTestsMNIST()
 	// if nrEpochs is 0 if 'has pretrained' is true it means: do not train further the pretrained model (it has ~99.35% accuracy on the test set)
 	// just testing together with some other models in an ensemble to see if it can be improved
 
-	const int nrEpochs = hasPretrained ? 4 : 20; // bigger dropout, more epochs - less if starting from a pretrained model
+	const int nrEpochs = hasPretrained ? 0 : 20; // bigger dropout, more epochs - less if starting from a pretrained model
 
 	if (nrEpochs > 0)
 	{
@@ -362,18 +362,30 @@ bool NeuralNetworkTestsMNIST()
 
 	std::cout << std::endl;
 
-	// I'll have to train better models for this, for now I obtain only a slightly better result than with a single network, because the majority of the others are not that good as the last 'pretrained' one
-
-	/*
 	NeuralNetworkType neuralNetwork1({ nrInputs, 1000, 800, 400, 100, nrOutputs });
 	NeuralNetworkType neuralNetwork2({ nrInputs, 1000, 800, 400, 100, nrOutputs });
 	NeuralNetworkType neuralNetwork3({ nrInputs, 1000, 800, 400, 100, nrOutputs });
 	NeuralNetworkType neuralNetwork4({ nrInputs, 1000, 800, 400, 100, nrOutputs });
 
 	if (!neuralNetwork1.loadNetwork("../../data/pretrained1.net")) return false;
+	std::cout << std::endl << "Pretrained 1:" << std::endl;
+	Utils::MNISTDatabase::PrintStats(neuralNetwork1, testInputs, testOutputs, nrOutputs);
+	std::cout << std::endl;
+
 	if (!neuralNetwork2.loadNetwork("../../data/pretrained2.net")) return false;
+	std::cout << std::endl << "Pretrained 2:" << std::endl;
+	Utils::MNISTDatabase::PrintStats(neuralNetwork2, testInputs, testOutputs, nrOutputs);
+	std::cout << std::endl;
+
 	if (!neuralNetwork3.loadNetwork("../../data/pretrained3.net")) return false;
+	std::cout << std::endl << "Pretrained 3:" << std::endl;
+	Utils::MNISTDatabase::PrintStats(neuralNetwork3, testInputs, testOutputs, nrOutputs);
+	std::cout << std::endl;
+
 	if (!neuralNetwork4.loadNetwork("../../data/pretrained4.net")) return false;
+	std::cout << std::endl << "Pretrained 4:" << std::endl;
+	Utils::MNISTDatabase::PrintStats(neuralNetwork4, testInputs, testOutputs, nrOutputs);
+	std::cout << std::endl;
 
 	Ensemble<NeuralNetworkType> ensemble;
 
@@ -388,7 +400,6 @@ bool NeuralNetworkTestsMNIST()
 	std::cout << std::endl << "Ensemble on the test set:" << std::endl;
 
 	Utils::MNISTDatabase::PrintStats(ensemble, testInputs, testOutputs, nrOutputs);
-	*/
 
 	return true;
 }
