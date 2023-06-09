@@ -24,6 +24,53 @@ bool LoadData(std::vector<std::pair<std::vector<double>, uint8_t>>& trainingReco
 }
 
 
+template<class NeuralNetworkType> bool EnsembleTest(NeuralNetworkType* neuralNetwork, int nrInputs, int nrOutputs, const Eigen::MatrixXd& testInputs, const Eigen::MatrixXd& testOutputs)
+{
+	std::cout << std::endl;
+
+	NeuralNetworkType neuralNetwork1({ nrInputs, 1000, 800, 400, 100, nrOutputs });
+	NeuralNetworkType neuralNetwork2({ nrInputs, 1000, 800, 400, 100, nrOutputs });
+	NeuralNetworkType neuralNetwork3({ nrInputs, 1000, 800, 400, 100, nrOutputs });
+	NeuralNetworkType neuralNetwork4({ nrInputs, 1000, 800, 400, 100, nrOutputs });
+
+	if (!neuralNetwork1.loadNetwork("../../data/pretrained1.net")) return false;
+	std::cout << std::endl << "Pretrained 1:" << std::endl;
+	Utils::MNISTDatabase::PrintStats(neuralNetwork1, testInputs, testOutputs, nrOutputs);
+	std::cout << std::endl;
+
+	if (!neuralNetwork2.loadNetwork("../../data/pretrained2.net")) return false;
+	std::cout << std::endl << "Pretrained 2:" << std::endl;
+	Utils::MNISTDatabase::PrintStats(neuralNetwork2, testInputs, testOutputs, nrOutputs);
+	std::cout << std::endl;
+
+	if (!neuralNetwork3.loadNetwork("../../data/pretrained3.net")) return false;
+	std::cout << std::endl << "Pretrained 3:" << std::endl;
+	Utils::MNISTDatabase::PrintStats(neuralNetwork3, testInputs, testOutputs, nrOutputs);
+	std::cout << std::endl;
+
+	if (!neuralNetwork4.loadNetwork("../../data/pretrained4.net")) return false;
+	std::cout << std::endl << "Pretrained 4:" << std::endl;
+	Utils::MNISTDatabase::PrintStats(neuralNetwork4, testInputs, testOutputs, nrOutputs);
+	std::cout << std::endl;
+
+	Ensemble<NeuralNetworkType> ensemble;
+
+	// a better weight could be estimated from training/validation set, but since all have > 99% accuracy, I won't bother
+	const double weight = 1. / 5;
+	ensemble.addModel(neuralNetwork, weight);
+	ensemble.addModel(&neuralNetwork1, weight);
+	ensemble.addModel(&neuralNetwork2, weight);
+	ensemble.addModel(&neuralNetwork3, weight);
+	ensemble.addModel(&neuralNetwork4, weight);
+
+	std::cout << std::endl << "Ensemble on the test set:" << std::endl;
+
+	Utils::MNISTDatabase::PrintStats(ensemble, testInputs, testOutputs, nrOutputs);
+
+	return true;
+}
+
+
 bool NeuralNetworkTestsMNIST()
 {
 	std::cout << "MNIST Neural Network Tests, it will take a long time..." << std::endl;
@@ -360,46 +407,5 @@ bool NeuralNetworkTestsMNIST()
 
 	Utils::MNISTDatabase::PrintStats(neuralNetwork, testInputs, testOutputs, nrOutputs);
 
-	std::cout << std::endl;
-
-	NeuralNetworkType neuralNetwork1({ nrInputs, 1000, 800, 400, 100, nrOutputs });
-	NeuralNetworkType neuralNetwork2({ nrInputs, 1000, 800, 400, 100, nrOutputs });
-	NeuralNetworkType neuralNetwork3({ nrInputs, 1000, 800, 400, 100, nrOutputs });
-	NeuralNetworkType neuralNetwork4({ nrInputs, 1000, 800, 400, 100, nrOutputs });
-
-	if (!neuralNetwork1.loadNetwork("../../data/pretrained1.net")) return false;
-	std::cout << std::endl << "Pretrained 1:" << std::endl;
-	Utils::MNISTDatabase::PrintStats(neuralNetwork1, testInputs, testOutputs, nrOutputs);
-	std::cout << std::endl;
-
-	if (!neuralNetwork2.loadNetwork("../../data/pretrained2.net")) return false;
-	std::cout << std::endl << "Pretrained 2:" << std::endl;
-	Utils::MNISTDatabase::PrintStats(neuralNetwork2, testInputs, testOutputs, nrOutputs);
-	std::cout << std::endl;
-
-	if (!neuralNetwork3.loadNetwork("../../data/pretrained3.net")) return false;
-	std::cout << std::endl << "Pretrained 3:" << std::endl;
-	Utils::MNISTDatabase::PrintStats(neuralNetwork3, testInputs, testOutputs, nrOutputs);
-	std::cout << std::endl;
-
-	if (!neuralNetwork4.loadNetwork("../../data/pretrained4.net")) return false;
-	std::cout << std::endl << "Pretrained 4:" << std::endl;
-	Utils::MNISTDatabase::PrintStats(neuralNetwork4, testInputs, testOutputs, nrOutputs);
-	std::cout << std::endl;
-
-	Ensemble<NeuralNetworkType> ensemble;
-
-	// a better weight could be estimated from training/validation set, but since all have > 99% accuracy, I won't bother
-	const double weight = 1. / 5;
-	ensemble.addModel(&neuralNetwork, weight);
-	ensemble.addModel(&neuralNetwork1, weight);
-	ensemble.addModel(&neuralNetwork2, weight);
-	ensemble.addModel(&neuralNetwork3, weight);
-	ensemble.addModel(&neuralNetwork4, weight);
-
-	std::cout << std::endl << "Ensemble on the test set:" << std::endl;
-
-	Utils::MNISTDatabase::PrintStats(ensemble, testInputs, testOutputs, nrOutputs);
-
-	return true;
+	return EnsembleTest(&neuralNetwork, nrInputs, nrOutputs, testInputs, testOutputs);
 }

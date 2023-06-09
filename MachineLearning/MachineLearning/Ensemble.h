@@ -22,8 +22,6 @@ public:
 		for (int i = 1; i < models.size(); ++i)
 			prediction += weights[i] * models[i]->Predict(x);
 
-		//prediction.normalize();
-
 		return prediction;
 	}
 
