@@ -411,7 +411,7 @@ The ensemble with five 'pretrained' networks reached about 99.45% on the test se
 
 ### Required libraries
 
-Dealing with matrices is done with the help of [Eigen]{https://eigen.tuxfamily.org/}.
+Dealing with matrices is done with the help of [Eigen](https://eigen.tuxfamily.org/).
 
 ### Bibliography
 
