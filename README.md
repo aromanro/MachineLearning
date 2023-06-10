@@ -409,6 +409,10 @@ Then I added batch normalization and dropped the dropout (they tend to not work 
 
 The ensemble with five 'pretrained' networks reached about 99.45% on the test set, sensibly higher than any of the included networks (max: ~99.37%, min: ~99.29%).
 
+### Required libraries
+
+Dealing with matrices is done with the help of [Eigen]{https://eigen.tuxfamily.org/}.
+
 ### Bibliography
 
 A selection of freely available books:
