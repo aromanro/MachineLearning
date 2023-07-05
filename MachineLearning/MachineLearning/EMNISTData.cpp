@@ -32,6 +32,21 @@ bool LoadData(std::vector<std::pair<std::vector<double>, uint8_t>>& trainingReco
 	return true;
 }
 
+bool LoadData(std::vector<std::pair<std::vector<double>, uint8_t>>& trainingRecords, std::vector<std::pair<std::vector<double>, uint8_t>>& validationRecords, std::vector<std::pair<std::vector<double>, uint8_t>>& testRecords, bool augment, double percentage)
+{
+	if (!LoadData(trainingRecords, testRecords, augment))
+		return false;
+
+	// split the training data into training and validation sets
+
+	const int nrTrainingRecords = static_cast<int>(trainingRecords.size() * percentage);
+
+	validationRecords = std::vector<std::pair<std::vector<double>, uint8_t>>(trainingRecords.begin() + nrTrainingRecords, trainingRecords.end());
+	trainingRecords.resize(nrTrainingRecords);
+
+	return true;
+}
+
 
 void SetDataIntoMatrices(const std::vector<std::pair<std::vector<double>, uint8_t>>& records, Eigen::MatrixXd& inputs, Eigen::MatrixXd& outputs)
 {

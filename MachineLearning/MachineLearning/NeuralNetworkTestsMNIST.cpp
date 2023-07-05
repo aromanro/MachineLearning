@@ -8,22 +8,6 @@
 #include "Ensemble.h"
 
 
-bool LoadData(std::vector<std::pair<std::vector<double>, uint8_t>>& trainingRecords, std::vector<std::pair<std::vector<double>, uint8_t>>& validationRecords, std::vector<std::pair<std::vector<double>, uint8_t>>& testRecords, bool augment = false)
-{
-	if (!LoadData(trainingRecords, testRecords, augment))
-		return false;
-
-	// split the training data into training and validation sets
-
-	const int nrTrainingRecords = static_cast<int>(trainingRecords.size() * 0.95);
-
-	validationRecords = std::vector<std::pair<std::vector<double>, uint8_t>>(trainingRecords.begin() + nrTrainingRecords, trainingRecords.end());
-	trainingRecords.resize(nrTrainingRecords);
-
-	return true;
-}
-
-
 template<class NeuralNetworkType> bool EnsembleTest(NeuralNetworkType* neuralNetwork, int nrInputs, int nrOutputs, const Eigen::MatrixXd& testInputs, const Eigen::MatrixXd& testOutputs)
 {
 	std::cout << std::endl;
