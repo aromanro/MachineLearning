@@ -232,6 +232,37 @@ namespace Utils {
 			std::cout << "Accuracy (% correct): " << 100.0 * static_cast<double>(correct) / static_cast<double>(Inputs.cols()) << "%" << std::endl;
 		}
 
+		// useful for saving images if for example an autoencoder is implemented, to be able to compare the input and output images visually
+		static bool SaveToPPM(const std::string& name, const std::vector<double>& img, int imgSize = 28)
+		{
+			assert(img.size() == imgSize * imgSize);
+
+			try
+			{
+				std::ofstream f(name);
+				if (!f.good()) return false;
+
+				f << "P3\n" << imgSize << " " << imgSize << "\n255\n";
+
+				for (int j = imgSize - 1; j >= 0; --j)
+					for (int i = 0; i < imgSize; ++i)
+					{
+						const double val = img[j * imgSize + i];
+						const int ir = int(255.99 * val);
+						const int ig = int(255.99 * val);
+						const int ib = int(255.99 * val);
+
+						f << ir << " " << ig << " " << ib << "\n";
+					}
+			}
+			catch (...)
+			{
+				return false;
+			}
+
+			return true;
+		}
+
 	private:
 		static uint32_t ntohlAlt(uint32_t val)
 		{
