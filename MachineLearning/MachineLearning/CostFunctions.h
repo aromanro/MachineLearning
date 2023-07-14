@@ -64,7 +64,7 @@ namespace LossFunctions
 			OutputType dif = output - target;
 
 			for (unsigned int i = 0; i < dif.cols(); ++i)
-				dif(i) = (dif(i) < 0) ? -1 : 1;
+				dif(i) = dif(i) < 0 ? -1 : 1;
 
 			return dif;
 		}
@@ -86,7 +86,7 @@ namespace LossFunctions
 
 		double derivative(const double& output, const double& target) const
 		{
-			return ((output - target) < 0) ? -1 : 1;
+			return (output - target) < 0 ? -1 : 1;
 		}
 
 		static std::string getName()

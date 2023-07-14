@@ -11,7 +11,7 @@ bool XORNeuralNetworksTests()
 	std::default_random_engine rde(42);
 	std::uniform_int_distribution<> distBool(0, 1);
 
-	const int nrTests = 1;
+	const int nrTests = 3;
 
 	// this alleviates the convergence issue
 	// there are 16 local minima for xor where the 3 neurons network could get 'stuck'

@@ -297,12 +297,12 @@ namespace ActivationFunctions
 	public:
 		double operator()(const double& input) const
 		{
-			return (input < 0) ? 0 : input;
+			return input < 0 ? 0 : input;
 		}
 
 		double derivative(const double& input) const
 		{
-			return (input < 0) ? 0 : 1;
+			return input < 0 ? 0 : 1;
 		}
 	};
 
@@ -344,7 +344,7 @@ namespace ActivationFunctions
 			InputOutputType out = input;
 
 			for (unsigned int i = 0; i < out.size(); ++i)
-				out(i) *= ((out(i) < 0) ? BaseType::alpha : 1.);
+				out(i) *= out(i) < 0 ? BaseType::alpha : 1.;
 
 			return out;
 		}
@@ -354,7 +354,7 @@ namespace ActivationFunctions
 			InputOutputType out = input;
 
 			for (unsigned int i = 0; i < out.size(); ++i)
-				out(i) = (out(i) < 0) ? BaseType::alpha : 1.;
+				out(i) = out(i) < 0 ? BaseType::alpha : 1.;
 
 			return out;
 		}
@@ -367,12 +367,12 @@ namespace ActivationFunctions
 
 		double operator()(const double& input) const
 		{
-			return ((input < 0) ? BaseType::alpha : 1.) * input;
+			return (input < 0 ? BaseType::alpha : 1.) * input;
 		}
 
 		double derivative(const double& input) const
 		{
-			return (input < 0) ? BaseType::alpha : 1.;
+			return input < 0 ? BaseType::alpha : 1.;
 		}
 	};
 
@@ -415,7 +415,7 @@ namespace ActivationFunctions
 			InputOutputType out(input.size());
 
 			for (unsigned int i = 0; i < out.size(); ++i)
-				out(i) = BaseType::scale * ((input(i) < 0) ? BaseType::alpha * (exp(input(i)) - 1.) : input(i));
+				out(i) = BaseType::scale * (input(i) < 0 ? BaseType::alpha * (exp(input(i)) - 1.) : input(i));
 
 			return out;
 		}
@@ -425,7 +425,7 @@ namespace ActivationFunctions
 			InputOutputType out(input.size());
 
 			for (unsigned int i = 0; i < out.size(); ++i)
-				out(i) = BaseType::scale * ((input(i) < 0) ? BaseType::alpha * exp(input(i)) : 1.);
+				out(i) = BaseType::scale * (input(i) < 0 ? BaseType::alpha * exp(input(i)) : 1.);
 
 			return out;
 		}
@@ -438,12 +438,12 @@ namespace ActivationFunctions
 
 		double operator()(const double& input) const
 		{
-			return BaseType::scale * ((input < 0) ? BaseType::alpha * (exp(input) - 1.) : input);
+			return BaseType::scale * (input < 0 ? BaseType::alpha * (exp(input) - 1.) : input);
 		}
 
 		double derivative(const double& input) const
 		{
-			return BaseType::scale * ((input < 0) ? BaseType::alpha * exp(input) : 1.);
+			return BaseType::scale * (input < 0 ? BaseType::alpha * exp(input) : 1.);
 		}
 	};
 
@@ -480,7 +480,7 @@ namespace ActivationFunctions
 
 			for (int j = 0; j < input.size(); ++j)
 				for (int i = 0; i < input.size(); ++i)
-					output(i, j) = fx(i) * (((i == j) ? 1. : 0.) - fx(j));
+					output(i, j) = fx(i) * ((i == j ? 1. : 0.) - fx(j));
 
 			return output;
 		}

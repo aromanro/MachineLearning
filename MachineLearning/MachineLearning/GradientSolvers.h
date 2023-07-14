@@ -274,8 +274,9 @@ namespace SGD
 			if (p.size() <= i) return i;
 
 			decay = p[i];
+			++i;
 
-			return i + 1;
+			return i;
 		}
 
 		double decay = 1.;
@@ -313,8 +314,9 @@ namespace SGD
 			if (p.size() <= i) return i;
 
 			decay = p[i];
+			++i;
 
-			return i + 1;
+			return i;
 		}
 
 		double decay = 1.;
@@ -345,8 +347,9 @@ namespace SGD
 			if (p.size() <= i) return i;
 
 			beta = p[i];
+			++i;
 
-			return i + 1;
+			return i;
 		}
 
 		double beta = 0.5;
@@ -375,8 +378,9 @@ namespace SGD
 			if (p.size() <= i) return i;
 
 			beta = p[i];
+			++i;
 
-			return i + 1;
+			return i;
 		}
 
 		double beta = 0.5;
@@ -611,8 +615,9 @@ namespace SGD
 			if (p.size() <= i) return i;
 
 			beta = p[i];
+			++i;
 
-			return i + 1;
+			return i;
 		}
 
 		double beta = 0.5;
@@ -656,8 +661,9 @@ namespace SGD
 			if (p.size() <= i) return i;
 
 			beta = p[i];
+			++i;
 
-			return i + 1;
+			return i;
 		}
 
 		double beta = 0.5;
@@ -732,8 +738,9 @@ namespace SGD
 			if (p.size() <= i) return i;
 
 			beta2 = p[i];
+			++i;
 
-			return i + 1;
+			return i;
 		}
 
 		double beta1 = 0.9;
@@ -802,8 +809,9 @@ namespace SGD
 			if (p.size() <= i) return i;
 
 			beta2 = p[i];
+			++i;
 
-			return i + 1;
+			return i;
 		}
 
 		double beta1 = 0.9;
