@@ -40,7 +40,7 @@ I also used the EMNIST dataset (only digits for now), so I implemented a `MNISTD
 
 As the name suggests, it's simple. One input, one output, linear. Wikipedia link: [simple linear regression](https://en.wikipedia.org/wiki/Simple_linear_regression).
 
-The implementation is in [SimpleLinearRegression.h](MachineLearning/MachineLearning/SimpleLinearRegression.h) and [SimpleLinearRegressionSolver.h](MachineLearning/MachineLearning/SimpleLinearRegressionSolver.h). The reason for having a separate class for the solver is that for the next - not so simple - models, there are several stochastic gradient solvers that work for all of them, so I had a similarly separate implementation for this particular case as well, although it wouldn't really be needed. I implemented the simple linear regression not only for the one input one output case, but also for n inputs, n ouptuts, it's just a bunch of independant simple linear models.
+The implementation is in [SimpleLinearRegression.h](MachineLearning/MachineLearning/SimpleLinearRegression.h) and [SimpleLinearRegressionSolver.h](MachineLearning/MachineLearning/SimpleLinearRegressionSolver.h). The reason for having a separate class for the solver is that for the next - not so simple - models, there are several stochastic gradient solvers that work for all of them, so I had a similarly separate implementation for this particular case as well, although it wouldn't really be needed. I implemented the simple linear regression not only for the one input one output case, but also for n inputs, n outputs, it's just a bunch of independant simple linear models.
 
 How they are used can be seen in [LinearRegressionTests.cpp](MachineLearning/MachineLearning/LinearRegressionTests.cpp), `Test1` function.
 
