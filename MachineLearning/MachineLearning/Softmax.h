@@ -10,13 +10,14 @@ namespace SGD
 	using SoftmaxRegressionAdaGradSolver = SGD::AdaGradSolver<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, Eigen::MatrixXd, Eigen::MatrixXd, ActivationFunctions::SoftmaxFunction<Eigen::VectorXd>, LossFunctions::CrossEntropyLoss<Eigen::VectorXd>>;
 	using SoftmaxRegressionRMSPropSolver = SGD::RMSPropSolver<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, Eigen::MatrixXd, Eigen::MatrixXd, ActivationFunctions::SoftmaxFunction<Eigen::VectorXd>, LossFunctions::CrossEntropyLoss<Eigen::VectorXd>>;
 	using SoftmaxRegressionAdamSolver = SGD::AdamSolver<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, Eigen::MatrixXd, Eigen::MatrixXd, ActivationFunctions::SoftmaxFunction<Eigen::VectorXd>, LossFunctions::CrossEntropyLoss<Eigen::VectorXd>>;
+	using SoftmaxRegressionAdamWSolver = SGD::AdamWSolver<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, Eigen::MatrixXd, Eigen::MatrixXd, ActivationFunctions::SoftmaxFunction<Eigen::VectorXd>, LossFunctions::CrossEntropyLoss<Eigen::VectorXd>>;
 
 }
 
 namespace GLM
 {
 
-	template<typename InputType = Eigen::VectorXd, typename OutputType = InputType, typename WeightsType = Eigen::MatrixXd, class Solver = SGD::SoftmaxRegressionAdamSolver, class BatchInputType = Eigen::MatrixXd, class BatchOutputType = BatchInputType> class SoftmaxRegression
+	template<typename InputType = Eigen::VectorXd, typename OutputType = InputType, typename WeightsType = Eigen::MatrixXd, class Solver = SGD::SoftmaxRegressionAdamWSolver, class BatchInputType = Eigen::MatrixXd, class BatchOutputType = BatchInputType> class SoftmaxRegression
 		: public GeneralizedLinearModel<InputType, OutputType, WeightsType, Solver, BatchInputType, BatchOutputType>
 	{
 	public:

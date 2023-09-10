@@ -16,12 +16,12 @@ namespace NeuralNetworks
 	// and that one can be different for the last layer
 
 	// for the hidden layer, by default use an adam solver with a leaky RELU activation (the cost does not matter, it's computed for the output of the last layer only)
-	using HiddenLayerDefault = SGD::AdamSolver<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, Eigen::MatrixXd, Eigen::MatrixXd, ActivationFunctions::LeakyRELUFunction<>>;
+	using HiddenLayerDefault = SGD::AdamWSolver<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, Eigen::MatrixXd, Eigen::MatrixXd, ActivationFunctions::LeakyRELUFunction<>>;
 
 	// for the last layer, by default a single neuron with sigmoid function, to be used for classification
 	// this should be changed more often, that's why it's the first template argument
 
-	template<class LastSolver = SGD::LogisticRegressionAdamSolver, class Solver = HiddenLayerDefault>
+	template<class LastSolver = SGD::LogisticRegressionAdamWSolver, class Solver = HiddenLayerDefault>
 	class MultilayerPerceptron
 	{
 	public:

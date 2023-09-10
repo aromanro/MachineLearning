@@ -827,4 +827,170 @@ namespace SGD
 		double mb = 0;
 	};
 
+
+
+
+	//*************************************************************************************************************************************************************************************************************************************************************************************************************
+	// AdamW
+	//*************************************************************************************************************************************************************************************************************************************************************************************************************
+
+
+	template<typename InputType = Eigen::VectorXd, typename OutputType = InputType, typename WeightsType = Eigen::MatrixXd, typename BatchInputType = Eigen::MatrixXd, typename BatchOutputType = BatchInputType,
+		class ActivationFunction = ActivationFunctions::IdentityFunction<OutputType>, class LossFunction = LossFunctions::L2Loss<OutputType>>
+		class AdamWSolver : public GradientDescentSolverBase<InputType, OutputType, WeightsType, BatchInputType, BatchOutputType, ActivationFunction, LossFunction>
+	{
+	public:
+		using BaseType = GradientDescentSolverBase<InputType, OutputType, WeightsType, BatchInputType, BatchOutputType, ActivationFunction, LossFunction>;
+
+		void Initialize(int szi = 1, int szo = 1)
+		{
+			sW = WeightsType::Zero(szo, szi);
+			sb = OutputType::Zero(szo);
+			mW = WeightsType::Zero(szo, szi);
+			mb = OutputType::Zero(szo);
+			step = 0;
+		}
+
+		BatchOutputType getWeightsAndBias(WeightsType& w, OutputType& b)
+		{
+			++step;
+
+			const double div1 = 1. / (1. - pow(beta1, step));
+			const double div2 = 1. / (1. - pow(beta2, step));
+
+			const BatchOutputType lossLinkGrad = BaseType::getGrad();
+
+			mb = beta1 * mb - (1. - beta1) * lossLinkGrad.rowwise().sum();
+			sb = beta2 * sb + (1. - beta2) * lossLinkGrad.cwiseProduct(lossLinkGrad).rowwise().sum();
+
+			mb *= div1;
+			sb *= div2;
+
+			const OutputType sba = sb + OutputType::Constant(sb.size(), eps);
+			b += BaseType::alpha * (mb.cwiseProduct(sba.cwiseSqrt().cwiseInverse()) - lambda * b);
+
+			const WeightsType wAdj = lossLinkGrad * BaseType::getInput().transpose();
+
+			mW = beta1 * mW - (1. - beta1) * wAdj;
+			mW *= div1;
+			sW = beta2 * sW + (1. - beta2) * wAdj.cwiseProduct(wAdj);
+			sW *= div2;
+
+			const WeightsType sWa = sW + WeightsType::Constant(sW.rows(), sW.cols(), eps);
+			w += BaseType::alpha * (mW.cwiseProduct(sWa.cwiseSqrt().cwiseInverse()) - lambda * w);
+
+			return lossLinkGrad;
+		}
+
+		int setParams(const std::vector<double>& p)
+		{
+			step = 0;
+
+			int i = BaseType::setParams(p);
+
+			if (p.size() <= i) return i;
+
+			beta1 = p[i];
+			++i;
+			if (p.size() <= i) return i;
+
+			beta2 = p[i];
+			++i;
+			if (p.size() <= i) return i;
+
+			lambda = p[i];
+			++i;
+
+			return i;
+		}
+
+		double beta1 = 0.9;
+		double beta2 = 0.995;
+		double lambda = 0.001; // wuth lambda 0 is the same as Adam
+
+	private:
+		int step = 0;
+
+		WeightsType sW;
+		OutputType sb;
+
+		WeightsType mW;
+		OutputType mb;
+	};
+
+	template<class ActivationFunction, class LossFunction>
+	class AdamWSolver<double, double, double, Eigen::RowVectorXd, Eigen::RowVectorXd, ActivationFunction, LossFunction> : public GradientDescentSolverBase<double, double, double, Eigen::RowVectorXd, Eigen::RowVectorXd, ActivationFunction, LossFunction>
+	{
+	public:
+		using BaseType = GradientDescentSolverBase<double, double, double, Eigen::RowVectorXd, Eigen::RowVectorXd, ActivationFunction, LossFunction>;
+
+		void Initialize(int szi = 1, int szo = 1)
+		{
+			sW = 0;
+			sb = 0;
+			mb = 0;
+			mW = 0;
+			step = 0;
+		}
+
+		Eigen::RowVectorXd getWeightsAndBias(double& w, double& b)
+		{
+			++step;
+			const Eigen::RowVectorXd lossLinkGrad = BaseType::getGrad();
+
+			const double div1 = 1. / (1. - pow(beta1, step));
+			const double div2 = 1. / (1. - pow(beta2, step));
+
+			mb = beta1 * mb - (1. - beta1) * lossLinkGrad.sum();
+			mb *= div1;
+			sb = beta2 * sb + (1. - beta2) * lossLinkGrad.cwiseProduct(lossLinkGrad).sum();
+			sb *= div2;
+
+			b += BaseType::alpha * (mb / sqrt(sb + eps) - lambda * b);
+
+			const double wAdj = (lossLinkGrad * BaseType::getInput().transpose())(0);
+
+			mW = beta1 * mW - (1. - beta1) * wAdj;
+			mW *= div1;
+			sW = beta2 * sW + (1. - beta2) * wAdj * wAdj;
+			sW *= div2;
+
+			w += BaseType::alpha * (mW / sqrt(sW + eps) - lambda * w);
+
+			return lossLinkGrad;
+		}
+
+		int setParams(const std::vector<double>& p)
+		{
+			int i = BaseType::setParams(p);
+
+			if (p.size() <= i) return i;
+
+			beta1 = p[i];
+			++i;
+			if (p.size() <= i) return i;
+
+			beta2 = p[i];
+			++i;
+			if (p.size() <= i) return i;
+
+			lambda = p[i];
+			++i;
+
+			return i;
+		}
+
+		double beta1 = 0.9;
+		double beta2 = 0.995;
+		double lambda = 0.001; // wuth lambda 0 is the same as Adam
+
+	private:
+		int step = 0;
+
+		double sW = 0;
+		double sb = 0;
+
+		double mW = 0;
+		double mb = 0;
+	};
 }

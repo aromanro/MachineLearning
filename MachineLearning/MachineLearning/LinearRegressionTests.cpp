@@ -34,7 +34,7 @@ bool Test1()
 
 		// a simple linear regression, but with gradient descent
 		//GeneralLinearModel<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, SGD::GradientDescentSolver<>, Eigen::MatrixXd> generalLinearModel;
-		GLM::GeneralizedLinearModel<double, double, double, SGD::AdamSolver<double, double, double, Eigen::RowVectorXd, Eigen::RowVectorXd, ActivationFunctions::IdentityFunction<double>, LossFunctions::L2Loss<double>>, Eigen::RowVectorXd, Eigen::RowVectorXd> generalLinearModel;
+		GLM::GeneralizedLinearModel<double, double, double, SGD::AdamWSolver<double, double, double, Eigen::RowVectorXd, Eigen::RowVectorXd, ActivationFunctions::IdentityFunction<double>, LossFunctions::L2Loss<double>>, Eigen::RowVectorXd, Eigen::RowVectorXd> generalLinearModel;
 		generalLinearModel.getSolver().alpha = 0.03;
 		generalLinearModel.getSolver().beta1 = 0.7;
 		generalLinearModel.getSolver().beta2 = 0.9;
@@ -105,7 +105,7 @@ bool Test2()
 			yvals3[i] = linearFunction3(i) + dist(rde);
 		}
 
-		GLM::GeneralizedLinearModel<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, SGD::AdamSolver<>> generalLinearModel(3, 3);
+		GLM::GeneralizedLinearModel<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, SGD::AdamWSolver<>> generalLinearModel(3, 3);
 		generalLinearModel.getSolver().alpha = 0.02;
 		generalLinearModel.getSolver().beta1 = 0.7;
 		generalLinearModel.getSolver().beta2 = 0.9;
@@ -189,9 +189,9 @@ bool Test3()
 			yvals[i] = (quadraticFunction(i) + dist(rde)) / 100;
 		theFile.AddDataset(xvals, yvals);
 
-		//typedef SGD::AdamSolver<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, Eigen::MatrixXd, Eigen::MatrixXd, IdentityFunction<Eigen::VectorXd>, LossFunctions::L1Loss<Eigen::VectorXd>> theSolver;
+		//typedef SGD::AdamWSolver<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, Eigen::MatrixXd, Eigen::MatrixXd, IdentityFunction<Eigen::VectorXd>, LossFunctions::L1Loss<Eigen::VectorXd>> theSolver;
 		//typedef SGD::GradientDescentSolver<> theSolver;
-		typedef SGD::AdamSolver<> theSolver;
+		typedef SGD::AdamWSolver<> theSolver;
 		GLM::GeneralizedLinearModel<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, theSolver> generalLinearModel(2, 1);
 
 		generalLinearModel.Initialize(initializer);
@@ -294,9 +294,9 @@ bool Test4()
 		//typedef SGD::RMSPropSolver<> theSolver;
 
 		// for testing with L1 loss
-		//typedef SGD::AdamSolver<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, Eigen::MatrixXd, Eigen::MatrixXd, IdentityFunction<Eigen::VectorXd>, LossFunctions::L1Loss<Eigen::VectorXd>> theSolver;
+		//typedef SGD::AdamWSolver<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, Eigen::MatrixXd, Eigen::MatrixXd, IdentityFunction<Eigen::VectorXd>, LossFunctions::L1Loss<Eigen::VectorXd>> theSolver;
 
-		typedef SGD::AdamSolver<> theSolver;
+		typedef SGD::AdamWSolver<> theSolver;
 		GLM::GeneralizedLinearModel<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, theSolver> generalLinearModel(3, 1);
 
 		//generalLinearModel.getSolver().alpha = 0.01;

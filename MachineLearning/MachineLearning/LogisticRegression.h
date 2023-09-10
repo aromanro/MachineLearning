@@ -20,13 +20,14 @@ namespace SGD
 	using LogisticRegressionAdaGradSolver = SGD::AdaGradSolver<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, Eigen::MatrixXd, Eigen::MatrixXd, ActivationFunctions::SigmoidFunction<Eigen::VectorXd, Eigen::MatrixXd>, LossFunctions::LogLoss<Eigen::VectorXd>>;
 	using LogisticRegressionRMSPropSolver = SGD::RMSPropSolver<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, Eigen::MatrixXd, Eigen::MatrixXd, ActivationFunctions::SigmoidFunction<Eigen::VectorXd, Eigen::MatrixXd>, LossFunctions::LogLoss<Eigen::VectorXd>>;
 	using LogisticRegressionAdamSolver = SGD::AdamSolver<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, Eigen::MatrixXd, Eigen::MatrixXd, ActivationFunctions::SigmoidFunction<Eigen::VectorXd, Eigen::MatrixXd>, LossFunctions::LogLoss<Eigen::VectorXd>>;
+	using LogisticRegressionAdamWSolver = SGD::AdamWSolver<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, Eigen::MatrixXd, Eigen::MatrixXd, ActivationFunctions::SigmoidFunction<Eigen::VectorXd, Eigen::MatrixXd>, LossFunctions::LogLoss<Eigen::VectorXd>>;
 
 }
 
 namespace GLM
 {
 
-	template<typename InputType = Eigen::VectorXd, typename OutputType = InputType, typename WeightsType = Eigen::MatrixXd, class Solver = SGD::LogisticRegressionAdamSolver, class BatchInputType = Eigen::MatrixXd, class BatchOutputType = BatchInputType> class LogisticRegression
+	template<typename InputType = Eigen::VectorXd, typename OutputType = InputType, typename WeightsType = Eigen::MatrixXd, class Solver = SGD::LogisticRegressionAdamWSolver, class BatchInputType = Eigen::MatrixXd, class BatchOutputType = BatchInputType> class LogisticRegression
 		: public GeneralizedLinearModel<InputType, OutputType, WeightsType, Solver, BatchInputType, BatchOutputType>
 	{
 	public:

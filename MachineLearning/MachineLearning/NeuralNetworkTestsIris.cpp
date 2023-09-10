@@ -111,7 +111,7 @@ bool IrisNeuralNetworkTest()
 	// create the model
 
 	// more layers can be added, and/or made wider, but it will take more time to train. One configuration that I tried: { 4, 246, 512, 127, 63, 27, 9, nrOutputs }
-	NeuralNetworks::MultilayerPerceptron<SGD::SoftmaxRegressionAdamSolver> neuralNetwork({ 4, 27, 9, nrOutputs });
+	NeuralNetworks::MultilayerPerceptron<SGD::SoftmaxRegressionAdamWSolver> neuralNetwork({ 4, 27, 9, nrOutputs });
 
 	const double alpha = 0.01;
 	const double beta1 = 0.7;

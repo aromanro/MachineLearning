@@ -14,7 +14,7 @@ namespace NeuralNetworks
 	// the only thing that can be changed is the solver, either to an entirely different one 
 	// or just by specifying the activation and/or cost functions
 
-	template<class Solver = SGD::AdamSolver<>>
+	template<class Solver = SGD::AdamWSolver<>>
 	class NeuralSublayer : public GLM::GeneralizedLinearModel<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, Solver>
 	{
 	public:

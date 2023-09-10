@@ -7,7 +7,7 @@ namespace NeuralNetworks
 
 	// to keep things simple, at least for a while it will simply use a single 'neural sublayer'
 
-	template<class Solver = SGD::AdamSolver<>>
+	template<class Solver = SGD::AdamWSolver<>>
 	class NeuralLayerPerceptron
 	{
 	public:

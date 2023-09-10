@@ -8,7 +8,7 @@ namespace NeuralNetworks
 
 	// the typical neuron is nothing else than a generalized linear model with a single output 
 
-	template<class Solver = SGD::AdamSolver<>>
+	template<class Solver = SGD::AdamWSolver<>>
 	class Neuron : public NeuralSublayer<Solver>
 	{
 	public:

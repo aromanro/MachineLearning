@@ -13,7 +13,7 @@
 
 namespace GLM {
 
-	template<class DerivedClass, typename InputType = Eigen::VectorXd, typename OutputType = Eigen::VectorXd, typename WeightsType = Eigen::MatrixXd, class Solver = SGD::AdamSolver<>, class BatchInputType = Eigen::MatrixXd, class BatchOutputType = BatchInputType>
+	template<class DerivedClass, typename InputType = Eigen::VectorXd, typename OutputType = Eigen::VectorXd, typename WeightsType = Eigen::MatrixXd, class Solver = SGD::AdamWSolver<>, class BatchInputType = Eigen::MatrixXd, class BatchOutputType = BatchInputType>
 	class GeneralizedLinearModelBase
 	{
 	public:
@@ -186,7 +186,7 @@ namespace GLM {
 
 
 
-	template<typename InputType = Eigen::VectorXd, typename OutputType = Eigen::VectorXd, typename WeightsType = Eigen::MatrixXd, class Solver = SGD::AdamSolver<>, class BatchInputType = Eigen::MatrixXd, class BatchOutputType = BatchInputType>
+	template<typename InputType = Eigen::VectorXd, typename OutputType = Eigen::VectorXd, typename WeightsType = Eigen::MatrixXd, class Solver = SGD::AdamWSolver<>, class BatchInputType = Eigen::MatrixXd, class BatchOutputType = BatchInputType>
 	class GeneralizedLinearModel : public GeneralizedLinearModelBase<GeneralizedLinearModel<InputType, OutputType, WeightsType, Solver, BatchInputType, BatchOutputType>, InputType, OutputType, WeightsType, Solver, BatchInputType, BatchOutputType>
 	{
 	public:

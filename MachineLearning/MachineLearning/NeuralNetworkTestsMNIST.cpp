@@ -134,9 +134,9 @@ bool NeuralNetworkTestsMNIST()
 
 	// tanh activation functions can be also used for the hidden layers, seem to work, but I prefer the leaky relu
 	// uncomment this and the commented template parameter if you want to try it, but it won't start from a pretrained network that had leaky relu (as the one I commited on github) 
-	//typedef  SGD::AdamSolver<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, Eigen::MatrixXd, Eigen::MatrixXd, ActivationFunctions::TanhFunction<>> HiddenLayerAlternative;
+	//typedef  SGD::AdamWSolver<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, Eigen::MatrixXd, Eigen::MatrixXd, ActivationFunctions::TanhFunction<>> HiddenLayerAlternative;
 
-	typedef NeuralNetworks::MultilayerPerceptron<SGD::SoftmaxRegressionAdamSolver/*, HiddenLayerAlternative*/> NeuralNetworkType;
+	typedef NeuralNetworks::MultilayerPerceptron<SGD::SoftmaxRegressionAdamWSolver/*, HiddenLayerAlternative*/> NeuralNetworkType;
 
 	NeuralNetworkType neuralNetwork(/*{nrInputs, 1000, 100, nrOutputs}*/{ nrInputs, 1000, 800, 400, 100, nrOutputs }, { 0.2, /*0.2, 0.1*/0, 0, 0, 0 }); // don't use dropout right before the softmax layer
 	// also dropout is less useful if batch normalization is used, so I commented out what I used without batch normalization, using zero instead
@@ -148,9 +148,10 @@ bool NeuralNetworkTestsMNIST()
 	const double beta1 = 0.9;
 	const double beta2 = 0.95;
 	const double lim = 10;
+	const double lambda = 0.001;
 
 	//alpha *= 10; // if batch normalization is used, the learning rate should be higher
-	neuralNetwork.setParams({ alpha, lim, beta1, beta2 });
+	neuralNetwork.setParams({ alpha, lim, beta1, beta2, lambda });
 	neuralNetwork.setBatchNormalizationParam(0.995); // turn on batch normalization
 
 
@@ -174,7 +175,7 @@ bool NeuralNetworkTestsMNIST()
 		else
 		{
 			alpha *= 0.01;
-			neuralNetwork.setParams({ alpha, lim, beta1, beta2 });
+			neuralNetwork.setParams({ alpha, lim, beta1, beta2, lambda });
 			hasPretrained = true;
 		}
 	}
@@ -214,7 +215,7 @@ bool NeuralNetworkTestsMNIST()
 	// if nrEpochs is 0 if 'has pretrained' is true it means: do not train further the pretrained model (it has ~99.35% accuracy on the test set)
 	// just testing together with some other models in an ensemble to see if it can be improved
 
-	const int nrEpochs = hasPretrained ? 0 : 20; // bigger dropout, more epochs - less if starting from a pretrained model
+	const int nrEpochs = hasPretrained ? 10 : 20; // bigger dropout, more epochs - less if starting from a pretrained model
 
 	if (nrEpochs > 0)
 	{
