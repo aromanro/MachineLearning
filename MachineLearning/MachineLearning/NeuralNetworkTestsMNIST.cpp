@@ -148,7 +148,7 @@ bool NeuralNetworkTestsMNIST()
 	const double beta1 = 0.9;
 	const double beta2 = 0.95;
 	const double lim = 10;
-	const double lambda = 0.001;
+	double lambda = 0.001;
 
 	//alpha *= 10; // if batch normalization is used, the learning rate should be higher
 	neuralNetwork.setParams({ alpha, lim, beta1, beta2, lambda });
@@ -175,6 +175,7 @@ bool NeuralNetworkTestsMNIST()
 		else
 		{
 			alpha *= 0.01;
+			lambda *= 0.01;
 			neuralNetwork.setParams({ alpha, lim, beta1, beta2, lambda });
 			hasPretrained = true;
 		}
@@ -357,6 +358,7 @@ bool NeuralNetworkTestsMNIST()
 
 			// makes the learning rate smaller each epoch
 			alpha *= decay;
+			lambda *= decay;
 			neuralNetwork.setLearnRate(alpha);
 		}
 
