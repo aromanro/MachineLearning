@@ -687,10 +687,10 @@ namespace SGD
 
 		void Initialize(int szi = 1, int szo = 1)
 		{
-			sW = WeightsType::Zero(szo, szi);
 			sb = OutputType::Zero(szo);
-			mW = WeightsType::Zero(szo, szi);
 			mb = OutputType::Zero(szo);
+			sW = WeightsType::Zero(szo, szi);
+			mW = WeightsType::Zero(szo, szi);
 			step = 0;
 		}
 
@@ -764,9 +764,9 @@ namespace SGD
 
 		void Initialize(int szi = 1, int szo = 1)
 		{
-			sW = 0;
 			sb = 0;
 			mb = 0;
+			sW = 0;
 			mW = 0;
 			step = 0;
 		}
@@ -844,10 +844,10 @@ namespace SGD
 
 		void Initialize(int szi = 1, int szo = 1)
 		{
-			sW = WeightsType::Zero(szo, szi);
 			sb = OutputType::Zero(szo);
-			mW = WeightsType::Zero(szo, szi);
 			mb = OutputType::Zero(szo);
+			sW = WeightsType::Zero(szo, szi);
+			mW = WeightsType::Zero(szo, szi);
 			step = 0;
 		}
 
@@ -926,9 +926,9 @@ namespace SGD
 
 		void Initialize(int szi = 1, int szo = 1)
 		{
-			sW = 0;
 			sb = 0;
 			mb = 0;
+			sW = 0;
 			mW = 0;
 			step = 0;
 		}
