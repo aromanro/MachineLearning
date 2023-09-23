@@ -906,7 +906,7 @@ namespace SGD
 
 		double beta1 = 0.9;
 		double beta2 = 0.995;
-		double lambda = 0.001; // wuth lambda 0 is the same as Adam
+		double lambda = 0.001; // with lambda 0 is the same as Adam
 
 	private:
 		int step = 0;
