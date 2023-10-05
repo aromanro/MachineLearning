@@ -146,7 +146,7 @@ bool NeuralNetworkTestsMNIST()
 	double alpha = 0.0015; // non const, so it can be adjusted
 	double decay = 0.95;
 	const double beta1 = 0.9;
-	const double beta2 = 0.97;
+	const double beta2 = 0.98;
 	const double lim = 10;
 	double lambda = 0.001;
 
