@@ -744,7 +744,7 @@ namespace SGD
 		}
 
 		double beta1 = 0.9;
-		double beta2 = 0.995;
+		double beta2 = 0.98;
 
 	private:
 		int step = 0;
@@ -815,7 +815,7 @@ namespace SGD
 		}
 
 		double beta1 = 0.9;
-		double beta2 = 0.995;
+		double beta2 = 0.98;
 
 	private:
 		int step = 0;
@@ -854,7 +854,6 @@ namespace SGD
 		BatchOutputType getWeightsAndBias(WeightsType& w, OutputType& b)
 		{
 			++step;
-
 			const double div1 = 1. / (1. - pow(beta1, step));
 			const double div2 = 1. / (1. - pow(beta2, step));
 
@@ -905,7 +904,7 @@ namespace SGD
 		}
 
 		double beta1 = 0.9;
-		double beta2 = 0.995;
+		double beta2 = 0.98;
 		double lambda = 0.001; // with lambda 0 is the same as Adam
 
 	private:
@@ -981,7 +980,7 @@ namespace SGD
 		}
 
 		double beta1 = 0.9;
-		double beta2 = 0.995;
+		double beta2 = 0.98;
 		double lambda = 0.001; // with lambda 0 is the same as Adam
 
 	private:
