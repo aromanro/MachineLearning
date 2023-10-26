@@ -216,7 +216,7 @@ bool NeuralNetworkTestsMNIST()
 	// if nrEpochs is 0 if 'has pretrained' is true it means: do not train further the pretrained model (it has ~99.35% accuracy on the test set)
 	// just testing together with some other models in an ensemble to see if it can be improved
 
-	const int nrEpochs = hasPretrained ? 10 : 20; // bigger dropout, more epochs - less if starting from a pretrained model
+	const int nrEpochs = hasPretrained ? 0 : 20; // bigger dropout, more epochs - less if starting from a pretrained model
 
 	if (nrEpochs > 0)
 	{

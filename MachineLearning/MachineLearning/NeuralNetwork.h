@@ -8,6 +8,7 @@
 #include "NeuralLayer.h"
 #include "Normalizer.h"
 
+
 namespace NeuralNetworks
 {
 
@@ -16,7 +17,7 @@ namespace NeuralNetworks
 	// and that one can be different for the last layer
 
 	// for the hidden layer, by default use an adam solver with a leaky RELU activation (the cost does not matter, it's computed for the output of the last layer only)
-	using HiddenLayerDefault = SGD::AdamWSolver<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, Eigen::MatrixXd, Eigen::MatrixXd, ActivationFunctions::LeakyRELUFunction<>>;
+	using HiddenLayerDefault = SGD::AdamWSolver<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, Eigen::MatrixXd, Eigen::MatrixXd, ActivationFunctions::LeakyRELUFunction<>/*ActivationFunctions::SELUFunction<>*/>;
 
 	// for the last layer, by default a single neuron with sigmoid function, to be used for classification
 	// this should be changed more often, that's why it's the first template argument
