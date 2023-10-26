@@ -409,6 +409,8 @@ Then I added batch normalization and dropped the dropout (they tend to not work 
 
 The ensemble with five 'pretrained' networks reached about 99.45% on the test set, sensibly higher than any of the included networks (max: ~99.37%, min: ~99.29%).
 
+Even later addition: After adding AdamW implementation (it's now default) and setting another beta2 value, the ensemble went to almost 99.55% (all individual networks being better than 99.4% but less than 99.5%).
+
 ### Required libraries
 
 Dealing with matrices is done with the help of [Eigen](https://eigen.tuxfamily.org/).
