@@ -8,7 +8,7 @@ namespace Norm
 	template<typename InputType = Eigen::VectorXd, typename BatchInputType = Eigen::MatrixXd> class Normalizer
 	{
 	public:
-		Normalizer(int sz = 1)
+		explicit Normalizer(int sz = 1)
 		{
 			Initialize(sz);
 		}
@@ -56,7 +56,7 @@ namespace Norm
 	template<> class Normalizer<double, Eigen::RowVectorXd>
 	{
 	public:
-		Normalizer(int sz = 1)
+		explicit Normalizer(int sz = 1)
 		{
 			Initialize(sz);
 		}
@@ -83,8 +83,6 @@ namespace Norm
 
 		void AddBatch(const Eigen::RowVectorXd& batchInput)
 		{
-			assert(batchInput.cols() == batchOutput.cols());
-
 			for (int i = 0; i < batchInput.cols(); ++i)
 			{
 				sumInput += batchInput(i);

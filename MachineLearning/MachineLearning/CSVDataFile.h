@@ -36,7 +36,9 @@ namespace Utils {
 			return res;
 		}
 
-	protected:
+		std::ifstream& GetFile() { return file; }
+
+	private:
 		std::ifstream file;
 	};
 
@@ -55,7 +57,7 @@ namespace Utils {
 		std::vector<Record> getAllRecords()
 		{
 			std::vector<Record> res;
-			while (!file.eof())
+			while (!GetFile().eof())
 			{
 				const Record record = getRecord();
 				if (std::get<4>(record).empty()) break;
@@ -115,7 +117,7 @@ namespace Utils {
 
 
 
-	protected:
+	private:
 		static double getMax(const Eigen::VectorXd& res, int nrOutputs)
 		{
 			double limp = 0.5;

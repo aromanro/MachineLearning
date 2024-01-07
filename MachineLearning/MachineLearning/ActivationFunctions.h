@@ -11,7 +11,7 @@ namespace ActivationFunctions
 	template <typename InputOutputType = Eigen::VectorXd> class BaseIdentity
 	{
 	public:
-		BaseIdentity(int size = 1)
+		explicit BaseIdentity(int size = 1)
 		{
 		}
 
@@ -77,7 +77,7 @@ namespace ActivationFunctions
 	public:
 		using BaseType = BaseSigmoid<InputOutputType>;
 
-		SigmoidFunction(int size = 1)
+		explicit SigmoidFunction(int size = 1)
 		{
 			BaseType::beta0 = InputOutputType::Zero(size);
 			BaseType::beta = InputOutputType::Ones(size);
@@ -140,7 +140,7 @@ namespace ActivationFunctions
 	template<typename InputOutputType = Eigen::VectorXd> class BaseTanh
 	{
 	public:
-		BaseTanh(int size = 1)
+		explicit BaseTanh(int size = 1)
 		{
 		}
 
@@ -194,7 +194,7 @@ namespace ActivationFunctions
 	template<typename InputOutputType = Eigen::VectorXd> class BaseSoftplus
 	{
 	public:
-		BaseSoftplus(int size = 1)
+		explicit BaseSoftplus(int size = 1)
 		{
 		}
 
@@ -252,7 +252,7 @@ namespace ActivationFunctions
 	template<typename InputOutputType = Eigen::VectorXd> class BaseRELU
 	{
 	public:
-		BaseRELU(int size = 1)
+		explicit BaseRELU(int size = 1)
 		{
 		}
 
@@ -310,7 +310,7 @@ namespace ActivationFunctions
 	template<typename InputOutputType = Eigen::VectorXd> class BaseLeakyRELU
 	{
 	public:
-		BaseLeakyRELU(int size = 1)
+		explicit BaseLeakyRELU(int size = 1)
 		{
 		}
 		
@@ -380,7 +380,7 @@ namespace ActivationFunctions
 	template<typename InputOutputType = Eigen::VectorXd> class BaseSELU
 	{
 	public:
-		BaseSELU(int size = 1)
+		explicit BaseSELU(int size = 1)
 		{
 		}
 
@@ -451,7 +451,7 @@ namespace ActivationFunctions
 	template<typename InputOutputType = Eigen::VectorXd> class SoftmaxFunction
 	{
 	public:
-		SoftmaxFunction(int size = 1)
+		explicit SoftmaxFunction(int size = 1)
 		{
 		}
 

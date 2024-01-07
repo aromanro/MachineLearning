@@ -29,7 +29,7 @@ namespace Utils
 			ctype = t;
 		}
 
-	protected:
+	private:
 		ChartType ctype = ChartType::linearRegression;
 		std::string cmdFileName = "plot.plt";
 	};
