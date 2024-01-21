@@ -138,6 +138,7 @@ bool NeuralNetworkTestsMNIST()
 
 	typedef NeuralNetworks::MultilayerPerceptron<SGD::SoftmaxRegressionAdamWSolver/*, HiddenLayerAlternative*/> NeuralNetworkType;
 
+	// the dropout parameters are commented out, passing 0 insted, because dropout does not work well with batch normalization
 	NeuralNetworkType neuralNetwork(/*{nrInputs, 1000, 100, nrOutputs}*/{ nrInputs, 1000, 800, 400, 100, nrOutputs }, { 0.2, /*0.2, 0.1*/0, 0, 0, 0 }/*, {0.1, 0.1, 0.05, 0.01, 0.}*/); // don't use dropout right before the softmax layer
 	// also dropout is less useful if batch normalization is used, so I commented out what I used without batch normalization, using zero instead
 	// the only place where I allow it is for the first layer, it's like adding noise to the input
