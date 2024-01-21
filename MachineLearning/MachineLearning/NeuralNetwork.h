@@ -28,7 +28,7 @@ namespace NeuralNetworks
 	public:
 		// neurons contains the number of neurons in each layer including the input layer 
 		// which is not explicitly represented in the implementation, but the number is used for the number of inputs
-		explicit MultilayerPerceptron(const std::vector<int>& neurons, const std::vector<double>& drop = {})
+		explicit MultilayerPerceptron(const std::vector<int>& neurons, const std::vector<double>& drop = {}, const std::vector<double> snoise = {})
 			: batchNormParam(1.), noBatchNormalizationOnInput(true)
 		{
 			if (neurons.empty()) return;
@@ -73,6 +73,10 @@ namespace NeuralNetworks
 			dropout.resize(hiddenLayers.size() + 1, 0.);
 			for (int i = 0; i < std::min(drop.size(), dropout.size()); ++i)
 				dropout[i] = drop[i];
+
+			stdsNoise.resize(hiddenLayers.size() + 1, 0.);
+			for (int i = 0; i < std::min(snoise.size(), stdsNoise.size()); ++i)
+				stdsNoise[i] = snoise[i];
 		}
 
 		// this assumes that the params for the last and hidden layers are the same, so use the same solver (but the activation and cost functions can be different)
@@ -145,13 +149,46 @@ namespace NeuralNetworks
 			for (int i = 0; i < hiddenLayers.size(); ++i)
 			{
 				if (batchNormParam != 1. && !(i == 0 && noBatchNormalizationOnInput))
-					v = (v - batchNormMeans[i]).cwiseProduct(batchNormInvStds[i]);
+				{
+					Eigen::VectorXd invStd = batchNormInvStds[i];
+
+					// Experimental code that allows adding gaussian noise to the outputs of the hidden layers and the input
+					// here the variance is adjusted for prediction
+					// because on top of the variance of the output (or for the input data, the variance of the input) there is the variance of the noise
+					if (stdsNoise[i] > 0.)
+					{
+						const Eigen::VectorXd st = invStd.cwiseInverse();
+						Eigen::VectorXd var1 = st.cwiseProduct(st);
+						const double var2 = stdsNoise[i] * stdsNoise[i];
+						var1 = var1.array() - var2;
+						invStd = var1.cwiseAbs().cwiseSqrt().cwiseInverse();
+					}
+					// end of experimental code
+					
+					v = (v - batchNormMeans[i]).cwiseProduct(invStd);
+				}
 				
 				v = hiddenLayers[i].Predict(v);
 			}
 
 			if (batchNormParam != 1. && !(hiddenLayers.empty() && noBatchNormalizationOnInput))
-				v = (v - batchNormMeans.back()).cwiseProduct(batchNormInvStds.back());
+			{
+				Eigen::VectorXd invStd = batchNormInvStds.back();
+
+				// Experimental code that allows adding gaussian noise to the outputs of the hidden layers and the input
+				// see the comment above for details
+				if (stdsNoise.back() > 0.)
+				{
+					const Eigen::VectorXd st = invStd.cwiseInverse();
+					Eigen::VectorXd var1 = st.cwiseProduct(st);
+					const double var2 = stdsNoise.back() * stdsNoise.back();
+					var1 = var1.array() - var2;
+					invStd = var1.cwiseAbs().cwiseSqrt().cwiseInverse();
+				}
+				// end of experimental code
+
+				v = (v - batchNormMeans.back()).cwiseProduct(invStd);
+			}
 
 			return lastLayer.Predict(v);
 		}
@@ -185,6 +222,18 @@ namespace NeuralNetworks
 
 			// dropout for input
 			Dropout(0, inp, dropoutMasks);
+
+			// Experimental code that allows adding gaussian noise to the outputs of the hidden layers and the input
+			// noise for input
+			if (stdsNoise[0] > 0.)
+			{
+				std::normal_distribution<double> dist(0., stdsNoise[0]);
+
+				for (int j = 0; j < inp.rows(); ++j)
+					for (int k = 0; k < inp.cols(); ++k)
+						inp(j, k) += dist(rde);
+			}
+			// end of experimental code
 			
 			for (int i = 0; i < hiddenLayers.size(); ++i)
 			{
@@ -195,6 +244,18 @@ namespace NeuralNetworks
 				inp = hiddenLayers[i].getPrediction();
 
 				Dropout(i + 1, inp, dropoutMasks);
+
+				// Experimental code that allows adding gaussian noise to the outputs of the hidden layers and the input
+				// noise for hidden layers
+				if (stdsNoise[i] > 0.)
+				{
+					std::normal_distribution<double> dist(0., stdsNoise[i]);
+
+					for (int j = 0; j < inp.rows(); ++j)
+						for (int k = 0; k < inp.cols(); ++k)
+							inp(j, k) += dist(rde);
+				}
+				// end of experimental code
 			}
 
 			BatchNormalize(avgi, istdi, static_cast<int>(hiddenLayers.size()), inp);
@@ -417,6 +478,7 @@ namespace NeuralNetworks
 		std::vector<NeuralLayerPerceptron<Solver>> hiddenLayers;
 
 		std::vector<double> dropout;
+		std::vector<double> stdsNoise;
 
 		std::mt19937 rde;
 		std::uniform_real_distribution<> distDrop{0., 1.};
