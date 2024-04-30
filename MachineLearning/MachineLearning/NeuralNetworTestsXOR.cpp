@@ -187,7 +187,7 @@ bool XORNeuralNetworksTests()
 		NeuralNetworks::MultilayerPerceptron<> neuralNetwork({ 2, numHiddenNeurons, 1 });
 
 		neuralNetwork.setParams({ alpha, lim, beta1, beta2 });
-		neuralNetwork.InitializHiddenLayers(weightsInitializer);
+		neuralNetwork.InitializeHiddenLayers(weightsInitializer);
 
 		int lowLoss = 0;
 		for (int i = 0; i <= 10000000; ++i)

@@ -128,7 +128,7 @@ namespace NeuralNetworks
 		void Initialize(Initializers::WeightsInitializerInterface& initializer)
 		{
 			InitializeLastLayer(initializer);
-			InitializHiddenLayers(initializer);
+			InitializeHiddenLayers(initializer);
 		}
 
 		void InitializeLastLayer(Initializers::WeightsInitializerInterface& initializer)
@@ -136,7 +136,7 @@ namespace NeuralNetworks
 			lastLayer.Initialize(initializer);
 		}
 
-		void InitializHiddenLayers(Initializers::WeightsInitializerInterface& initializer)
+		void InitializeHiddenLayers(Initializers::WeightsInitializerInterface& initializer)
 		{
 			for (int i = 0; i < hiddenLayers.size(); ++i)
 				hiddenLayers[i].Initialize(initializer);
