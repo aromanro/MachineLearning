@@ -56,7 +56,7 @@ namespace GLM
 	template<> class MultivariateSimpleLinearRegression<double> : public GeneralizedLinearModel<double, Eigen::VectorXd, Eigen::MatrixXd, SLRS::SimpleLinearRegressionSolver<double, Eigen::VectorXd, Eigen::MatrixXd, Eigen::RowVectorXd, Eigen::MatrixXd>, Eigen::RowVectorXd, Eigen::MatrixXd>
 	{
 	public:
-		typedef GeneralizedLinearModel<double, Eigen::VectorXd, Eigen::MatrixXd, SLRS::SimpleLinearRegressionSolver<double, Eigen::VectorXd, Eigen::MatrixXd, Eigen::RowVectorXd, Eigen::MatrixXd>, Eigen::RowVectorXd, Eigen::MatrixXd> BaseType;
+		using BaseType = GeneralizedLinearModel<double, Eigen::VectorXd, Eigen::MatrixXd, SLRS::SimpleLinearRegressionSolver<double, Eigen::VectorXd, Eigen::MatrixXd, Eigen::RowVectorXd, Eigen::MatrixXd>, Eigen::RowVectorXd, Eigen::MatrixXd>;
 
 		MultivariateSimpleLinearRegression(int szi = 1, int szo = 1) : BaseType(szi, szo)
 		{

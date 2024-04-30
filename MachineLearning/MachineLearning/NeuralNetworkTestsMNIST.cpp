@@ -134,9 +134,9 @@ bool NeuralNetworkTestsMNIST()
 
 	// tanh activation functions can be also used for the hidden layers, seem to work, but I prefer the leaky relu
 	// uncomment this and the commented template parameter if you want to try it, but it won't start from a pretrained network that had leaky relu (as the one I commited on github) 
-	//typedef  SGD::AdamWSolver<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, Eigen::MatrixXd, Eigen::MatrixXd, ActivationFunctions::TanhFunction<>> HiddenLayerAlternative;
+	//using HiddenLayerAlternative = SGD::AdamWSolver<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, Eigen::MatrixXd, Eigen::MatrixXd, ActivationFunctions::TanhFunction<>>;
 
-	typedef NeuralNetworks::MultilayerPerceptron<SGD::SoftmaxRegressionAdamWSolver/*, HiddenLayerAlternative*/> NeuralNetworkType;
+	using NeuralNetworkType = NeuralNetworks::MultilayerPerceptron<SGD::SoftmaxRegressionAdamWSolver/*, HiddenLayerAlternative*/>;
 
 	// the dropout parameters are commented out, passing 0 insted, because dropout does not work well with batch normalization
 	// don't use dropout right before the softmax layer

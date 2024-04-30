@@ -189,9 +189,9 @@ bool Test3()
 			yvals[i] = (quadraticFunction(i) + dist(rde)) / 100;
 		theFile.AddDataset(xvals, yvals);
 
-		//typedef SGD::AdamWSolver<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, Eigen::MatrixXd, Eigen::MatrixXd, IdentityFunction<Eigen::VectorXd>, LossFunctions::L1Loss<Eigen::VectorXd>> theSolver;
-		//typedef SGD::GradientDescentSolver<> theSolver;
-		typedef SGD::AdamWSolver<> theSolver;
+		//using theSolver = SGD::AdamWSolver<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, Eigen::MatrixXd, Eigen::MatrixXd, IdentityFunction<Eigen::VectorXd>, LossFunctions::L1Loss<Eigen::VectorXd>>;
+		//using theSolver = SGD::GradientDescentSolver<>;
+		using theSolver = SGD::AdamWSolver<>;
 		GLM::GeneralizedLinearModel<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, theSolver> generalLinearModel(2, 1);
 
 		generalLinearModel.Initialize(initializer);
@@ -288,15 +288,15 @@ bool Test4()
 			yvals[i] = (polyFunction(i) + dist(rde)) / 100;
 		theFile.AddDataset(xvals, yvals);
 
-		//typedef SGD::GradientDescentSolver<> theSolver;
-		//typedef SGD::MomentumSolver<> theSolver;
-		//typedef SGD::AdaGradSolver<> theSolver;
-		//typedef SGD::RMSPropSolver<> theSolver;
+		//using theSolver = SGD::GradientDescentSolver<>;
+		//using theSolver = SGD::MomentumSolver<>;
+		//using theSolver = SGD::AdaGradSolver<>;
+		//using theSolver = SGD::RMSPropSolver<>;
 
 		// for testing with L1 loss
-		//typedef SGD::AdamWSolver<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, Eigen::MatrixXd, Eigen::MatrixXd, IdentityFunction<Eigen::VectorXd>, LossFunctions::L1Loss<Eigen::VectorXd>> theSolver;
+		//using theSolver = SGD::AdamWSolver<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, Eigen::MatrixXd, Eigen::MatrixXd, IdentityFunction<Eigen::VectorXd>, LossFunctions::L1Loss<Eigen::VectorXd>>;
 
-		typedef SGD::AdamWSolver<> theSolver;
+		using theSolver = SGD::AdamWSolver<>;
 		GLM::GeneralizedLinearModel<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, theSolver> generalLinearModel(3, 1);
 
 		//generalLinearModel.getSolver().alpha = 0.01;

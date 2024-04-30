@@ -46,7 +46,7 @@ bool XORNeuralNetworksTests()
 		// RMSProp or momentum also work
 
 		// works with some other last neuron, such as one that has a tanh activation function, but I like the logistic one more
-		//typedef SGD::AdamWSolver<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, Eigen::MatrixXd, Eigen::MatrixXd, ActivationFunctions::TanhFunction<>> LastLayerRegressionAdamSolver;
+		//using LastLayerRegressionAdamSolver = SGD::AdamWSolver<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, Eigen::MatrixXd, Eigen::MatrixXd, ActivationFunctions::TanhFunction<>>;
 		//GeneralizedLinearModel<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, LastLayerRegressionAdamSolver> modelLastLayer(2, 1);
 
 		GLM::LogisticRegression<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, SGD::LogisticRegressionAdamWSolver> modelLastLayer(numHiddenNeurons, 1);
@@ -61,8 +61,8 @@ bool XORNeuralNetworksTests()
 
 		// kind of works with tanh as well, it just seems to have a bigger chance to end up in a local minimum
 		// works with others, too, but they might need some other parameters (for example, smaller aplha)
-		//typedef SGD::AdamWSolver<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, Eigen::MatrixXd, Eigen::MatrixXd, ActivationFunctions::LeakyRELUFunction<>> HiddenLayerRegressionAdamSolver;
-		typedef SGD::AdamWSolver<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, Eigen::MatrixXd, Eigen::MatrixXd, ActivationFunctions::LeakyRELUFunction<>> HiddenLayerRegressionAdamSolver;
+		//using HiddenLayerRegressionAdamSolver = SGD::AdamWSolver<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, Eigen::MatrixXd, Eigen::MatrixXd, ActivationFunctions::LeakyRELUFunction<>>;
+		using HiddenLayerRegressionAdamSolver = SGD::AdamWSolver<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, Eigen::MatrixXd, Eigen::MatrixXd, ActivationFunctions::LeakyRELUFunction<>>;
 		GLM::GeneralizedLinearModel<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, HiddenLayerRegressionAdamSolver> hiddenLayerModel(2, numHiddenNeurons);
 
 		hiddenLayerModel.getSolver().alpha = alpha;
