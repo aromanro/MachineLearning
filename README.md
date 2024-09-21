@@ -4,6 +4,8 @@ From linear regression towards neural networks...
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/c40593d78ad04d23933016a6c37ffb3d)](https://app.codacy.com/gh/aromanro/MachineLearning/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
 [![CodeFactor](https://www.codefactor.io/repository/github/aromanro/machinelearning/badge/master)](https://www.codefactor.io/repository/github/aromanro/machinelearning/overview/master)
 
+Blog page on Computational Physics Blog: https://compphys.go.ro/machine-learning-from-scratch/
+
 ### Rationale
 
 I've seen plenty of misconceptions about neural networks on some reddit groups and on some forums and although the subject is dealt a lot all over internet, I intend to add here some code starting from linear regression and going towards neural networks, from 'zero' (using Eigen for linear algebra probably, but not some machine learning library). Obviously I won't touch a lot of other machine learning subjects, despite being important, there are simply too many of them to cover a significant part of them.
