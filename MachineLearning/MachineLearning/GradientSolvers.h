@@ -3,6 +3,8 @@
 #include <Eigen/Eigen>
 //#include <unsupported/Eigen/MatrixFunctions>
 
+#include <cassert>
+
 #include "ActivationFunctions.h"
 #include "CostFunctions.h"
 

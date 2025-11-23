@@ -2,6 +2,8 @@
 
 #include <Eigen/Eigen>
 
+#include <cassert>
+
 #include "ActivationFunctions.h"
 
 namespace SLRS
