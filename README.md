@@ -6,14 +6,6 @@ From linear regression towards neural networks...
 
 Blog page on Computational Physics Blog: https://compphys.go.ro/machine-learning-from-scratch/
 
-### Tools
-
-The project compiles on Windows with Visual Studio 2026 (the code can be compiled with older versions starting with VS 2015, but it's currently maintained with VS 2026 and C++ 17 or higher).
-
-### Libraries
-
-The program requires the typical VC++ runtime libraries.
-
 ### Rationale
 
 I've seen plenty of misconceptions about neural networks on some reddit groups and on some forums and although the subject is dealt a lot all over internet, I intend to add here some code starting from linear regression and going towards neural networks, from 'zero' (using Eigen for linear algebra probably, but not some machine learning library). Obviously I won't touch a lot of other machine learning subjects, despite being important, there are simply too many of them to cover a significant part of them.
@@ -421,8 +413,13 @@ The ensemble with five 'pretrained' networks reached about 99.45% on the test se
 
 Even later addition: After adding AdamW implementation (it's now default) and setting another beta2 value, the ensemble went to almost 99.55% (all individual networks being better than 99.4% but less than 99.5%).
 
-### Required libraries
+### Tools
 
+The project compiles on Windows with Visual Studio 2026 (the code can be compiled with older versions starting with VS 2015, but it's currently maintained with VS 2026 and C++ 17 or higher).
+
+### Libraries
+
+The program requires the typical VC++ runtime libraries.
 Dealing with matrices is done with the help of [Eigen](https://eigen.tuxfamily.org/).
 
 ### Bibliography
