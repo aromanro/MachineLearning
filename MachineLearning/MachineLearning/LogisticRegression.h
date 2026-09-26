@@ -2,16 +2,6 @@
 
 #include "GeneralizedLinearModel.h"
 
-namespace LossFunctions
-{
-	// a special kind of generalized linear regression, with a sigmoid function as the link function and a logistic loss (which is the cross entropy loss for a special case of 'target' values being either 0 or 1)
-
-	template<typename T> class LogLoss : public BinaryCrossEntropyLoss<T>
-	{
-	};
-
-}
-
 namespace SGD
 {
 

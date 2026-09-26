@@ -30,3 +30,15 @@
 *.exe
 *.out
 *.app
+
+# Standalone numerical tests and before/after snapshots
+/build-neural-tests/
+
+# Visual Studio state and build output
+/MachineLearning/.vs/
+/MachineLearning/**/x64/
+
+# Local backups and downloaded datasets
+/Data/bak/
+/Datasets/*
+!/Datasets/README.md

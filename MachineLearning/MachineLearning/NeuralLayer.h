@@ -11,8 +11,8 @@ namespace NeuralNetworks
 	class NeuralLayerPerceptron
 	{
 	public:
-		NeuralLayerPerceptron(int szi = 1, int szo = 1)
-			: layer(szi, szo)
+		NeuralLayerPerceptron(int szi = 1, int szo = 1, GLM::OptimizerInitialization initialization = GLM::OptimizerInitialization::Eager)
+			: layer(szi, szo, initialization)
 		{
 		}
 
@@ -56,6 +56,10 @@ namespace NeuralNetworks
 			return layer.Predict(input);
 		}
 
+		Eigen::MatrixXd PredictBatch(const Eigen::MatrixXd& input) { return layer.PredictBatch(input); }
+		bool isOptimizerInitialized() const { return layer.isOptimizerInitialized(); }
+		void ClearBatchCache() { layer.ClearBatchCache(); }
+
 		double getLoss() const
 		{
 			return layer.getLoss();
@@ -81,12 +85,34 @@ namespace NeuralNetworks
 			layer.AddBatchNoParamsAdjustment(batchInput, batchOutput);
 		}
 
+		void AddBatchNoParamsAdjustment(const Eigen::MatrixXd& batchInput)
+		{
+			layer.AddBatchNoParamsAdjustment(batchInput);
+		}
+
 		Eigen::MatrixXd AddBatchWithParamsAdjusment(const Eigen::MatrixXd& batchInput, const Eigen::MatrixXd& batchOutput)
 		{
 			return layer.AddBatchWithParamsAdjusment(batchInput, batchOutput);
 		}
 
-		Eigen::MatrixXd getPrediction() const
+		Eigen::MatrixXd ComputeBatchGradient(const Eigen::MatrixXd& batchOutput)
+		{
+			return layer.ComputeBatchGradient(batchOutput);
+		}
+
+		void ApplyBatchUpdate()
+		{
+			layer.ApplyBatchUpdate();
+		}
+
+		void ApplyBatchUpdate(const Eigen::MatrixXd& gradient)
+		{
+			layer.ApplyBatchUpdate(gradient);
+		}
+
+		// Borrowed views: valid until the next recording forward, cache mutation,
+		// ClearBatchCache, or destruction. Copy explicitly when longer lived.
+		const Eigen::MatrixXd& getPrediction() const
 		{
 			return layer.getPrediction();
 		}
@@ -96,7 +122,7 @@ namespace NeuralNetworks
 			layer.setPrediction(p);
 		}
 
-		Eigen::MatrixXd getInput() const
+		const Eigen::MatrixXd& getInput() const
 		{
 			return layer.getInput();
 		}
@@ -111,9 +137,9 @@ namespace NeuralNetworks
 			return layer.saveModel(os);
 		}
 
-		bool loadLayer(std::ifstream& is)
+		bool loadLayer(std::ifstream& is, std::string* error = nullptr)
 		{
-			return layer.loadModel(is);
+			return layer.loadModel(is, error);
 		}
 
 	private:

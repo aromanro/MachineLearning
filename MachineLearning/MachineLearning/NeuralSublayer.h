@@ -20,7 +20,7 @@ namespace NeuralNetworks
 	public:
 		using BaseType = GLM::GeneralizedLinearModel<Eigen::VectorXd, Eigen::VectorXd, Eigen::MatrixXd, Solver>;
 
-		NeuralSublayer(int szi = 1, int szo = 1) : BaseType(szi, szo)
+		NeuralSublayer(int szi = 1, int szo = 1, GLM::OptimizerInitialization initialization = GLM::OptimizerInitialization::Eager) : BaseType(szi, szo, initialization)
 		{
 		}
 

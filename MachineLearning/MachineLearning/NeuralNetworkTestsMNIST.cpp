@@ -219,7 +219,7 @@ bool NeuralNetworkTestsMNIST()
 	// if nrEpochs is 0 if 'has pretrained' is true it means: do not train further the pretrained model (it has ~99.35% accuracy on the test set)
 	// just testing together with some other models in an ensemble to see if it can be improved
 
-	const int nrEpochs = hasPretrained ? 0 : 20; // bigger dropout, more epochs - less if starting from a pretrained model
+	const int nrEpochs = hasPretrained ? 0 : 40; // bigger dropout, more epochs - less if starting from a pretrained model
 
 	if (nrEpochs > 0)
 	{
@@ -280,10 +280,25 @@ bool NeuralNetworkTestsMNIST()
 			long long int validCorrect = 0;
 			long long int trainCorrect = 0;
 
+			// Bound inference workspaces while preserving the sampled training
+			// examples and their order for the existing accuracy/loss statistics.
+			Eigen::MatrixXd sampledInputs(nrInputs, Prediction::DefaultBatchSize);
+			for (Eigen::Index start = 0; start < validationInputs.cols(); start += Prediction::DefaultBatchSize)
+			{
+				const Eigen::Index count = std::min(Prediction::DefaultBatchSize, validationInputs.cols() - start);
+				validationRes.middleCols(start, count) = neuralNetwork.PredictBatch(validationInputs.middleCols(start, count));
+				for (Eigen::Index column = 0; column < count; ++column)
+				{
+					const int index = distIntBig(rde);
+					sampledInputs.col(column) = trainInputs.col(index);
+					trainStatsOutputs.col(start + column) = trainOutputs.col(index);
+				}
+				trainStatsRes.middleCols(start, count) = neuralNetwork.PredictBatch(sampledInputs.leftCols(count));
+			}
+
 			for (int i = 0; i < validationRecords.size(); ++i)
 			{
-				Eigen::VectorXd res = neuralNetwork.Predict(validationInputs.col(i));
-				validationRes.col(i) = res;
+				Eigen::VectorXd res = validationRes.col(i);
 
 				double limp = 0;
 				for (int j = 0; j < nrOutputs; ++j)
@@ -311,11 +326,7 @@ bool NeuralNetworkTestsMNIST()
 					++validCorrect;
 
 
-				const int ind = distIntBig(rde);
-
-				res = neuralNetwork.Predict(trainInputs.col(ind));
-				trainStatsRes.col(i) = res;
-				trainStatsOutputs.col(i) = trainOutputs.col(ind);
+				res = trainStatsRes.col(i);
 
 				limp = 0;
 

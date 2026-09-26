@@ -97,14 +97,16 @@ bool XORNeuralNetworksTests()
 			hiddenLayerModel.AddBatchNoParamsAdjustment(x, t);
 			Eigen::MatrixXd pred = hiddenLayerModel.getPrediction();
 
-			// forward and backward for the last layer:
-			const Eigen::MatrixXd grad = modelLastLayer.AddBatchWithParamsAdjusment(pred, y);
+			// Forward and backward use unchanged weights in both layers.
+			modelLastLayer.AddBatchNoParamsAdjustment(pred, y);
+			const Eigen::MatrixXd grad = modelLastLayer.ComputeBatchGradient(y);
 
 			// now backpropagate the gradient to previous layer:
 			pred = modelLastLayer.BackpropagateBatch(grad);
 
-			// now do the adjustments as well in the first layer
-			hiddenLayerModel.AddBatchWithParamsAdjusment(x, pred);
+			const Eigen::MatrixXd hiddenGradient = hiddenLayerModel.ComputeBatchGradient(pred);
+			modelLastLayer.ApplyBatchUpdate(grad);
+			hiddenLayerModel.ApplyBatchUpdate(hiddenGradient);
 
 			if (i % 10000 == 0)
 			{

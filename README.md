@@ -31,7 +31,9 @@ Another thing that I don't want to repeat in many places is that - unless specif
 ### A warning
 
 With the default hyperparameters, computing can take quite some time for training the multilayer perceptron on the EMNIST dataset. If you want to try it as it is, you should have min 32 gigabytes of RAM and a quite good processor. To use less memory, you should change to false (or simply remove) the parameter of the `ReadAllImagesAndLabels` call in `NeuralNetworkTestsMNIST`. As it is, the training dataset is increased to 5x the size of the original dataset by augmenting the data (simply a single pixel offset in the horizontal and vertical directions). Also you might want to reduce the number of the training epochs.
-The project has openmp and AVX2 turned on, it will use close to 100% all the cores, when training.
+The x64 Release project enables OpenMP and AVX2. The demo requests at most eight Eigen threads, capped by the reported hardware concurrency (one when unknown); Eigen also applies the OpenMP limit. Set `ML_EIGEN_THREADS` before launching it to choose another limit; `0` uses the OpenMP default. For example, in PowerShell use `$env:ML_EIGEN_THREADS = '8'`. Builds without OpenMP report a one-thread limit and explain why. MNIST statistics and ensemble evaluation use batches of up to 128 examples.
+
+The [training checks](tests/README.md), [loading/performance results](tests/ROBUSTNESS_PERFORMANCE_RESULTS.md), and [review fixes](tests/REVIEW_FIX_RESULTS.md) describe validation, saved-model compatibility, and benchmark commands.
 
 ### Some utility classes
 
@@ -42,7 +44,7 @@ I also used the EMNIST dataset (only digits for now), so I implemented a `MNISTD
 
 As the name suggests, it's simple. One input, one output, linear. Wikipedia link: [simple linear regression](https://en.wikipedia.org/wiki/Simple_linear_regression).
 
-The implementation is in [SimpleLinearRegression.h](MachineLearning/MachineLearning/SimpleLinearRegression.h) and [SimpleLinearRegressionSolver.h](MachineLearning/MachineLearning/SimpleLinearRegressionSolver.h). The reason for having a separate class for the solver is that for the next - not so simple - models, there are several stochastic gradient solvers that work for all of them, so I had a similarly separate implementation for this particular case as well, although it wouldn't really be needed. I implemented the simple linear regression not only for the one input one output case, but also for n inputs, n outputs, it's just a bunch of independant simple linear models.
+The implementation is in [SimpleLinearRegression.h](MachineLearning/MachineLearning/SimpleLinearRegression.h) and [SimpleLinearRegressionSolvers.h](MachineLearning/MachineLearning/SimpleLinearRegressionSolvers.h). The reason for having a separate class for the solver is that for the next - not so simple - models, there are several stochastic gradient solvers that work for all of them, so I had a similarly separate implementation for this particular case as well, although it wouldn't really be needed. I implemented the simple linear regression not only for the one input one output case, but also for n inputs, n outputs, it's just a bunch of independant simple linear models.
 
 How they are used can be seen in [LinearRegressionTests.cpp](MachineLearning/MachineLearning/LinearRegressionTests.cpp), `Test1` function.
 
@@ -378,7 +380,7 @@ It contains the last layer and the hidden layers and adds some implementation fo
 
 ##### XOR
 
-The multilayer perceptron usage is exemplified in [NeuralNetworkTestsXOR.cpp](MachineLearning/MachineLearning/NeuralNetworkTestsXOR.cpp). The `XORNeuralNetworksTests` function exemplifies it for a XOR, a simple but not so trivial example. It cannot be solved with a single neuron (unless you use some 'tricks' like here: https://arxiv.org/abs/2108.12943 or here: https://arxiv.org/abs/2110.06871v1), you need two layers, a hidden one with two neurons and the output one with a single neuron. There is some nasty issue that the problem has local minimums where the neural network can get 'stuck', so I implemented an initializer that initializes the weights to some random values that avoid starting in such position (but it still could get there with a big enough learn rate).
+The multilayer perceptron usage is exemplified in [NeuralNetworTestsXOR.cpp](MachineLearning/MachineLearning/NeuralNetworTestsXOR.cpp). The `XORNeuralNetworksTests` function exemplifies it for a XOR, a simple but not so trivial example. It cannot be solved with a single neuron (unless you use some 'tricks' like here: https://arxiv.org/abs/2108.12943 or here: https://arxiv.org/abs/2110.06871v1), you need two layers, a hidden one with two neurons and the output one with a single neuron. There is some nasty issue that the problem has local minimums where the neural network can get 'stuck', so I implemented an initializer that initializes the weights to some random values that avoid starting in such position (but it still could get there with a big enough learn rate).
 The `XORNeuralNetworksTests` function repeats the same thing twice: once explicitely, without using the `MultilayerPerceptron` class, but a `LogisticRegression` object for the last layer and a `GeneralizedLinearModel` object for the hidden layer... and once as expected, using a `MultilayerPerceptron` object. The reason is that I implemented the first part before having any neural network code implemented yet and I thought it could be helpful to let it there to see how those things can implement a neural network, without having to look into the neural network implementation code.
 
 ##### Iris dataset
@@ -412,6 +414,11 @@ Then I added batch normalization and dropped the dropout (they tend to not work 
 The ensemble with five 'pretrained' networks reached about 99.45% on the test set, sensibly higher than any of the included networks (max: ~99.37%, min: ~99.29%).
 
 Even later addition: After adding AdamW implementation (it's now default) and setting another beta2 value, the ensemble went to almost 99.55% (all individual networks being better than 99.4% but less than 99.5%).
+
+> [!NOTE]
+> I started using AI for some of the work. I run an analysis on the project and found some issues which were fixed (the biggest one was that I used by mistake the 'new' value for gradient in learning). 
+> I also did some improvements - with Astra help (removing some big intermediates and the biggest being using caching for learning). There is a small speed improvement for inference and a big one for learning.
+> Now the results are even better, almost all trained networks are over 99.6 - except one, but it's very close - and the ensemble obviously went higher than all of them, over 99.66%.
 
 ### Tools
 

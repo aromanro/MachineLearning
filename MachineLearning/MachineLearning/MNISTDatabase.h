@@ -1,11 +1,14 @@
 #pragma once
 
+#include "BatchPrediction.h"
+
 #include <fstream>
 #include <iostream>
 #include <sstream>
 #include <vector>
 
 #include "DataFileBase.h"
+#include "TestStatistics.h"
 
 namespace Utils {
 
@@ -192,38 +195,44 @@ namespace Utils {
 
 			long long int correct = 0;
 
-			for (int i = 0; i < Inputs.cols(); ++i)
+			for (Eigen::Index start = 0; start < Inputs.cols(); start += Prediction::DefaultBatchSize)
 			{
-				Eigen::VectorXd res = neuralNetwork.Predict(Inputs.col(i));
-
-				double limp = 0;
-				for (int j = 0; j < nrOutputs; ++j)
-					limp = std::max(limp, res(j));
-
-				int nr = -1;
-				for (int j = 0; j < nrOutputs; ++j)
+				const Eigen::Index count = std::min(Prediction::DefaultBatchSize, Inputs.cols() - start);
+				const Eigen::MatrixXd predictions = Prediction::PredictBatch(neuralNetwork, Inputs.middleCols(start, count));
+				for (Eigen::Index column = 0; column < count; ++column)
 				{
-					stats[j].AddPrediction(res(j) >= limp, Outputs(j, i) > 0.5);
+					const Eigen::Index i = start + column;
+					const auto res = predictions.col(column);
 
-					if (Outputs(j, i) > 0.5)
+					double limp = 0;
+					for (int j = 0; j < nrOutputs; ++j)
+						limp = std::max(limp, res(j));
+
+					int nr = -1;
+					for (int j = 0; j < nrOutputs; ++j)
 					{
-						if (nr != -1)
-							std::cout << "Info from label ambiguous, should not happen: " << nr << " and " << j << std::endl;
-						nr = j;
+						stats[j].AddPrediction(res(j) >= limp, Outputs(j, i) > 0.5);
+
+						if (Outputs(j, i) > 0.5)
+						{
+							if (nr != -1)
+								std::cout << "Info from label ambiguous, should not happen: " << nr << " and " << j << std::endl;
+							nr = j;
+						}
 					}
+
+					int predn = -1;
+					for (int n = 0; n < nrOutputs; ++n)
+						if (res(n) >= limp)
+						{
+							if (predn != -1)
+								std::cout << "Ambiguous prediction: " << predn << " and " << n << std::endl;
+							predn = n;
+						}
+
+					if (predn == nr)
+						++correct;
 				}
-
-				int predn = -1;
-				for (int n = 0; n < nrOutputs; ++n)
-					if (res(n) >= limp)
-					{
-						if (predn != -1)
-							std::cout << "Ambiguous prediction: " << predn << " and " << n << std::endl;
-						predn = n;
-					}
-
-				if (predn == nr)
-					++correct;
 			}
 
 			for (int j = 0; j < nrOutputs; ++j)

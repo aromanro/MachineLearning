@@ -172,6 +172,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CostFunctions.h" />
+    <ClInclude Include="BatchPrediction.h" />
+    <ClInclude Include="RuntimeSettings.h" />
     <ClInclude Include="CSVDataFile.h" />
     <ClInclude Include="DataFile.h" />
     <ClInclude Include="DataFileBase.h" />

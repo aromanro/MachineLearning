@@ -1,6 +1,10 @@
 #pragma once
 
+#include <algorithm>
+#include <iomanip>
+#include <limits>
 #include <vector>
+#include <stdexcept>
 
 
 #include "GradientSolvers.h"
@@ -28,55 +32,47 @@ namespace NeuralNetworks
 	public:
 		// neurons contains the number of neurons in each layer including the input layer 
 		// which is not explicitly represented in the implementation, but the number is used for the number of inputs
-		explicit MultilayerPerceptron(const std::vector<int>& neurons, const std::vector<double>& drop = {}, const std::vector<double> snoise = {})
-			: batchNormParam(1.), noBatchNormalizationOnInput(true)
+		explicit MultilayerPerceptron(const std::vector<int>& neurons, const std::vector<double>& drop = {}, const std::vector<double> snoise = {},
+			GLM::OptimizerInitialization initialization = GLM::OptimizerInitialization::Eager)
+			: lastLayer(1, 1, initialization), optimizerInitialization(initialization),
+			configuredDropout(drop), configuredNoise(snoise), batchNormParam(1.), noBatchNormalizationOnInput(true)
 		{
-			if (neurons.empty()) return;
-			else if (neurons.size() == 1)
-			{
-				lastLayer = NeuralLayerPerceptron<LastSolver>(neurons[0]);
-				lastLayer.setLastLayer();
-				batchNormMeans.push_back(Eigen::VectorXd::Zero(neurons[0]));
-				batchNormInvStds.push_back(Eigen::VectorXd::Ones(neurons[0]));
-				return;
-			}
+			const std::vector<int> sizes = neurons.size() < 2
+				? std::vector<int>{neurons.empty() ? 1 : neurons.front(), 1} : neurons;
+			if (std::any_of(sizes.begin(), sizes.end(), [](int size) { return size <= 0; }))
+				throw std::invalid_argument("Layer dimensions must be positive");
 
-			batchNormMeans.reserve(neurons.size());
-			batchNormInvStds.reserve(neurons.size());
+			batchNormMeans.reserve(sizes.size());
+			batchNormVariances.reserve(sizes.size());
+			hiddenLayers.reserve(sizes.size() - 2);
 
-			int inputs = neurons[0];
-			for (int i = 1; i < neurons.size() - 1; ++i)
+			int inputs = sizes[0];
+			for (int i = 1; i < sizes.size() - 1; ++i)
 			{
-				const int outputs = neurons[i];
-				hiddenLayers.emplace_back(NeuralLayerPerceptron<Solver>(inputs, outputs));
+				const int outputs = sizes[i];
+				hiddenLayers.emplace_back(inputs, outputs, initialization);
 				const int hidInd = i - 1;
 				hiddenLayers[hidInd].setLastLayer(false);
 				hiddenLayers[hidInd].setFirstLayer(false);
 
 				batchNormMeans.push_back(Eigen::VectorXd::Zero(inputs));
-				batchNormInvStds.push_back(Eigen::VectorXd::Ones(inputs));
+				batchNormVariances.push_back(Eigen::VectorXd::Ones(inputs));
 
 				inputs = outputs;
 			}
 			if (!hiddenLayers.empty()) hiddenLayers.front().setFirstLayer();
 
-			lastLayer = NeuralLayerPerceptron<LastSolver>(inputs, neurons.back());
+			lastLayer = NeuralLayerPerceptron<LastSolver>(inputs, sizes.back(), initialization);
 			lastLayer.setLastLayer();
-			lastLayer.setFirstLayer(false);
+			lastLayer.setFirstLayer(hiddenLayers.empty());
 
 			batchNormMeans.push_back(Eigen::VectorXd::Zero(inputs));
-			batchNormInvStds.push_back(Eigen::VectorXd::Ones(inputs));
+			batchNormVariances.push_back(Eigen::VectorXd::Ones(inputs));
 
 			std::random_device rd;
 			rde.seed(rd());
 
-			dropout.resize(hiddenLayers.size() + 1, 0.);
-			for (int i = 0; i < std::min(drop.size(), dropout.size()); ++i)
-				dropout[i] = drop[i];
-
-			stdsNoise.resize(hiddenLayers.size() + 1, 0.);
-			for (int i = 0; i < std::min(snoise.size(), stdsNoise.size()); ++i)
-				stdsNoise[i] = snoise[i];
+			ConfigureRegularization();
 		}
 
 		// this assumes that the params for the last and hidden layers are the same, so use the same solver (but the activation and cost functions can be different)
@@ -88,9 +84,17 @@ namespace NeuralNetworks
 
 		void setLearnRate(double a)
 		{
+			if (hiddenLayerParams.empty()) hiddenLayerParams.push_back(a);
+			else hiddenLayerParams[0] = a;
 			lastLayer.setLearnRate(a);
 			for (int i = 0; i < hiddenLayers.size(); ++i)
 				hiddenLayers[i].setLearnRate(a);
+		}
+
+		// Reproducible dropout/noise; weight initialization has its own generator.
+		void setRandomSeed(unsigned int seed)
+		{
+			rde.seed(seed);
 		}
 
 		void setParamsLastLayer(const std::vector<double>& params)
@@ -100,6 +104,9 @@ namespace NeuralNetworks
 
 		void setParamsHiddenLayers(const std::vector<double>& params)
 		{
+			// setParams accepts a prefix: retain the rest for layers added by loading.
+			if (hiddenLayerParams.size() < params.size()) hiddenLayerParams.resize(params.size());
+			std::copy(params.begin(), params.end(), hiddenLayerParams.begin());
 			for (int i = 0; i < hiddenLayers.size(); ++i)
 				hiddenLayers[i].setParams(params);
 		}
@@ -129,6 +136,8 @@ namespace NeuralNetworks
 		{
 			InitializeLastLayer(initializer);
 			InitializeHiddenLayers(initializer);
+			for (auto& mean : batchNormMeans) mean.setZero();
+			for (auto& variance : batchNormVariances) variance.setOnes();
 		}
 
 		void InitializeLastLayer(Initializers::WeightsInitializerInterface& initializer)
@@ -149,48 +158,44 @@ namespace NeuralNetworks
 			for (int i = 0; i < hiddenLayers.size(); ++i)
 			{
 				if (batchNormParam != 1. && !(i == 0 && noBatchNormalizationOnInput))
-				{
-					Eigen::VectorXd invStd = batchNormInvStds[i];
-
-					// Experimental code that allows adding gaussian noise to the outputs of the hidden layers and the input
-					// here the variance is adjusted for prediction
-					// because on top of the variance of the output (or for the input data, the variance of the input) there is the variance of the noise
-					if (stdsNoise[i] > 0.)
-					{
-						const Eigen::VectorXd st = invStd.cwiseInverse();
-						Eigen::VectorXd var1 = st.cwiseProduct(st);
-						const double var2 = stdsNoise[i] * stdsNoise[i];
-						var1 = var1.array() - var2;
-						invStd = var1.cwiseAbs().cwiseSqrt().cwiseInverse();
-					}
-					// end of experimental code
-					
-					v = (v - batchNormMeans[i]).cwiseProduct(invStd);
-				}
+					v = (v - batchNormMeans[i]).cwiseProduct(PredictionInvStd(i));
 				
 				v = hiddenLayers[i].Predict(v);
 			}
 
 			if (batchNormParam != 1. && !(hiddenLayers.empty() && noBatchNormalizationOnInput))
-			{
-				Eigen::VectorXd invStd = batchNormInvStds.back();
-
-				// Experimental code that allows adding gaussian noise to the outputs of the hidden layers and the input
-				// see the comment above for details
-				if (stdsNoise.back() > 0.)
-				{
-					const Eigen::VectorXd st = invStd.cwiseInverse();
-					Eigen::VectorXd var1 = st.cwiseProduct(st);
-					const double var2 = stdsNoise.back() * stdsNoise.back();
-					var1 = var1.array() - var2;
-					invStd = var1.cwiseAbs().cwiseSqrt().cwiseInverse();
-				}
-				// end of experimental code
-
-				v = (v - batchNormMeans.back()).cwiseProduct(invStd);
-			}
+				v = (v - batchNormMeans.back()).cwiseProduct(PredictionInvStd(static_cast<int>(hiddenLayers.size())));
 
 			return lastLayer.Predict(v);
+		}
+
+		// Each column is an independent example. This path uses the saved
+		// inference normalization statistics and never records training caches.
+		Eigen::MatrixXd PredictBatch(const Eigen::MatrixXd& input)
+		{
+			Eigen::MatrixXd value = input;
+			for (int i = 0; i < hiddenLayers.size(); ++i)
+			{
+				NormalizePredictionBatch(i, value);
+				value = hiddenLayers[i].PredictBatch(value);
+			}
+			NormalizePredictionBatch(static_cast<int>(hiddenLayers.size()), value);
+			return lastLayer.PredictBatch(value);
+		}
+
+		// True if at least one layer has initialized its optimizer.
+		bool isOptimizerInitialized() const
+		{
+			if (lastLayer.isOptimizerInitialized()) return true;
+			for (const auto& layer : hiddenLayers)
+				if (layer.isOptimizerInitialized()) return true;
+			return false;
+		}
+
+		void ClearBatchCache()
+		{
+			lastLayer.ClearBatchCache();
+			for (auto& layer : hiddenLayers) layer.ClearBatchCache();
 		}
 
 		double getLoss() const
@@ -205,7 +210,6 @@ namespace NeuralNetworks
 
 		Eigen::MatrixXd ForwardBackwardStep(const Eigen::MatrixXd& input, const Eigen::MatrixXd& target, bool backpropagateToInput = false)
 		{
-			const int batchSize = static_cast<int>(input.cols());
 			std::vector<Eigen::VectorXd> dropoutMasks(dropout.size());
 
 			std::vector<Eigen::VectorXd> avgi;
@@ -214,58 +218,76 @@ namespace NeuralNetworks
 			if (batchNormParam != 1.)
 			{
 				avgi.reserve(batchNormMeans.size());
-				istdi.reserve(batchNormInvStds.size());
+				istdi.reserve(batchNormVariances.size());
 			}
 
-			// forward
-			Eigen::MatrixXd inp = input;
-
-			// dropout for input
-			Dropout(0, inp, dropoutMasks);
-
-			// Experimental code that allows adding gaussian noise to the outputs of the hidden layers and the input
-			// noise for input
-			if (stdsNoise[0] > 0.)
+			const bool transforms = batchNormParam != 1.
+				|| std::any_of(dropout.begin(), dropout.end(), [](double p) { return p > 0.; })
+				|| std::any_of(stdsNoise.begin(), stdsNoise.end(), [](double s) { return s > 0.; });
+			if (!transforms)
 			{
-				std::normal_distribution<double> dist(0., stdsNoise[0]);
-
-				for (int j = 0; j < inp.rows(); ++j)
-					for (int k = 0; k < inp.cols(); ++k)
-						inp(j, k) += dist(rde);
+				// Pass borrowed outputs directly to the next layer's owning cache.
+				// No temporary input/prediction copies or dummy targets are needed.
+				const Eigen::MatrixXd* current = &input;
+				for (auto& layer : hiddenLayers)
+				{
+					layer.AddBatchNoParamsAdjustment(*current);
+					current = &layer.getPrediction();
+				}
+				lastLayer.AddBatchNoParamsAdjustment(*current, target);
 			}
-			// end of experimental code
-			
-			for (int i = 0; i < hiddenLayers.size(); ++i)
+			else
 			{
-				BatchNormalize(avgi, istdi, i, inp);
-				
-				t.resize(hiddenLayers[i].getNrOutputs(), batchSize);
-				hiddenLayers[i].AddBatchNoParamsAdjustment(inp, t);
-				inp = hiddenLayers[i].getPrediction();
+				Eigen::MatrixXd inp = input;
 
-				Dropout(i + 1, inp, dropoutMasks);
+				// dropout for input
+				Dropout(0, inp, dropoutMasks);
 
 				// Experimental code that allows adding gaussian noise to the outputs of the hidden layers and the input
-				// noise for hidden layers
-				if (stdsNoise[i] > 0.)
+				// noise for input
+				if (stdsNoise[0] > 0.)
 				{
-					std::normal_distribution<double> dist(0., stdsNoise[i]);
+					std::normal_distribution<double> dist(0., stdsNoise[0]);
 
 					for (int j = 0; j < inp.rows(); ++j)
 						for (int k = 0; k < inp.cols(); ++k)
 							inp(j, k) += dist(rde);
 				}
 				// end of experimental code
+
+				for (int i = 0; i < hiddenLayers.size(); ++i)
+				{
+					BatchNormalize(avgi, istdi, i, inp);
+
+					hiddenLayers[i].AddBatchNoParamsAdjustment(inp);
+					inp = hiddenLayers[i].getPrediction();
+
+					Dropout(i + 1, inp, dropoutMasks);
+
+					// Experimental code that allows adding gaussian noise to the outputs of the hidden layers and the input
+					// noise for hidden layers
+					if (stdsNoise[i + 1] > 0.)
+					{
+						std::normal_distribution<double> dist(0., stdsNoise[i + 1]);
+
+						for (int j = 0; j < inp.rows(); ++j)
+							for (int k = 0; k < inp.cols(); ++k)
+								inp(j, k) += dist(rde);
+					}
+					// end of experimental code
+				}
+
+				BatchNormalize(avgi, istdi, static_cast<int>(hiddenLayers.size()), inp);
+				lastLayer.AddBatchNoParamsAdjustment(inp, target);
 			}
 
-			BatchNormalize(avgi, istdi, static_cast<int>(hiddenLayers.size()), inp);
+			// Finish forward without updating any weights. Every input derivative
+			// below must use the same weights that produced these predictions.
+			const Eigen::MatrixXd lastGradient = lastLayer.ComputeBatchGradient(target);
+			Eigen::MatrixXd grad = lastLayer.BackpropagateBatch(lastGradient);
+			std::vector<Eigen::MatrixXd> hiddenGradients(hiddenLayers.size());
 
-			// forward and backward for the last layer and backpropagate the gradient to the last hidden layer
-			Eigen::MatrixXd grad = lastLayer.BackpropagateBatch(lastLayer.AddBatchWithParamsAdjusment(inp, target));
-
-			// backward: now backpropagate the gradient through the hidden layers:
-
-			for (int i = static_cast<int>(hiddenLayers.size() - 1); i > 0; --i)
+			for (int i = static_cast<int>(hiddenLayers.size()) - 1; i >= 0; --i)
 			{
 				const int ip1 = i + 1;
 
@@ -274,22 +296,21 @@ namespace NeuralNetworks
 				// zero out the gradient for the dropped out neurons
 				DropoutGradient(ip1, grad, dropoutMasks);
 
-				// do the adjustments of the parameters as well and backpropagate for each hidden layer
-				grad = hiddenLayers[i].BackpropagateBatch(hiddenLayers[i].AddBatchWithParamsAdjusment(hiddenLayers[i].getInput(), grad));
+				hiddenGradients[i] = hiddenLayers[i].ComputeBatchGradient(grad);
+				if (i > 0 || backpropagateToInput)
+					grad = hiddenLayers[i].BackpropagateBatch(hiddenGradients[i]);
 			}
 
-			// the first layer does not need to backpropagate gradient to the input layer, that one cannot be adjusted
-			// TODO: this could be part of a larger network, even as a single 'layer', before it there could be more layers, for example a convolutional network, in such a case the gradient needs to be backpropagated
-			if (!hiddenLayers.empty())
+			if (backpropagateToInput)
 			{
-				BatchNormalizeGradient(istdi, 1, grad);
-
-				DropoutGradient(1, grad, dropoutMasks);
-
-				hiddenLayers[0].AddBatchWithParamsAdjusment(hiddenLayers[0].getInput(), grad);
-
-				if (backpropagateToInput) grad = hiddenLayers[0].BackpropagateBatch(grad);
+				BatchNormalizeGradient(istdi, 0, grad);
+				DropoutGradient(0, grad, dropoutMasks);
 			}
+
+			// All backward propagation is complete before the first update.
+			lastLayer.ApplyBatchUpdate(lastGradient);
+			for (size_t i = 0; i < hiddenLayers.size(); ++i)
+				hiddenLayers[i].ApplyBatchUpdate(hiddenGradients[i]);
 
 			return grad;
 		}
@@ -309,104 +330,200 @@ namespace NeuralNetworks
 
 			// save all layers
 			for (int i = 0; i < hiddenLayers.size(); ++i)
-				hiddenLayers[i].saveLayer(os);
+				if (!hiddenLayers[i].saveLayer(os)) return false;
 
-			lastLayer.saveLayer(os);
+			if (!lastLayer.saveLayer(os)) return false;
 
-			// save batch normalization stuff
-			os << batchNormParam << std::endl;
+			// Keep the published inverse-std layout so older readers preserve inference.
+			// Running statistics in memory remain variances.
+			const auto precision = os.precision();
+			os << std::setprecision(std::numeric_limits<double>::max_digits10) << batchNormParam << std::endl;
+			os.precision(precision);
 
 			const static Eigen::IOFormat csv(Eigen::FullPrecision, Eigen::DontAlignCols, ", ", "\n");
 			for (int i = 0; i < batchNormMeans.size(); ++i)
 			{
 				os << batchNormMeans[i].format(csv) << std::endl;
-				os << batchNormInvStds[i].format(csv) << std::endl;
+				const Eigen::VectorXd invStd = (batchNormVariances[i].array() + batchNormEpsilon).sqrt().inverse();
+				os << invStd.format(csv) << std::endl;
 			}
 
-			return true;
+			return static_cast<bool>(os);
 		}
 
 		bool loadNetwork(const std::string& name)
 		{
 			std::ifstream is(name, std::ios::in);
+			if (!is.is_open())
+			{
+				std::cerr << "Couldn't load network '" << name << "': cannot open file\n";
+				return false;
+			}
 
 			return loadNetwork(is);
 		}
 
 		bool loadNetwork(std::ifstream& is)
 		{
-			if (!is.is_open()) return false;
-
-			int nrLayers;
-			is >> nrLayers;
-
-			std::cout << "Loading network with " << nrLayers + 1 << " layers" << std::endl;
-			
-			hiddenLayers.resize(nrLayers);
-
-			// load all layers
-			for (int i = 0; i < hiddenLayers.size(); ++i)
-				if (!hiddenLayers[i].loadLayer(is)) {
-					std::cout << "Couldn't load layer nr: " << i << std::endl;
-					return false;
-				}
-
-			if (!lastLayer.loadLayer(is)) return false;
-
-			// load batch normalization stuff
 			try
 			{
-				batchNormParam = 1.;
-				is >> batchNormParam;
-				is.ignore();
-			}
-			catch (...)
-			{
-				batchNormParam = 1.;
-			}
-
-			if (batchNormParam == 0)
-				batchNormParam = 1.;
-
-			if (batchNormParam == 1.)
-			{
-				for (int i = 0; i < batchNormMeans.size(); ++i)
+				// Parse into a candidate: failed loads preserve parameters, optimizer
+				// state, normalization statistics, configuration, and the random seed.
+				auto candidate = *this;
+				std::string error;
+				if (!candidate.LoadNetworkParameters(is, error))
 				{
-					batchNormMeans[i] = Eigen::VectorXd::Zero(batchNormMeans[i].size());
-					batchNormInvStds[i] = Eigen::VectorXd::Ones(batchNormInvStds[i].size());
+					std::cerr << "Couldn't load network: " << error << '\n';
+					return false;
 				}
-
+				if (candidate.hiddenLayers.size() > hiddenLayers.size()
+					&& (configuredDropout.size() < candidate.dropout.size() || configuredNoise.size() < candidate.stdsNoise.size()))
+					std::cerr << "Loaded network: unspecified dropout/noise entries for added stages use 0; "
+						"pass complete constructor schedules to configure them.\n";
+				*this = std::move(candidate);
 				return true;
 			}
-
-			for (int i = 0; i < batchNormMeans.size(); ++i)
+			catch (const std::exception& exception)
 			{
-				int row = 0;
-				std::string field;
-				while (getline(is, field))
-				{
-					batchNormMeans[i](row) = stod(field);
-
-					++row;
-					if (row == batchNormMeans[i].size())
-						break;
-				}
-
-				row = 0;
-				while (getline(is, field))
-				{
-					batchNormInvStds[i](row) = stod(field);
-
-					++row;
-					if (row == batchNormInvStds[i].size())
-						break;
-				}
+				std::cerr << "Couldn't load network: " << exception.what() << '\n';
+				return false;
 			}
-
-			return true;
 		}
 
 	private:
+		// Entries refer to input (0), then each hidden layer's output (1, 2, ...).
+		// Keep the full supplied schedules so a smaller placeholder or a temporary
+		// topology reduction does not discard settings for a later load.
+		void ConfigureRegularization()
+		{
+			dropout = configuredDropout;
+			stdsNoise = configuredNoise;
+			dropout.resize(hiddenLayers.size() + 1, 0.);
+			stdsNoise.resize(hiddenLayers.size() + 1, 0.);
+		}
+
+		bool LoadNetworkParameters(std::ifstream& is, std::string& error)
+		{
+			const auto fail = [&](const std::string& reason) { error = reason; return false; };
+			if (!is.is_open()) return fail("input file is not open");
+
+			int nrLayers;
+			if (!(is >> nrLayers) || nrLayers < 0) return fail("invalid hidden-layer count");
+
+			std::cout << "Loading network with " << static_cast<size_t>(nrLayers) + 1 << " layers" << std::endl;
+			
+			if (nrLayers < hiddenLayers.size()) hiddenLayers.resize(nrLayers);
+
+			// load all layers
+			for (int i = 0; i < nrLayers; ++i)
+			{
+				if (i == hiddenLayers.size())
+				{
+					hiddenLayers.emplace_back(1, 1, optimizerInitialization);
+					hiddenLayers.back().setParams(hiddenLayerParams);
+				}
+				std::string layerError;
+				if (!hiddenLayers[i].loadLayer(is, &layerError))
+					return fail("hidden layer " + std::to_string(i) + ": " + layerError);
+				if (i > 0 && hiddenLayers[i].getNrInputs() != hiddenLayers[i - 1].getNrOutputs())
+					return fail("hidden layer " + std::to_string(i) + ": input count does not match the previous layer");
+			}
+
+			std::string layerError;
+			if (!lastLayer.loadLayer(is, &layerError)) return fail("output layer: " + layerError);
+			if (!hiddenLayers.empty() && lastLayer.getNrInputs() != hiddenLayers.back().getNrOutputs())
+				return fail("output layer: input count does not match the previous layer");
+
+			// Size statistics from the loaded layers, including when topology changes.
+			batchNormMeans.resize(hiddenLayers.size() + 1);
+			batchNormVariances.resize(hiddenLayers.size() + 1);
+			ConfigureRegularization();
+			for (int i = 0; i < batchNormMeans.size(); ++i)
+			{
+				const int inputs = i < hiddenLayers.size() ? hiddenLayers[i].getNrInputs() : lastLayer.getNrInputs();
+				batchNormMeans[i] = Eigen::VectorXd::Zero(inputs);
+				batchNormVariances[i] = Eigen::VectorXd::Ones(inputs);
+				if (i < hiddenLayers.size())
+				{
+					hiddenLayers[i].setLastLayer(false);
+					hiddenLayers[i].setFirstLayer(i == 0);
+				}
+			}
+			lastLayer.setLastLayer();
+			lastLayer.setFirstLayer(hiddenLayers.empty());
+
+			std::string format;
+			batchNormParam = 1.;
+			if (!(is >> format)) // Older files may omit normalization.
+				return (is.eof() && !is.bad()) || fail("cannot read normalization header");
+			const bool varianceFormat = format == "BatchNormVarianceV1";
+			if (varianceFormat)
+			{
+				if (!(is >> batchNormParam)) return fail("missing normalization coefficient");
+			}
+			else
+			{
+				try
+				{
+					size_t parsed = 0;
+					batchNormParam = std::stod(format, &parsed);
+					if (parsed != format.size()) return fail("invalid normalization header");
+				}
+				catch (const std::exception&) { return fail("invalid normalization header"); }
+			}
+			if (!std::isfinite(batchNormParam) || batchNormParam < 0. || batchNormParam > 1.)
+				return fail("normalization coefficient must be finite and between 0 and 1");
+			if (batchNormParam == 0.) batchNormParam = 1.;
+			// Legacy files may stop at the disabled-normalization flag. If stats
+			// are present, validate and retain them even while normalization is off.
+			is >> std::ws;
+			if (batchNormParam == 1. && !varianceFormat && is.eof()) return !is.bad() || fail("cannot read normalization statistics");
+
+			for (int i = 0; i < batchNormMeans.size(); ++i)
+			{
+				for (int row = 0; row < batchNormMeans[i].size(); ++row)
+				{
+					if (!(is >> batchNormMeans[i](row)) || !std::isfinite(batchNormMeans[i](row)))
+						return fail("invalid or missing normalization mean for stage " + std::to_string(i));
+				}
+				for (int row = 0; row < batchNormVariances[i].size(); ++row)
+				{
+					double value;
+					if (!(is >> value) || !std::isfinite(value) || value < 0.)
+						return fail("invalid or missing normalization scale for stage " + std::to_string(i));
+					if (!varianceFormat)
+					{
+						if (value == 0.) return fail("zero inverse standard deviation for stage " + std::to_string(i));
+						// Recover the effective variance; historical batch variances are unavailable.
+						const double stddev = 1. / value;
+						value = std::max(0., stddev * stddev - batchNormEpsilon);
+						if (!std::isfinite(value)) return fail("normalization variance overflow for stage " + std::to_string(i));
+					}
+					batchNormVariances[i](row) = value;
+				}
+			}
+
+			is >> std::ws;
+			return (is.eof() && !is.bad()) || fail("unexpected trailing data or stream error");
+		}
+
+		static constexpr double batchNormEpsilon = 1E-10;
+
+		Eigen::VectorXd PredictionInvStd(int index) const
+		{
+			// Noise is a training transform. Preserve the learned normalization
+			// scale at inference, including the noise contribution to its variance.
+			return (batchNormVariances[index].array() + batchNormEpsilon).sqrt().inverse().matrix();
+		}
+
+		void NormalizePredictionBatch(int index, Eigen::MatrixXd& values) const
+		{
+			if (batchNormParam == 1. || (index == 0 && noBatchNormalizationOnInput)) return;
+			const Eigen::VectorXd invStd = PredictionInvStd(index);
+			values.colwise() -= batchNormMeans[index];
+			values.array().colwise() *= invStd.array();
+		}
+
 		void BatchNormalize(std::vector<Eigen::VectorXd>& avgi, std::vector<Eigen::VectorXd>& istdi, int i, Eigen::MatrixXd& inp)
 		{
 			if (batchNormParam != 1.)
@@ -415,18 +532,15 @@ namespace NeuralNetworks
 				{
 					const double oneMinusBatchNormParam = 1. - batchNormParam;
 
-					Norm::Normalizer normalizer(static_cast<int>(inp.rows()));
-					normalizer.AddBatch(inp);
-
-					avgi.emplace_back(normalizer.getAverage());
-					const Eigen::VectorXd eps = Eigen::VectorXd::Constant(avgi.back().size(), 1E-10);
-					istdi.emplace_back((normalizer.getVariance() + eps).cwiseSqrt().cwiseInverse());
-
-					inp = inp.colwise() - avgi.back();
+					avgi.emplace_back(inp.rowwise().mean());
+					inp.colwise() -= avgi.back();
+					// Center first to avoid cancellation in E[x^2] - E[x]^2.
+					const Eigen::VectorXd variance = inp.array().square().rowwise().mean();
+					istdi.emplace_back((variance.array() + batchNormEpsilon).sqrt().inverse().matrix());
 					inp = inp.array().colwise() * istdi.back().array();
 
 					batchNormMeans[i] = batchNormParam * batchNormMeans[i] + oneMinusBatchNormParam * avgi.back();
-					batchNormInvStds[i] = batchNormParam * batchNormInvStds[i] + oneMinusBatchNormParam * istdi.back();
+					batchNormVariances[i] = batchNormParam * batchNormVariances[i] + oneMinusBatchNormParam * variance;
 				}
 				else
 				{
@@ -438,8 +552,17 @@ namespace NeuralNetworks
 
 		void BatchNormalizeGradient(const std::vector<Eigen::VectorXd>& istdi, int index, Eigen::MatrixXd& grad)
 		{
-			if (batchNormParam != 1.)
-				grad = grad.array().colwise() * istdi[index].array();
+			if (batchNormParam == 1. || (index == 0 && noBatchNormalizationOnInput)) return;
+
+			// The layer input is the normalized activation saved during forward.
+			// Differentiate the batch mean and variance as well as the scaling.
+			const Eigen::MatrixXd& normalized = index < hiddenLayers.size()
+				? hiddenLayers[index].getInput() : lastLayer.getInput();
+			const Eigen::VectorXd meanGradient = grad.rowwise().mean();
+			const Eigen::VectorXd projected = (grad.array() * normalized.array()).rowwise().mean();
+			grad.colwise() -= meanGradient;
+			grad.array() -= normalized.array().colwise() * projected.array();
+			grad.array().colwise() *= istdi[index].array();
 		}
 
 		void Dropout(int index, Eigen::MatrixXd& inp, std::vector<Eigen::VectorXd>& dropoutMasks)
@@ -457,8 +580,8 @@ namespace NeuralNetworks
 
 				inp /= (1. - dropout[index]);
 
-				// change the prediction, too, for backpropagation 
-				if (index > 0) hiddenLayers[index - 1].setPrediction(inp);
+				// Keep the activation cache unchanged. Backward uses the saved
+				// preactivation and the explicit mask to differentiate dropout.
 			}
 		}
 
@@ -475,7 +598,11 @@ namespace NeuralNetworks
 
 
 		NeuralLayerPerceptron<LastSolver> lastLayer;
+		GLM::OptimizerInitialization optimizerInitialization;
 		std::vector<NeuralLayerPerceptron<Solver>> hiddenLayers;
+		std::vector<double> hiddenLayerParams;
+		std::vector<double> configuredDropout;
+		std::vector<double> configuredNoise;
 
 		std::vector<double> dropout;
 		std::vector<double> stdsNoise;
@@ -483,12 +610,10 @@ namespace NeuralNetworks
 		std::mt19937 rde;
 		std::uniform_real_distribution<> distDrop{0., 1.};
 
-		Eigen::MatrixXd t; // bogus, used only for its size during forward-backward step
-
 		double batchNormParam;
 		bool noBatchNormalizationOnInput;
 		std::vector<Eigen::VectorXd> batchNormMeans;
-		std::vector<Eigen::VectorXd> batchNormInvStds;
+		std::vector<Eigen::VectorXd> batchNormVariances;
 	};
 
 }

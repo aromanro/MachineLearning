@@ -125,5 +125,11 @@
     <ClInclude Include="Ensemble.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="BatchPrediction.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="RuntimeSettings.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

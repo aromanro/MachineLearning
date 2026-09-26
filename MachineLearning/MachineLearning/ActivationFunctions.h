@@ -67,6 +67,9 @@ namespace ActivationFunctions
 			return "Sigmoid";
 		}
 
+		const InputOutputType& getSlope() const { return beta; }
+		const InputOutputType& getOffset() const { return beta0; }
+
 	protected:
 		InputOutputType beta0;
 		InputOutputType beta;
@@ -107,9 +110,12 @@ namespace ActivationFunctions
 
 		InputOutputType derivative(const InputOutputType& input)
 		{
-			const InputOutputType fx = operator()(input);
+			return derivativeFromOutput(operator()(input));
+		}
 
-			return fx.cwiseProduct(InputOutputType::Ones(fx.rows(), fx.cols()) - fx);
+		InputOutputType derivativeFromOutput(const InputOutputType& output) const
+		{
+			return BaseType::beta.cwiseProduct(output).cwiseProduct(InputOutputType::Ones(output.rows(), output.cols()) - output);
 		}
 	};
 
@@ -117,6 +123,12 @@ namespace ActivationFunctions
 	{
 	public:
 		using BaseType = BaseSigmoid<double>;
+
+		SigmoidFunction()
+		{
+			BaseType::beta0 = 0.;
+			BaseType::beta = 1.;
+		}
 
 		void setParams(double b0, double b)
 		{
@@ -131,9 +143,12 @@ namespace ActivationFunctions
 
 		double derivative(const double& input)
 		{
-			const double fx = operator()(input);
+			return derivativeFromOutput(operator()(input));
+		}
 
-			return fx * (1. - fx);
+		double derivativeFromOutput(double output) const
+		{
+			return BaseType::beta * output * (1. - output);
 		}
 	};
 
@@ -168,9 +183,12 @@ namespace ActivationFunctions
 
 		InputOutputType derivative(const InputOutputType& input) const
 		{
-			const InputOutputType fx = operator()(input);
+			return derivativeFromOutput(operator()(input));
+		}
 
-			return InputOutputType::Ones(fx.rows(), fx.cols()) - fx.cwiseProduct(fx);
+		InputOutputType derivativeFromOutput(const InputOutputType& output) const
+		{
+			return InputOutputType::Ones(output.rows(), output.cols()) - output.cwiseProduct(output);
 		}
 	};
 
@@ -184,9 +202,12 @@ namespace ActivationFunctions
 
 		double derivative(const double& input) const
 		{
-			const double fx = operator()(input);
+			return derivativeFromOutput(operator()(input));
+		}
 
-			return 1. - fx * fx;
+		double derivativeFromOutput(double output) const
+		{
+			return 1. - output * output;
 		}
 	};
 
@@ -483,6 +504,12 @@ namespace ActivationFunctions
 					output(i, j) = fx(i) * ((i == j ? 1. : 0.) - fx(j));
 
 			return output;
+		}
+
+		// J^T * gradient without constructing the dense softmax Jacobian.
+		InputOutputType derivativeProductFromOutput(const InputOutputType& output, const InputOutputType& gradient) const
+		{
+			return (output.array() * (gradient.array() - output.dot(gradient))).matrix();
 		}
 
 		static bool isDerivativeJacobianMatrix()
